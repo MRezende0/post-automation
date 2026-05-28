@@ -67,3 +67,43 @@
       dryRun: true
       channel: instagram
       captionLength: 66
+- pillar: dica
+  angle: precificacao
+  post:
+    hook: Sua precificação de projeto esconde lucro ou prejuízo?
+    body: >-
+      Sua precificação de projeto esconde lucro ou prejuízo?
+
+
+      A maioria dos escritórios de engenharia erra nos mesmos 4 pontos ao montar um orçamento. E esse erro custa seu
+      pró-labore no fim do mês.
+
+
+      Veja onde você pode estar sangrando dinheiro sem perceber:
+
+
+      ▪️ Não sabe sua hora real: custo fixo mensal ÷ horas produtivas. É o número base!
+
+
+      ▪️ Ignora 'pequenos' extras: deslocamento, reunião fora do escopo, revisões do cliente indeciso.
+
+
+      ▪️ Não compara com projetos passados: sem dados históricos, todo preço é um chute novo.
+
+
+      ▪️ Chuta a margem de lucro: o famoso BDI pra projeto existe por um motivo. Use-o!
+
+
+      Qual desses pontos você ainda não aplica no seu escritório?
+
+
+      #engenhariadeprojetos #gestaodeengenharia #produtividadeengenheiro #precificacaoengenharia
+    format: single
+  generated_at: '2026-05-28T22:55:07.410Z'
+  published_at: '2026-05-28T22:55:07.411Z'
+  chosen_variation: 1
+  channels:
+    instagram:
+      variationId: 1
+      id: '18075311855663888'
+      channel: instagram
