@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<style>
+  :root {
+    --bg: #0a0e14;
+    --fg: #e6edf3;
+    --accent: #3b82f6;
+    --muted: #8b949e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1080px; height: 1350px;
+    background: var(--bg); color: var(--fg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .card {
+    width: 1080px; height: 1350px;
+    padding: 110px 90px;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    background: radial-gradient(120% 80% at 0% 0%, #11192b 0%, #0a0e14 60%);
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 12px 22px;
+    background: rgba(59,130,246,0.12);
+    border: 1px solid rgba(59,130,246,0.4);
+    color: var(--accent);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    width: fit-content;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+  .hook {
+    font-size: 72px;
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+  .body {
+    font-size: 32px;
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 900px;
+    border-left: 4px solid var(--accent);
+    padding-left: 32px;
+  }
+  .footer {
+    display: flex; justify-content: space-between; align-items: center;
+    color: var(--muted);
+    font-size: 22px;
+  }
+  .brand { font-weight: 700; color: var(--fg); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div>
+      <span class="badge"><span class="dot"></span>{{badge}}</span>
+    </div>
+    <div>
+      <h1 class="hook">{{hook}}</h1>
+    </div>
+    <div>
+      <p class="body">{{subline}}</p>
+    </div>
+    <div class="footer">
+      <span class="brand">{{brand}}</span>
+      <span>{{handle}}</span>
+    </div>
+  </div>
+</body>
+</html>

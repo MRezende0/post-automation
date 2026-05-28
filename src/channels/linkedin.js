@@ -107,6 +107,26 @@ export async function publishCarousel({ text, imagePaths, dryRun = false }) {
   throw new Error('LinkedIn carousel requer PDF — TODO: gerar PDF dos slides e usar /documents endpoint');
 }
 
+// Coleta likes/comentários de um post via socialActions. Impressões exigem
+// o endpoint de organizationalEntityShareStatistics (só páginas de empresa) —
+// deixado como null quando indisponível. Best-effort, não quebra a coleta.
+export async function getInsights(shareUrn) {
+  if (!shareUrn) return null;
+  const out = { likes: null, comments: null, impressions: null };
+
+  try {
+    const encoded = encodeURIComponent(shareUrn);
+    const res = await fetch(`${API_BASE}/socialActions/${encoded}`, { headers: headers() });
+    if (res.ok) {
+      const json = await res.json();
+      out.likes = json.likesSummary?.totalLikes ?? null;
+      out.comments = json.commentsSummary?.totalComments ?? json.commentsSummary?.aggregatedTotalComments ?? null;
+    }
+  } catch (_) { /* mantém null */ }
+
+  return out;
+}
+
 export async function refreshToken() {
   const refresh = process.env.LINKEDIN_REFRESH_TOKEN;
   const clientId = process.env.LINKEDIN_CLIENT_ID;

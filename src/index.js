@@ -2,8 +2,8 @@
 // Chamado por: .github/workflows/post.yml. Flags via env: DRY_RUN, PUBLISH_TEST, SKIP_APPROVAL.
 
 import 'dotenv/config';
-import { generatePost } from './generate.js';
-import { renderImage } from './render-image.js';
+import { generatePost, judgeVariations } from './generate.js';
+import { renderImage, renderCarousel } from './render-image.js';
 import { popNext, markPublished, markRejected, getQueue, loadPending, savePending, clearPending, expirePending } from './utils/queue.js';
 import { rankVariations } from './utils/ranking.js';
 import { uploadImage } from './utils/storage.js';
@@ -17,6 +17,7 @@ const PUBLISH_TEST = process.env.PUBLISH_TEST === 'true';
 const SKIP_APPROVAL = process.env.SKIP_APPROVAL === 'true' || DRY_RUN;
 const HOLIDAY_AWARE = process.env.HOLIDAY_AWARE !== 'false';
 const HOLIDAY_WINDOW_DAYS = Number(process.env.HOLIDAY_WINDOW_DAYS || 7);
+const MAX_REGEN = Number(process.env.MAX_REGEN || 3);
 
 const CHANNELS = (process.env.CHANNELS || 'instagram').split(',').map(s => s.trim());
 
@@ -49,6 +50,7 @@ async function main() {
   }
 
   const results = {};
+  let lastPublished = null;
 
   for (const channel of CHANNELS) {
     log(`\n=== Canal: ${channel} ===`);
@@ -146,11 +148,16 @@ async function main() {
 
     await clearPending(channel);
     results[channel] = { variationId: chosen.id, ...publishResult };
+    lastPublished = {
+      pillar: generation.pillar,
+      angle: generation.angle,
+      post: { hook: chosen.hook, body: chosen.body, format: chosen.format },
+    };
   }
 
   if (Object.keys(results).length > 0) {
     await markPublished(
-      { ...seed, generated_at: new Date().toISOString() },
+      { ...seed, ...lastPublished, generated_at: new Date().toISOString() },
       { chosenVariationId: results.instagram?.variationId || results.linkedin?.variationId, channels: results },
     );
     if (!DRY_RUN) {
@@ -159,6 +166,42 @@ async function main() {
   }
 
   log('\nFim do run.');
+}
+
+// Gera variações, escolhe o top-1 (LLM-judge com fallback heurístico),
+// renderiza o preview e sobe a imagem. Reutilizável a cada regeneração.
+async function prepareGeneration({ channel, seed, regenNote }) {
+  const context = [seed.context, regenNote].filter(Boolean).join('\n\n') || undefined;
+  const generation = await generatePost({
+    channel,
+    pillar: seed.pillar,
+    angle: seed.angle,
+    context,
+    dryRun: DRY_RUN,
+  });
+  log(`Gerou ${generation.variations.length} variações | pilar=${generation.pillar} | ângulo=${generation.angle}`);
+
+  const ranked = rankVariations(generation.variations);
+  let topId = ranked[0].variation.id;
+  let how = `heurística (score ${ranked[0].score})`;
+  if (!DRY_RUN) {
+    const verdict = await judgeVariations({ channel, pillar: generation.pillar, variations: generation.variations });
+    if (verdict) {
+      topId = verdict.chosenId;
+      how = `LLM-judge (${verdict.reason})`;
+    }
+  }
+  log(`Top-1: variação #${topId} via ${how}`);
+
+  const top = generation.variations.find(v => v.id === topId);
+  const imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: top });
+  let imageUrl;
+  if (imagePath && !DRY_RUN) {
+    const uploaded = await uploadImage(imagePath);
+    imageUrl = uploaded.url;
+    log(`Imagem publicada: ${imageUrl}`);
+  }
+  return { generation, topId, imagePath, imageUrl };
 }
 
 async function renderPreview({ channel, pillar, variation }) {
@@ -181,14 +224,29 @@ async function renderPreview({ channel, pillar, variation }) {
   }
 }
 
-async function publishToChannel({ channel, variation, imageUrl }) {
+// Renderiza cada slide do carrossel em PNG e sobe pro storage público,
+// retornando as URLs na ordem. Em dry-run, não renderiza nem sobe.
+async function buildCarouselUrls({ channel, pillar, variation }) {
+  const files = await renderCarousel({ channel, pillar, slides: variation.slides || [] });
+  const urls = [];
+  for (const file of files) {
+    const uploaded = await uploadImage(file);
+    urls.push(uploaded.url);
+  }
+  return urls;
+}
+
+async function publishToChannel({ channel, variation, imageUrl, pillar }) {
   if (channel === 'instagram') {
-    if (variation.format === 'carousel' && variation.slides) {
-      return instagram.publishCarousel({
-        imageUrls: variation.slideUrls || [],
-        caption: variation.body,
-        dryRun: DRY_RUN,
-      });
+    if (variation.format === 'carousel' && variation.slides?.length) {
+      if (DRY_RUN) {
+        return instagram.publishCarousel({ imageUrls: variation.slides, caption: variation.body, dryRun: true });
+      }
+      const imageUrls = variation.slideUrls?.length
+        ? variation.slideUrls
+        : await buildCarouselUrls({ channel, pillar, variation });
+      log(`Carousel ${channel}: ${imageUrls.length} slides renderizados/enviados`);
+      return instagram.publishCarousel({ imageUrls, caption: variation.body, dryRun: false });
     }
     return instagram.publishSingle({
       imageUrl: variation.imageUrl || imageUrl,

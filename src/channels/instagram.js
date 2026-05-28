@@ -112,6 +112,43 @@ export async function publishCarousel({ imageUrls, caption, dryRun = false }) {
   return { id: published.id, channel: 'instagram', slides: imageUrls.length };
 }
 
+// Coleta engajamento de um post publicado. Combina campos diretos (like_count,
+// comments_count) com insights (reach, saved). Best-effort: métrica indisponível
+// vira null em vez de quebrar a coleta inteira.
+export async function getInsights(mediaId) {
+  if (!mediaId) return null;
+  const out = { likes: null, comments: null, reach: null, saved: null };
+
+  try {
+    const fieldsUrl = new URL(`${API_BASE}/${mediaId}`);
+    fieldsUrl.searchParams.set('fields', 'like_count,comments_count');
+    fieldsUrl.searchParams.set('access_token', token());
+    const fieldsRes = await fetch(fieldsUrl);
+    if (fieldsRes.ok) {
+      const json = await fieldsRes.json();
+      out.likes = json.like_count ?? null;
+      out.comments = json.comments_count ?? null;
+    }
+  } catch (_) { /* mantém null */ }
+
+  try {
+    const insUrl = new URL(`${API_BASE}/${mediaId}/insights`);
+    insUrl.searchParams.set('metric', 'reach,saved');
+    insUrl.searchParams.set('access_token', token());
+    const insRes = await fetch(insUrl);
+    if (insRes.ok) {
+      const { data = [] } = await insRes.json();
+      for (const m of data) {
+        const value = m.values?.[0]?.value ?? m.total_value?.value ?? null;
+        if (m.name === 'reach') out.reach = value;
+        if (m.name === 'saved') out.saved = value;
+      }
+    }
+  } catch (_) { /* mantém null */ }
+
+  return out;
+}
+
 export async function refreshToken() {
   const current = token();
   const url = new URL('https://graph.instagram.com/refresh_access_token');

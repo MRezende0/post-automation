@@ -105,10 +105,11 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     throw new Error(`Canal inválido: ${channel}`);
   }
 
+  const published = await getPublished();
+
   let chosenPillar = pillar;
   let chosenAngle = angle;
   if (!chosenPillar) {
-    const published = await getPublished();
     chosenPillar = chooseNextPillar(published);
     chosenAngle = chooseNextAngle(chosenPillar, published);
   }
@@ -116,6 +117,8 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
   if (dryRun) {
     return mockGeneration({ channel, pillar: chosenPillar, angle: chosenAngle });
   }
+
+  const recentHooks = extractRecentHooks(published);
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -140,7 +143,7 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     buildFewShot(examples),
   ].join('\n\n---\n\n');
 
-  const userMessage = buildUserMessage({ channel, pillar: chosenPillar, angle: chosenAngle, context });
+  const userMessage = buildUserMessage({ channel, pillar: chosenPillar, angle: chosenAngle, context, recentHooks });
 
   const response = await client.models.generateContent({
     model: MODEL_GENERATE,
@@ -157,15 +160,62 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
   return { ...parsed, channel, pillar: chosenPillar, angle: chosenAngle };
 }
 
-function buildUserMessage({ channel, pillar, angle, context }) {
+// Últimos ganchos publicados, pra instruir o modelo a não repetir tema/abertura.
+function extractRecentHooks(published, limit = 12) {
+  return published
+    .slice(-limit)
+    .map(item => item.post?.hook)
+    .filter(Boolean);
+}
+
+function buildUserMessage({ channel, pillar, angle, context, recentHooks = [] }) {
+  const avoidBlock = recentHooks.length
+    ? `Ganchos já usados recentemente (NÃO repita o tema nem a abertura destes):\n${recentHooks.map(h => `- ${h}`).join('\n')}`
+    : '';
   const parts = [
     `Gere 3 variações de post pra ${channel} no pilar "${pillar}".`,
     angle ? `Ângulo sugerido: ${angle}.` : '',
     context ? `Contexto adicional: ${context}` : '',
+    avoidBlock,
     '',
     'Retorne JSON puro conforme o formato definido no system prompt.',
   ].filter(Boolean);
   return parts.join('\n');
+}
+
+// LLM-as-judge: escolhe a melhor variação usando o modelo simples (barato).
+// Retorna { chosenId, reason } ou null se a API não estiver disponível/falhar.
+export async function judgeVariations({ channel, pillar, variations }) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || !variations?.length) return null;
+
+  const client = new GoogleGenAI({ apiKey });
+  const list = variations
+    .map(v => `Variação ${v.id}:\nHook: ${v.hook}\nCorpo: ${v.body}`)
+    .join('\n\n');
+
+  const prompt = [
+    `Você é editor de conteúdo de um SaaS B2B pra escritórios de engenharia.`,
+    `Escolha a MELHOR das ${variations.length} variações pra ${channel}, pilar "${pillar}".`,
+    `Critérios: hook que para o scroll, dor concreta (não abstrata), zero buzzword, frases curtas, autenticidade.`,
+    '',
+    list,
+    '',
+    'Responda só JSON: {"chosenId": <número>, "reason": "<1 frase>"}',
+  ].join('\n');
+
+  try {
+    const response = await client.models.generateContent({
+      model: MODEL_SIMPLE,
+      contents: prompt,
+      config: { maxOutputTokens: 200, responseMimeType: 'application/json' },
+    });
+    const parsed = parseJsonResponse(response.text || '');
+    if (!variations.some(v => v.id === parsed.chosenId)) return null;
+    return { chosenId: parsed.chosenId, reason: parsed.reason || '' };
+  } catch (e) {
+    return null;
+  }
 }
 
 function parseJsonResponse(text) {

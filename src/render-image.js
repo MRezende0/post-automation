@@ -21,8 +21,8 @@ const TEMPLATE_MAP = {
     citacao: 'templates/instagram/citacao.html',
     stat: 'templates/instagram/stat.html',
     anuncio: 'templates/instagram/anuncio.html',
-    building: 'templates/instagram/citacao.html',
-    prova: 'templates/instagram/citacao.html',
+    building: 'templates/instagram/building.html',
+    prova: 'templates/instagram/prova.html',
   },
   linkedin: {
     dor: 'templates/linkedin/single.html',
@@ -41,12 +41,22 @@ function resolveTemplate(channel, pillar) {
   return path.join(ROOT, rel);
 }
 
-function applyVars(html, vars) {
+const BADGE_BY_PILLAR = {
+  dor: 'DOR REAL',
+  dica: 'DICA PRÁTICA',
+  building: 'BUILDING IN PUBLIC',
+  prova: 'CLIENTE REAL',
+  citacao: 'CITAÇÃO',
+  stat: 'NÚMERO',
+  anuncio: 'NOVIDADE',
+};
+
+function applyVars(html, vars, pillar) {
   let out = html;
   const merged = {
     brand: vars.brand || 'SaaS Engenharia',
     handle: vars.handle || '@seu_handle',
-    badge: vars.badge || 'DOR REAL',
+    badge: vars.badge || BADGE_BY_PILLAR[pillar] || 'DOR REAL',
     hook: vars.hook || '',
     subline: vars.subline || vars.body || '',
     step: vars.step || 'DICA',
@@ -86,7 +96,7 @@ export async function renderImage({ channel, pillar, vars, outPath }) {
   }
 
   const template = await readFile(templateFile, 'utf8');
-  const html = applyVars(template, vars || {});
+  const html = applyVars(template, vars || {}, pillar);
 
   if (!existsSync(TMP_DIR)) await mkdir(TMP_DIR, { recursive: true });
   const finalOut = outPath || path.join(TMP_DIR, `${channel}-${pillar}-${Date.now()}.png`);

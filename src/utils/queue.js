@@ -51,11 +51,21 @@ export async function getRejected() {
   return readYaml(paths().REJECTED_FILE);
 }
 
-export async function popNext() {
+// Item é elegível se não tem agendamento ou se a data já chegou.
+function isDue(item, now) {
+  if (!item || !item.scheduled_for) return true;
+  const when = new Date(item.scheduled_for);
+  if (Number.isNaN(when.getTime())) return true; // data inválida → não bloqueia
+  return when.getTime() <= now;
+}
+
+export async function popNext(now = Date.now()) {
   const queue = await getQueue();
   if (queue.length === 0) return null;
-  const [next, ...rest] = queue;
-  await writeYaml(paths().QUEUE_FILE, rest);
+  const idx = queue.findIndex(item => isDue(item, now));
+  if (idx === -1) return null; // só restam itens agendados pro futuro
+  const [next] = queue.splice(idx, 1);
+  await writeYaml(paths().QUEUE_FILE, queue);
   return next;
 }
 
@@ -84,6 +94,12 @@ export async function pushToQueue(item) {
   const queue = await getQueue();
   queue.push(item);
   await writeYaml(paths().QUEUE_FILE, queue);
+}
+
+// Regrava a lista inteira de publicados — usado pelo coletor de métricas
+// pra anexar insights nos posts já existentes sem duplicar.
+export async function writePublished(list) {
+  await writeYaml(paths().PUBLISHED_FILE, list);
 }
 
 export async function getPending() {
