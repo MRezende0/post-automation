@@ -55,6 +55,31 @@ describe('queue utils', () => {
     expect(next).toBeNull();
   });
 
+  it('popNext pula item agendado pro futuro', async () => {
+    const future = new Date(Date.now() + 86400000).toISOString();
+    await pushToQueue({ pillar: 'dor', scheduled_for: future });
+    await pushToQueue({ pillar: 'dica' });
+    const first = await popNext();
+    expect(first.pillar).toBe('dica'); // pula o agendado
+    const remaining = await getQueue();
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0].pillar).toBe('dor');
+  });
+
+  it('popNext retorna null quando só restam itens agendados pro futuro', async () => {
+    const future = new Date(Date.now() + 86400000).toISOString();
+    await pushToQueue({ pillar: 'dor', scheduled_for: future });
+    const next = await popNext();
+    expect(next).toBeNull();
+  });
+
+  it('popNext aceita item agendado cuja data já passou', async () => {
+    const past = new Date(Date.now() - 86400000).toISOString();
+    await pushToQueue({ pillar: 'prova', scheduled_for: past });
+    const next = await popNext();
+    expect(next.pillar).toBe('prova');
+  });
+
   it('markPublished move pra published.yaml com timestamp', async () => {
     const item = { pillar: 'dor', angle: 'tempo' };
     await markPublished(item, { chosenVariationId: 1, channels: ['instagram'] });

@@ -52,107 +52,97 @@ async function main() {
   const results = {};
   let lastPublished = null;
 
+  channelLoop:
   for (const channel of CHANNELS) {
     log(`\n=== Canal: ${channel} ===`);
 
     const pending = await loadPending(channel);
-    let generation;
-    let topId;
-    let imagePath;
-    let imageUrl;
-    let channelSeed = seed;
+    const channelSeed = pending?.seed || seed;
+    let prepared;
 
     if (pending) {
       log(`Retomando pending salvo em ${pending.saved_at}`);
       await notify(`🔁 Retomando post ${channel} pendente desde ${pending.saved_at}`, { dryRun: DRY_RUN }).catch(() => {});
-      generation = pending.generation;
-      topId = pending.top_id;
-      imageUrl = pending.image_url;
-      channelSeed = pending.seed || seed;
+      prepared = { generation: pending.generation, topId: pending.top_id, imagePath: undefined, imageUrl: pending.image_url };
     } else {
-      generation = await generatePost({
-        channel,
-        pillar: seed.pillar,
-        angle: seed.angle,
-        context: seed.context,
-        dryRun: DRY_RUN,
-      });
-      log(`Gerou ${generation.variations.length} variações | pilar=${generation.pillar} | ângulo=${generation.angle}`);
-      const ranked = rankVariations(generation.variations);
-      topId = ranked[0].variation.id;
-      log(`Top-1 por heurística: variação #${topId} (score ${ranked[0].score})`);
-      const top = generation.variations.find(v => v.id === topId);
-      imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: top });
-      if (imagePath && !DRY_RUN) {
-        const uploaded = await uploadImage(imagePath);
-        imageUrl = uploaded.url;
-        log(`Imagem publicada: ${imageUrl}`);
-      }
+      prepared = await prepareGeneration({ channel, seed: channelSeed });
     }
 
-    let chosenId = topId;
-    let action = 'approve';
+    let regenCount = 0;
+    let approved = false;
 
-    if (!SKIP_APPROVAL) {
-      const { messageId, botInstance } = await sendApprovalRequest({
-        channel,
+    while (!approved) {
+      const { generation, topId, imagePath, imageUrl } = prepared;
+      let chosenId = topId;
+
+      if (!SKIP_APPROVAL) {
+        const { messageId, botInstance } = await sendApprovalRequest({
+          channel,
+          pillar: generation.pillar,
+          angle: generation.angle,
+          variations: generation.variations,
+          imagePath,
+          imageUrl,
+        });
+        log(`Enviou preview Telegram (msg=${messageId}), aguardando decisão...`);
+
+        const decision = await waitForDecision({ botInstance, messageId });
+        const action = decision.action;
+        chosenId = decision.chosenId || topId;
+        log(`Decisão: ${action} (variação ${chosenId}${decision.reason ? ' | motivo: ' + decision.reason : ''})`);
+
+        if (action === 'reject') {
+          await clearPending(channel);
+          await markRejected({ ...channelSeed, channel, generation }, decision.reason);
+          await notify(`❌ Post ${channel} rejeitado: ${decision.reason}`, { dryRun: DRY_RUN });
+          continue channelLoop;
+        }
+        if (action === 'regen') {
+          await clearPending(channel);
+          if (regenCount >= MAX_REGEN) {
+            await notify(`🔄 Limite de ${MAX_REGEN} regenerações em ${channel} — publicando o top atual`, { dryRun: DRY_RUN });
+          } else {
+            regenCount += 1;
+            await notify(`🔄 Regenerando ${channel} (tentativa ${regenCount}/${MAX_REGEN})...`, { dryRun: DRY_RUN });
+            const regenNote = `Tentativa ${regenCount + 1}: as variações anteriores foram recusadas. Mude o ÂNGULO e a ABERTURA — não repita o mesmo gancho.${decision.reason ? ' Motivo da recusa: ' + decision.reason : ''}`;
+            prepared = await prepareGeneration({ channel, seed: channelSeed, regenNote });
+            continue; // refaz o approval com a geração nova
+          }
+        } else if (action === 'timeout') {
+          await savePending({ channel, generation, top_id: topId, image_url: imageUrl, seed: channelSeed });
+          await notify(`⏱️ Post ${channel} sem decisão — salvo pra retomar no próximo run (TTL 7d)`, { dryRun: DRY_RUN });
+          continue channelLoop;
+        } else if (action !== 'approve') {
+          await savePending({ channel, generation, top_id: topId, image_url: imageUrl, seed: channelSeed });
+          await notify(`⚠️ Ação desconhecida (${action}) em ${channel} — salvo pra retomar`, { dryRun: DRY_RUN });
+          continue channelLoop;
+        }
+      }
+
+      approved = true;
+
+      const chosen = generation.variations.find(v => v.id === chosenId);
+      let finalImageUrl = imageUrl;
+      if (chosen.id !== topId && !DRY_RUN) {
+        const newImg = await renderPreview({ channel, pillar: generation.pillar, variation: chosen });
+        if (newImg) {
+          const uploaded = await uploadImage(newImg);
+          finalImageUrl = uploaded.url;
+          log(`Reimagem variação ${chosen.id}: ${finalImageUrl}`);
+        }
+      }
+
+      const publishResult = await publishToChannel({ channel, variation: chosen, imageUrl: finalImageUrl, pillar: generation.pillar });
+      log(`Publicou em ${channel}: ${JSON.stringify(publishResult)}`);
+
+      await clearPending(channel);
+      results[channel] = { variationId: chosen.id, ...publishResult };
+      lastPublished = {
         pillar: generation.pillar,
         angle: generation.angle,
-        variations: generation.variations,
-        imagePath,
-        imageUrl,
-      });
-      log(`Enviou preview Telegram (msg=${messageId}), aguardando decisão...`);
-
-      const decision = await waitForDecision({ botInstance, messageId });
-      action = decision.action;
-      chosenId = decision.chosenId || topId;
-      log(`Decisão: ${action} (variação ${chosenId}${decision.reason ? ' | motivo: ' + decision.reason : ''})`);
-
-      if (action === 'reject') {
-        await clearPending(channel);
-        await markRejected({ ...channelSeed, channel, generation }, decision.reason);
-        await notify(`❌ Post ${channel} rejeitado: ${decision.reason}`, { dryRun: DRY_RUN });
-        continue;
-      }
-      if (action === 'regen') {
-        await clearPending(channel);
-        await notify(`🔄 Regenerar ${channel} ficou pra próximo run (não implementado em loop)`, { dryRun: DRY_RUN });
-        continue;
-      }
-      if (action === 'timeout') {
-        await savePending({ channel, generation, top_id: topId, image_url: imageUrl, seed: channelSeed });
-        await notify(`⏱️ Post ${channel} sem decisão — salvo pra retomar no próximo run (TTL 7d)`, { dryRun: DRY_RUN });
-        continue;
-      }
-      if (action !== 'approve') {
-        await savePending({ channel, generation, top_id: topId, image_url: imageUrl, seed: channelSeed });
-        await notify(`⚠️ Ação desconhecida (${action}) em ${channel} — salvo pra retomar`, { dryRun: DRY_RUN });
-        continue;
-      }
+        post: { hook: chosen.hook, body: chosen.body, format: chosen.format },
+      };
     }
-
-    const chosen = generation.variations.find(v => v.id === chosenId);
-    let finalImageUrl = imageUrl;
-    if (chosen.id !== topId && !DRY_RUN) {
-      const newImg = await renderPreview({ channel, pillar: generation.pillar, variation: chosen });
-      if (newImg) {
-        const uploaded = await uploadImage(newImg);
-        finalImageUrl = uploaded.url;
-        log(`Reimagem variação ${chosen.id}: ${finalImageUrl}`);
-      }
-    }
-
-    const publishResult = await publishToChannel({ channel, variation: chosen, imageUrl: finalImageUrl });
-    log(`Publicou em ${channel}: ${JSON.stringify(publishResult)}`);
-
-    await clearPending(channel);
-    results[channel] = { variationId: chosen.id, ...publishResult };
-    lastPublished = {
-      pillar: generation.pillar,
-      angle: generation.angle,
-      post: { hook: chosen.hook, body: chosen.body, format: chosen.format },
-    };
   }
 
   if (Object.keys(results).length > 0) {

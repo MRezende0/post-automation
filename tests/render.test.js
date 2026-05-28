@@ -27,12 +27,29 @@ describe('render-image internals', () => {
       const out = _internal.applyVars(html, { body: 'corpo' });
       expect(out).toContain('corpo');
     });
+
+    it('badge default vem do pilar', () => {
+      const html = '<div>{{badge}}</div>';
+      expect(_internal.applyVars(html, {}, 'building')).toContain('BUILDING IN PUBLIC');
+      expect(_internal.applyVars(html, {}, 'prova')).toContain('CLIENTE REAL');
+    });
+
+    it('badge explícito sobrescreve o do pilar', () => {
+      const html = '<div>{{badge}}</div>';
+      const out = _internal.applyVars(html, { badge: 'CUSTOM' }, 'building');
+      expect(out).toContain('CUSTOM');
+    });
   });
 
   describe('resolveTemplate', () => {
     it('escolhe template instagram/dor pra pilar dor', () => {
       const file = _internal.resolveTemplate('instagram', 'dor');
       expect(file).toMatch(/instagram\/dor\.html$/);
+    });
+
+    it('building e prova têm template próprio', () => {
+      expect(_internal.resolveTemplate('instagram', 'building')).toMatch(/instagram\/building\.html$/);
+      expect(_internal.resolveTemplate('instagram', 'prova')).toMatch(/instagram\/prova\.html$/);
     });
 
     it('fallback pra dor quando pilar não tem template específico', () => {
