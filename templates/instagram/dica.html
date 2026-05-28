@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<style>
+  :root {
+    --bg: #fafaf9;
+    --fg: #0f1115;
+    --accent: #1d4ed8;
+    --muted: #57534e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1080px; height: 1350px;
+    background: var(--bg); color: var(--fg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .card {
+    width: 1080px; height: 1350px;
+    padding: 110px 90px;
+    display: flex; flex-direction: column;
+    gap: 60px;
+  }
+  .step {
+    color: var(--accent);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .title {
+    font-size: 72px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .description {
+    font-size: 32px;
+    line-height: 1.55;
+    color: var(--muted);
+    flex: 1;
+    max-width: 880px;
+  }
+  .footer {
+    border-top: 2px solid #e7e5e4;
+    padding-top: 36px;
+    display: flex; justify-content: space-between; align-items: center;
+    color: var(--muted);
+    font-size: 22px;
+  }
+  .brand { font-weight: 700; color: var(--fg); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="step">{{step}}</div>
+    <h1 class="title">{{title}}</h1>
+    <p class="description">{{description}}</p>
+    <div class="footer">
+      <span class="brand">{{brand}}</span>
+      <span>{{handle}}</span>
+    </div>
+  </div>
+</body>
+</html>

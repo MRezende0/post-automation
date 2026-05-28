@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<style>
+  :root {
+    --bg: #ecfdf5;
+    --fg: #064e3b;
+    --accent: #059669;
+    --muted: #047857;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1080px; height: 1350px;
+    background: var(--bg); color: var(--fg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+  .card {
+    width: 1080px; height: 1350px;
+    padding: 110px 90px;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+  }
+  .label {
+    color: var(--muted);
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .number {
+    font-size: 260px;
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    color: var(--accent);
+  }
+  .unit {
+    font-size: 60px;
+    font-weight: 600;
+    margin-top: 20px;
+  }
+  .description {
+    font-size: 36px;
+    line-height: 1.4;
+    max-width: 880px;
+  }
+  .footer {
+    display: flex; justify-content: space-between;
+    color: var(--muted);
+    font-size: 22px;
+  }
+  .brand { font-weight: 700; color: var(--fg); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="label">{{label}}</div>
+    <div>
+      <div class="number">{{number}}</div>
+      <div class="unit">{{unit}}</div>
+    </div>
+    <p class="description">{{description}}</p>
+    <div class="footer">
+      <span class="brand">{{brand}}</span>
+      <span>{{handle}}</span>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# Fila de posts. Sistema faz pop do primeiro a cada run.
+# Se vazio, gera ideia automática baseada em rotação de pilar.
+#
+# Schema:
+#   - pillar: dor | dica | building | prova
+#     angle: financeira | tempo | versao_arquivo | ...    (ver docs/pilares.md)
+#     context: string com fato concreto pra post de building/prova
+#     channels: [instagram, linkedin]                     (opcional, default ambos)
+#     scheduled_for: ISO date                             (opcional)
+#
+# Exemplo:
+# - pillar: dor
+#   angle: tempo
+#   context: |
+#     Reflexão sobre domingo trabalhando — relevante essa semana.
+#
+[]

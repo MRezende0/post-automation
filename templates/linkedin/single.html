@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<style>
+  :root {
+    --bg: #f8fafc;
+    --fg: #0f172a;
+    --accent: #0a66c2;
+    --muted: #475569;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1200px; height: 627px;
+    background: var(--bg); color: var(--fg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+  .card {
+    width: 1200px; height: 627px;
+    padding: 70px 80px;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+  .accent-bar {
+    width: 60px; height: 6px;
+    background: var(--accent);
+    border-radius: 3px;
+  }
+  .hook {
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    max-width: 980px;
+  }
+  .sub {
+    font-size: 26px;
+    line-height: 1.5;
+    color: var(--muted);
+    max-width: 980px;
+  }
+  .footer {
+    display: flex; justify-content: space-between; align-items: center;
+    color: var(--muted);
+    font-size: 20px;
+  }
+  .brand { font-weight: 700; color: var(--fg); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="accent-bar"></div>
+    <h1 class="hook">{{hook}}</h1>
+    <p class="sub">{{subline}}</p>
+    <div class="footer">
+      <span class="brand">{{brand}}</span>
+      <span>{{handle}}</span>
+    </div>
+  </div>
+</body>
+</html>
