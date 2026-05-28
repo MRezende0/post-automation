@@ -10,10 +10,13 @@ import { uploadImage } from './utils/storage.js';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
 import { sendApprovalRequest, waitForDecision, notify } from './telegram.js';
+import { getUpcomingHoliday, holidayContext } from './utils/holidays.js';
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const PUBLISH_TEST = process.env.PUBLISH_TEST === 'true';
 const SKIP_APPROVAL = process.env.SKIP_APPROVAL === 'true' || DRY_RUN;
+const HOLIDAY_AWARE = process.env.HOLIDAY_AWARE !== 'false';
+const HOLIDAY_WINDOW_DAYS = Number(process.env.HOLIDAY_WINDOW_DAYS || 7);
 
 const CHANNELS = (process.env.CHANNELS || 'instagram').split(',').map(s => s.trim());
 
@@ -27,6 +30,17 @@ async function main() {
   const queueItem = await popNext();
   const seed = queueItem || {};
   log(`Item da fila: ${queueItem ? JSON.stringify(queueItem) : 'vazio, gera automático'}`);
+
+  // Sem item forçado na fila, um feriado próximo tem prioridade sobre a rotação normal.
+  if (HOLIDAY_AWARE && !seed.pillar) {
+    const holiday = getUpcomingHoliday(new Date(), HOLIDAY_WINDOW_DAYS);
+    if (holiday) {
+      seed.pillar = holiday.pillar;
+      seed.angle = holiday.angle;
+      seed.context = [seed.context, holidayContext(holiday)].filter(Boolean).join('\n\n');
+      log(`Feriado em ${holiday.daysUntil}d → post temático: ${holiday.name} (pilar=${holiday.pillar}, ângulo=${holiday.angle})`);
+    }
+  }
 
   const results = {};
 
