@@ -91,6 +91,15 @@ async function main() {
         await notify(`🔄 Regenerar ${channel} ficou pra próximo run (não implementado em loop)`, { dryRun: DRY_RUN });
         continue;
       }
+      if (action === 'timeout') {
+        await markRejected({ ...seed, channel, generation }, 'timeout sem aprovação');
+        await notify(`⏱️ Post ${channel} expirou sem aprovação — não publicado`, { dryRun: DRY_RUN });
+        continue;
+      }
+      if (action !== 'approve') {
+        await notify(`⚠️ Ação desconhecida (${action}) em ${channel} — não publicado`, { dryRun: DRY_RUN });
+        continue;
+      }
     }
 
     const chosen = generation.variations.find(v => v.id === chosenId);

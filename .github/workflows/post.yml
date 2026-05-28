@@ -2,8 +2,8 @@ name: Post
 
 on:
   schedule:
-    # Seg, qua, sex às 12:00 UTC = 09:00 BRT
-    - cron: '0 12 * * 1,3,5'
+    # Ter e qui às 20:00 UTC = 17:00 BRT (pico fim de tarde B2B)
+    - cron: '0 20 * * 2,4'
   workflow_dispatch:
     inputs:
       dry_run:
