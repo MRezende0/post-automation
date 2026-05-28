@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Automação de postagens Instagram + LinkedIn via GitHub Actions, geração com Claude API, aprovação via Telegram.",
+  "description": "Automação de postagens Instagram + LinkedIn via GitHub Actions, geração com Gemini API, aprovação via Telegram.",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -18,7 +18,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.30.0",
+    "@google/genai": "^1.52.0",
     "dotenv": "^16.4.5",
     "js-yaml": "^4.1.0",
     "node-telegram-bot-api": "^0.66.0",

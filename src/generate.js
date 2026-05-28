@@ -1,15 +1,15 @@
-// generate.js — gera 3 variações de post via Claude API com few-shot.
+// generate.js — gera 3 variações de post via Gemini API com few-shot.
 // Chamado por: src/index.js. Lê: docs/, prompts/, content/examples/.
 
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenAI } from '@google/genai';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { chooseNextPillar, chooseNextAngle } from './utils/ranking.js';
 import { getPublished } from './utils/queue.js';
 
-const MODEL_GENERATE = 'claude-sonnet-4-6';
-const MODEL_SIMPLE = 'claude-haiku-4-5';
+const MODEL_GENERATE = 'gemini-2.5-pro';
+const MODEL_SIMPLE = 'gemini-2.5-flash';
 
 const ROOT = process.cwd();
 
@@ -83,12 +83,12 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     return mockGeneration({ channel, pillar: chosenPillar, angle: chosenAngle });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error('ANTHROPIC_API_KEY não configurada. Use DRY_RUN=true pra testar sem API.');
+    throw new Error('GEMINI_API_KEY não configurada. Use DRY_RUN=true pra testar sem API.');
   }
 
-  const client = new Anthropic({ apiKey });
+  const client = new GoogleGenAI({ apiKey });
 
   const [systemBase, channelPrompt, pillarPrompt, examples] = await Promise.all([
     loadSystemPrompt(),
@@ -108,14 +108,17 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
 
   const userMessage = buildUserMessage({ channel, pillar: chosenPillar, angle: chosenAngle, context });
 
-  const response = await client.messages.create({
+  const response = await client.models.generateContent({
     model: MODEL_GENERATE,
-    max_tokens: 4000,
-    system,
-    messages: [{ role: 'user', content: userMessage }],
+    contents: userMessage,
+    config: {
+      systemInstruction: system,
+      maxOutputTokens: 4000,
+      responseMimeType: 'application/json',
+    },
   });
 
-  const text = response.content?.[0]?.text || '';
+  const text = response.text || '';
   const parsed = parseJsonResponse(text);
   return { ...parsed, channel, pillar: chosenPillar, angle: chosenAngle };
 }
@@ -138,7 +141,7 @@ function parseJsonResponse(text) {
   } catch (e) {
     const match = cleaned.match(/\{[\s\S]*\}/);
     if (match) return JSON.parse(match[0]);
-    throw new Error(`Falha ao parsear resposta do Claude: ${e.message}\nRaw: ${text.slice(0, 500)}`);
+    throw new Error(`Falha ao parsear resposta do Gemini: ${e.message}\nRaw: ${text.slice(0, 500)}`);
   }
 }
 
@@ -173,7 +176,7 @@ function mockGeneration({ channel, pillar, angle }) {
     meta: {
       pillar,
       angle: angle || 'mock',
-      reasoning: '[MOCK] Geração sem chamada API. Use ANTHROPIC_API_KEY pra geração real.',
+      reasoning: '[MOCK] Geração sem chamada API. Use GEMINI_API_KEY pra geração real.',
     },
   };
 }
