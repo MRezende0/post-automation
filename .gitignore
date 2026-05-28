@@ -10,3 +10,4 @@ tmp/
 *.png
 !templates/**/*.png
 !docs/**/*.png
+!content/images/**/*.png

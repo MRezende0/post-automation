@@ -6,6 +6,7 @@ import { generatePost } from './generate.js';
 import { renderImage } from './render-image.js';
 import { popNext, markPublished, markRejected, getQueue } from './utils/queue.js';
 import { rankVariations } from './utils/ranking.js';
+import { uploadImage } from './utils/storage.js';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
 import { sendApprovalRequest, waitForDecision, notify } from './telegram.js';
@@ -14,7 +15,7 @@ const DRY_RUN = process.env.DRY_RUN === 'true';
 const PUBLISH_TEST = process.env.PUBLISH_TEST === 'true';
 const SKIP_APPROVAL = process.env.SKIP_APPROVAL === 'true' || DRY_RUN;
 
-const CHANNELS = ['instagram', 'linkedin'];
+const CHANNELS = (process.env.CHANNELS || 'instagram').split(',').map(s => s.trim());
 
 async function main() {
   log(`Iniciando run | DRY_RUN=${DRY_RUN} | PUBLISH_TEST=${PUBLISH_TEST} | SKIP_APPROVAL=${SKIP_APPROVAL}`);
@@ -132,8 +133,14 @@ async function publishToChannel({ channel, variation, imagePath }) {
         dryRun: DRY_RUN,
       });
     }
+    let imageUrl = variation.imageUrl;
+    if (!imageUrl && imagePath && !DRY_RUN) {
+      const uploaded = await uploadImage(imagePath);
+      imageUrl = uploaded.url;
+      log(`Imagem publicada: ${imageUrl}`);
+    }
     return instagram.publishSingle({
-      imageUrl: variation.imageUrl || `file://${imagePath}`,
+      imageUrl: imageUrl || `file://${imagePath}`,
       caption: variation.body,
       dryRun: DRY_RUN,
     });
@@ -157,18 +164,22 @@ async function runPublishTest() {
     format: 'single',
   };
   const imagePath = await renderPreview({ channel: 'instagram', pillar: 'dor', variation });
+  const uploaded = await uploadImage(imagePath);
+  log('Upload imagem:', uploaded.url);
   const ig = await instagram.publishSingle({
-    imageUrl: variation.imageUrl || `file://${imagePath}`,
+    imageUrl: uploaded.url,
     caption: variation.body,
     dryRun: false,
   });
   log('IG publish-test:', JSON.stringify(ig));
-  const li = await linkedin.publishText({
-    text: variation.body,
-    imagePath,
-    dryRun: false,
-  });
-  log('LinkedIn publish-test:', JSON.stringify(li));
+  if (CHANNELS.includes('linkedin')) {
+    const li = await linkedin.publishText({
+      text: variation.body,
+      imagePath,
+      dryRun: false,
+    });
+    log('LinkedIn publish-test:', JSON.stringify(li));
+  }
 }
 
 function log(...args) {

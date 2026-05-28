@@ -1,2 +1,18 @@
-# Histórico de posts publicados. Alimentado automaticamente pelo orquestrador.
-[]
+- generated_at: '2026-05-28T15:33:38.850Z'
+  published_at: '2026-05-28T15:33:38.850Z'
+  chosen_variation: 3
+  channels:
+    instagram:
+      variationId: 3
+      id: mock_ig_post_id
+      dryRun: true
+      channel: instagram
+      imageUrl: file:///Users/matheus.rezende/Documents/Pessoal/post-automation/tmp/instagram-dor-1779982415703.png
+      captionLength: 66
+    linkedin:
+      variationId: 3
+      id: mock_li_post_id
+      dryRun: true
+      channel: linkedin
+      textLength: 66
+      hasImage: true

@@ -1,7 +1,7 @@
-// instagram.js — publica post (single image ou carousel) via Instagram Graph API.
-// Chamado por: src/index.js. Docs: developers.facebook.com/docs/instagram-api/guides/content-publishing
+// instagram.js — publica post (single image ou carousel) via Instagram Business Login API.
+// Chamado por: src/index.js. Docs: developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login
 //
-// Fluxo Graph API:
+// Fluxo:
 //   1. POST /{ig-user-id}/media → cria container (image_url ou children pra carousel)
 //   2. POST /{ig-user-id}/media_publish → publica container
 //
@@ -12,7 +12,7 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 
 const GRAPH_VERSION = 'v21.0';
-const API_BASE = `https://graph.facebook.com/${GRAPH_VERSION}`;
+const API_BASE = `https://graph.instagram.com/${GRAPH_VERSION}`;
 
 function token() {
   const t = process.env.IG_ACCESS_TOKEN;
@@ -41,6 +41,24 @@ async function apiPost(endpoint, params) {
   return res.json();
 }
 
+async function waitContainerReady(containerId, { timeoutMs = 60000, intervalMs = 2000 } = {}) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const url = new URL(`${API_BASE}/${containerId}`);
+    url.searchParams.set('fields', 'status_code');
+    url.searchParams.set('access_token', token());
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`IG status check ${res.status}: ${await res.text()}`);
+    const { status_code } = await res.json();
+    if (status_code === 'FINISHED') return;
+    if (status_code === 'ERROR' || status_code === 'EXPIRED') {
+      throw new Error(`Container ${containerId} status=${status_code}`);
+    }
+    await new Promise(r => setTimeout(r, intervalMs));
+  }
+  throw new Error(`Container ${containerId} não ficou pronto em ${timeoutMs}ms`);
+}
+
 export async function publishSingle({ imageUrl, caption, dryRun = false }) {
   if (dryRun) {
     return { id: 'mock_ig_post_id', dryRun: true, channel: 'instagram', imageUrl, captionLength: caption?.length || 0 };
@@ -51,6 +69,8 @@ export async function publishSingle({ imageUrl, caption, dryRun = false }) {
     image_url: imageUrl,
     caption: caption || '',
   });
+
+  await waitContainerReady(container.id);
 
   const published = await apiPost(`/${accountId()}/media_publish`, {
     creation_id: container.id,
@@ -75,11 +95,15 @@ export async function publishCarousel({ imageUrls, caption, dryRun = false }) {
     childIds.push(child.id);
   }
 
+  for (const id of childIds) await waitContainerReady(id);
+
   const container = await apiPost(`/${accountId()}/media`, {
     media_type: 'CAROUSEL',
     children: childIds.join(','),
     caption: caption || '',
   });
+
+  await waitContainerReady(container.id);
 
   const published = await apiPost(`/${accountId()}/media_publish`, {
     creation_id: container.id,
@@ -90,7 +114,7 @@ export async function publishCarousel({ imageUrls, caption, dryRun = false }) {
 
 export async function refreshToken() {
   const current = token();
-  const url = new URL(`${API_BASE}/refresh_access_token`);
+  const url = new URL('https://graph.instagram.com/refresh_access_token');
   url.searchParams.set('grant_type', 'ig_refresh_token');
   url.searchParams.set('access_token', current);
   const res = await fetch(url);
@@ -98,21 +122,21 @@ export async function refreshToken() {
     const text = await res.text();
     throw new Error(`IG refresh ${res.status}: ${text}`);
   }
-  return res.json();
+  const json = await res.json();
+  const daysLeft = json.expires_in ? Math.round(json.expires_in / 86400) : null;
+  return { ...json, daysLeft };
 }
 
 export async function checkTokenHealth() {
-  const url = new URL(`${API_BASE}/debug_token`);
-  url.searchParams.set('input_token', token());
+  const url = new URL(`${API_BASE}/me`);
+  url.searchParams.set('fields', 'id,username,account_type');
   url.searchParams.set('access_token', token());
   const res = await fetch(url);
   if (!res.ok) {
     return { valid: false, error: await res.text() };
   }
   const json = await res.json();
-  const expiresAt = json.data?.expires_at;
-  const daysLeft = expiresAt ? Math.round((expiresAt * 1000 - Date.now()) / 86400000) : null;
-  return { valid: json.data?.is_valid, daysLeft, raw: json.data };
+  return { valid: true, raw: json };
 }
 
 // TODO: upload de imagem local pra storage temporário público (S3, imgur, etc).
