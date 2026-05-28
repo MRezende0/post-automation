@@ -4,7 +4,7 @@
 import 'dotenv/config';
 import { generatePost } from './generate.js';
 import { renderImage } from './render-image.js';
-import { popNext, markPublished, markRejected, getQueue } from './utils/queue.js';
+import { popNext, markPublished, markRejected, getQueue, loadPending, savePending, clearPending, expirePending } from './utils/queue.js';
 import { rankVariations } from './utils/ranking.js';
 import { uploadImage } from './utils/storage.js';
 import * as instagram from './channels/instagram.js';
@@ -27,6 +27,12 @@ async function main() {
     return runPublishTest();
   }
 
+  const expired = await expirePending();
+  for (const e of expired) {
+    log(`Pending expirado descartado: ${e.channel} (saved_at=${e.saved_at})`);
+    await notify(`🗑️ Pending ${e.channel} expirou (>7d) e foi descartado`, { dryRun: DRY_RUN }).catch(() => {});
+  }
+
   const queueItem = await popNext();
   const seed = queueItem || {};
   log(`Item da fila: ${queueItem ? JSON.stringify(queueItem) : 'vazio, gera automático'}`);
@@ -47,22 +53,40 @@ async function main() {
   for (const channel of CHANNELS) {
     log(`\n=== Canal: ${channel} ===`);
 
-    const generation = await generatePost({
-      channel,
-      pillar: seed.pillar,
-      angle: seed.angle,
-      context: seed.context,
-      dryRun: DRY_RUN,
-    });
+    const pending = await loadPending(channel);
+    let generation;
+    let topId;
+    let imagePath;
+    let imageUrl;
+    let channelSeed = seed;
 
-    log(`Gerou ${generation.variations.length} variações | pilar=${generation.pillar} | ângulo=${generation.angle}`);
-
-    const ranked = rankVariations(generation.variations);
-    const topId = ranked[0].variation.id;
-    log(`Top-1 por heurística: variação #${topId} (score ${ranked[0].score})`);
-
-    const top = generation.variations.find(v => v.id === topId);
-    const imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: top });
+    if (pending) {
+      log(`Retomando pending salvo em ${pending.saved_at}`);
+      await notify(`🔁 Retomando post ${channel} pendente desde ${pending.saved_at}`, { dryRun: DRY_RUN }).catch(() => {});
+      generation = pending.generation;
+      topId = pending.top_id;
+      imageUrl = pending.image_url;
+      channelSeed = pending.seed || seed;
+    } else {
+      generation = await generatePost({
+        channel,
+        pillar: seed.pillar,
+        angle: seed.angle,
+        context: seed.context,
+        dryRun: DRY_RUN,
+      });
+      log(`Gerou ${generation.variations.length} variações | pilar=${generation.pillar} | ângulo=${generation.angle}`);
+      const ranked = rankVariations(generation.variations);
+      topId = ranked[0].variation.id;
+      log(`Top-1 por heurística: variação #${topId} (score ${ranked[0].score})`);
+      const top = generation.variations.find(v => v.id === topId);
+      imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: top });
+      if (imagePath && !DRY_RUN) {
+        const uploaded = await uploadImage(imagePath);
+        imageUrl = uploaded.url;
+        log(`Imagem publicada: ${imageUrl}`);
+      }
+    }
 
     let chosenId = topId;
     let action = 'approve';
@@ -74,6 +98,7 @@ async function main() {
         angle: generation.angle,
         variations: generation.variations,
         imagePath,
+        imageUrl,
       });
       log(`Enviou preview Telegram (msg=${messageId}), aguardando decisão...`);
 
@@ -83,34 +108,43 @@ async function main() {
       log(`Decisão: ${action} (variação ${chosenId}${decision.reason ? ' | motivo: ' + decision.reason : ''})`);
 
       if (action === 'reject') {
-        await markRejected({ ...seed, channel, generation }, decision.reason);
+        await clearPending(channel);
+        await markRejected({ ...channelSeed, channel, generation }, decision.reason);
         await notify(`❌ Post ${channel} rejeitado: ${decision.reason}`, { dryRun: DRY_RUN });
         continue;
       }
       if (action === 'regen') {
+        await clearPending(channel);
         await notify(`🔄 Regenerar ${channel} ficou pra próximo run (não implementado em loop)`, { dryRun: DRY_RUN });
         continue;
       }
       if (action === 'timeout') {
-        await markRejected({ ...seed, channel, generation }, 'timeout sem aprovação');
-        await notify(`⏱️ Post ${channel} expirou sem aprovação — não publicado`, { dryRun: DRY_RUN });
+        await savePending({ channel, generation, top_id: topId, image_url: imageUrl, seed: channelSeed });
+        await notify(`⏱️ Post ${channel} sem decisão — salvo pra retomar no próximo run (TTL 7d)`, { dryRun: DRY_RUN });
         continue;
       }
       if (action !== 'approve') {
-        await notify(`⚠️ Ação desconhecida (${action}) em ${channel} — não publicado`, { dryRun: DRY_RUN });
+        await savePending({ channel, generation, top_id: topId, image_url: imageUrl, seed: channelSeed });
+        await notify(`⚠️ Ação desconhecida (${action}) em ${channel} — salvo pra retomar`, { dryRun: DRY_RUN });
         continue;
       }
     }
 
     const chosen = generation.variations.find(v => v.id === chosenId);
-    let finalImage = imagePath;
-    if (chosen.id !== top.id) {
-      finalImage = await renderPreview({ channel, pillar: generation.pillar, variation: chosen });
+    let finalImageUrl = imageUrl;
+    if (chosen.id !== topId && !DRY_RUN) {
+      const newImg = await renderPreview({ channel, pillar: generation.pillar, variation: chosen });
+      if (newImg) {
+        const uploaded = await uploadImage(newImg);
+        finalImageUrl = uploaded.url;
+        log(`Reimagem variação ${chosen.id}: ${finalImageUrl}`);
+      }
     }
 
-    const publishResult = await publishToChannel({ channel, variation: chosen, imagePath: finalImage });
+    const publishResult = await publishToChannel({ channel, variation: chosen, imageUrl: finalImageUrl });
     log(`Publicou em ${channel}: ${JSON.stringify(publishResult)}`);
 
+    await clearPending(channel);
     results[channel] = { variationId: chosen.id, ...publishResult };
   }
 
@@ -147,7 +181,7 @@ async function renderPreview({ channel, pillar, variation }) {
   }
 }
 
-async function publishToChannel({ channel, variation, imagePath }) {
+async function publishToChannel({ channel, variation, imageUrl }) {
   if (channel === 'instagram') {
     if (variation.format === 'carousel' && variation.slides) {
       return instagram.publishCarousel({
@@ -156,14 +190,8 @@ async function publishToChannel({ channel, variation, imagePath }) {
         dryRun: DRY_RUN,
       });
     }
-    let imageUrl = variation.imageUrl;
-    if (!imageUrl && imagePath && !DRY_RUN) {
-      const uploaded = await uploadImage(imagePath);
-      imageUrl = uploaded.url;
-      log(`Imagem publicada: ${imageUrl}`);
-    }
     return instagram.publishSingle({
-      imageUrl: imageUrl || `file://${imagePath}`,
+      imageUrl: variation.imageUrl || imageUrl,
       caption: variation.body,
       dryRun: DRY_RUN,
     });
@@ -171,7 +199,7 @@ async function publishToChannel({ channel, variation, imagePath }) {
   if (channel === 'linkedin') {
     return linkedin.publishText({
       text: variation.body,
-      imagePath,
+      imageUrl,
       dryRun: DRY_RUN,
     });
   }

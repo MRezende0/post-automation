@@ -46,7 +46,7 @@ function formatPreview({ channel, pillar, angle, variations }) {
   return head + blocks;
 }
 
-export async function sendApprovalRequest({ channel, pillar, angle, variations, imagePath, dryRun = false }) {
+export async function sendApprovalRequest({ channel, pillar, angle, variations, imagePath, imageUrl, dryRun = false }) {
   if (dryRun) {
     return {
       messageId: 'mock_msg_id',
@@ -59,10 +59,12 @@ export async function sendApprovalRequest({ channel, pillar, angle, variations, 
   const cid = chatId();
   const caption = formatPreview({ channel, pillar, angle, variations });
 
+  const photo = imageUrl || (imagePath && existsSync(imagePath) ? imagePath : null);
+
   let messageId;
-  if (imagePath && existsSync(imagePath)) {
+  if (photo) {
     const truncated = caption.length > 1024 ? caption.slice(0, 1020) + '...' : caption;
-    const sent = await bot.sendPhoto(cid, imagePath, {
+    const sent = await bot.sendPhoto(cid, photo, {
       caption: truncated,
       parse_mode: 'Markdown',
       reply_markup: buildKeyboard(),

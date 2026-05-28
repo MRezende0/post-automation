@@ -12,8 +12,11 @@ function paths() {
     QUEUE_FILE: path.join(contentDir, 'queue.yaml'),
     PUBLISHED_FILE: path.join(contentDir, 'published.yaml'),
     REJECTED_FILE: path.join(contentDir, 'rejected.yaml'),
+    PENDING_FILE: path.join(contentDir, 'pending-approval.yaml'),
   };
 }
+
+const PENDING_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 async function ensureDir(file) {
   const dir = path.dirname(file);
@@ -83,4 +86,55 @@ export async function pushToQueue(item) {
   await writeYaml(paths().QUEUE_FILE, queue);
 }
 
+export async function getPending() {
+  return readYaml(paths().PENDING_FILE);
+}
+
+export async function loadPending(channel) {
+  const items = await getPending();
+  const now = Date.now();
+  const valid = [];
+  let found = null;
+  for (const item of items) {
+    const age = now - new Date(item.saved_at).getTime();
+    if (age > PENDING_TTL_MS) continue;
+    if (!found && item.channel === channel) {
+      found = item;
+    } else {
+      valid.push(item);
+    }
+  }
+  if (found || valid.length !== items.length) {
+    await writeYaml(paths().PENDING_FILE, valid);
+  }
+  return found;
+}
+
+export async function savePending(item) {
+  const items = await getPending();
+  const filtered = items.filter(i => i.channel !== item.channel);
+  filtered.push({ ...item, saved_at: new Date().toISOString() });
+  await writeYaml(paths().PENDING_FILE, filtered);
+}
+
+export async function clearPending(channel) {
+  const items = await getPending();
+  const filtered = items.filter(i => i.channel !== channel);
+  if (filtered.length !== items.length) {
+    await writeYaml(paths().PENDING_FILE, filtered);
+  }
+}
+
+export async function expirePending() {
+  const items = await getPending();
+  const now = Date.now();
+  const valid = items.filter(i => now - new Date(i.saved_at).getTime() <= PENDING_TTL_MS);
+  const expired = items.filter(i => now - new Date(i.saved_at).getTime() > PENDING_TTL_MS);
+  if (expired.length > 0) {
+    await writeYaml(paths().PENDING_FILE, valid);
+  }
+  return expired;
+}
+
 export const _paths = paths;
+export const _PENDING_TTL_MS = PENDING_TTL_MS;
