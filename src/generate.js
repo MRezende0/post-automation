@@ -8,8 +8,8 @@ import path from 'node:path';
 import { chooseNextPillar, chooseNextAngle } from './utils/ranking.js';
 import { getPublished } from './utils/queue.js';
 
-const MODEL_GENERATE = 'gemini-2.5-pro';
-const MODEL_SIMPLE = 'gemini-2.5-flash';
+const MODEL_GENERATE = 'gemini-2.5-flash';
+const MODEL_SIMPLE = 'gemini-2.5-flash-lite';
 
 const ROOT = process.cwd();
 
@@ -43,27 +43,61 @@ async function loadPillarPrompt(pillar) {
   return readDoc(`prompts/pillars/${pillar}.md`);
 }
 
-async function loadExamples() {
-  const dir = path.join(ROOT, 'content/examples/high-performers');
+// Lê a linha "Engajamento: 312 likes, 47 salvamentos, ..." e soma os números
+// como score bruto. Sem a linha, retorna 0 (seeds entram, mas atrás dos reais).
+function parseEngagementScore(content) {
+  const match = content.match(/engajamento\s*:?(.*)/i);
+  if (!match) return 0;
+  const nums = match[1].match(/\d+/g);
+  if (!nums) return 0;
+  return nums.reduce((sum, n) => sum + Number(n), 0);
+}
+
+async function loadExamplesFrom(rel) {
+  const dir = path.join(ROOT, rel);
   if (!existsSync(dir)) return [];
   const files = await readdir(dir);
   const examples = [];
   for (const f of files) {
-    if (f.endsWith('.md') || f.endsWith('.txt')) {
+    if ((f.endsWith('.md') || f.endsWith('.txt')) && f.toLowerCase() !== 'readme.md') {
       const content = await readFile(path.join(dir, f), 'utf8');
-      examples.push({ name: f, content });
+      examples.push({ name: f, content, score: parseEngagementScore(content) });
     }
   }
   return examples;
 }
 
-function buildFewShot(examples) {
-  if (examples.length === 0) return '';
-  const blocks = examples
-    .slice(0, 6)
-    .map((ex, i) => `### Exemplo ${i + 1} (${ex.name})\n${ex.content}`)
-    .join('\n\n');
-  return `\n\n## Exemplos de posts que performaram bem (use como referência de tom e estrutura)\n\n${blocks}`;
+async function loadExamples() {
+  const [high, low] = await Promise.all([
+    loadExamplesFrom('content/examples/high-performers'),
+    loadExamplesFrom('content/examples/low-performers'),
+  ]);
+  // Maior engajamento primeiro; seeds (score 0) ficam no fim.
+  high.sort((a, b) => b.score - a.score);
+  return { high, low };
+}
+
+function buildFewShot({ high = [], low = [] }) {
+  const sections = [];
+  if (high.length > 0) {
+    const blocks = high
+      .slice(0, 6)
+      .map((ex, i) => `### Exemplo ${i + 1} (${ex.name})\n${ex.content}`)
+      .join('\n\n');
+    sections.push(
+      `## Exemplos de posts que performaram bem (referência de tom e estrutura — imite o tom, não copie o conteúdo)\n\n${blocks}`,
+    );
+  }
+  if (low.length > 0) {
+    const blocks = low
+      .slice(0, 4)
+      .map((ex, i) => `### Anti-exemplo ${i + 1} (${ex.name})\n${ex.content}`)
+      .join('\n\n');
+    sections.push(
+      `## Anti-exemplos — posts que performaram MAL (NÃO repita esse tom, estrutura ou tipo de hook)\n\n${blocks}`,
+    );
+  }
+  return sections.length > 0 ? `\n\n${sections.join('\n\n')}` : '';
 }
 
 export async function generatePost({ channel, pillar, angle, context, dryRun = false }) {
