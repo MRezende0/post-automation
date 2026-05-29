@@ -14,3 +14,6 @@ tmp/
 
 # RAG: índice de embeddings gerado por src/build-index.js (regenerar localmente/CI)
 content/kb-index.json
+
+# previews locais de imagem (testes)
+previews/
