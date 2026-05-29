@@ -10,6 +10,7 @@ import { chooseNextPillar, chooseNextAngle, chooseNextFormat, pillarPosteriors }
 import { getPublished, isRealPost } from './utils/queue.js';
 import { usingSupabase, supabase } from './utils/db.js';
 import { retrieve } from './utils/rag.js';
+import { withRetry } from './utils/retry.js';
 
 const MODEL_GENERATE = 'gemini-2.5-flash';
 const MODEL_SIMPLE = 'gemini-2.5-flash-lite';
@@ -169,15 +170,20 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
   const targetFormat = channel === 'instagram' ? chooseNextFormat(published) : null;
   const userMessage = buildUserMessage({ channel, pillar: chosenPillar, angle: chosenAngle, context, recentHooks, targetFormat });
 
-  const response = await client.models.generateContent({
-    model: MODEL_GENERATE,
-    contents: userMessage,
-    config: {
-      systemInstruction: system,
-      maxOutputTokens: 4000,
-      responseMimeType: 'application/json',
-    },
-  });
+  // Retry com backoff: o Gemini dá 503 "high demand" / 429 com frequência.
+  // Caminho fatal da geração — não pode morrer numa sobrecarga transitória.
+  const response = await withRetry(
+    () => client.models.generateContent({
+      model: MODEL_GENERATE,
+      contents: userMessage,
+      config: {
+        systemInstruction: system,
+        maxOutputTokens: 4000,
+        responseMimeType: 'application/json',
+      },
+    }),
+    { tries: 4, baseMs: 2000, label: 'gemini-generate' },
+  );
 
   const text = response.text || '';
   const parsed = parseJsonResponse(text);
