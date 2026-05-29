@@ -2,7 +2,7 @@
 // entre a fase GERAR (index.js) e a fase RESOLVER (resolve.js).
 
 import { readFile } from 'node:fs/promises';
-import { generatePost, judgeVariations, polishPost, checkGuardrails } from './generate.js';
+import { generatePost, judgeVariations, critiqueVariations, polishPost, checkGuardrails } from './generate.js';
 import { renderImage, renderCarousel } from './render-image.js';
 import { rankVariations } from './utils/ranking.js';
 import { uploadImage } from './utils/storage.js';
@@ -76,11 +76,25 @@ export async function prepareGeneration({ channel, seed, regenNote }) {
   const ranked = rankVariations(generation.variations);
   let topId = ranked[0].variation.id;
   let how = `heurística (score ${ranked[0].score})`;
+  // Scores heurísticos por variação → persistidos em post_variants (observabilidade).
+  generation.heuristic_scores = Object.fromEntries(ranked.map(r => [r.variation.id, r.score]));
   if (!DRY_RUN) {
-    const verdict = await judgeVariations({ channel, pillar: generation.pillar, variations: generation.variations });
+    // Agente Crítico: derruba variações fracas ANTES do judge (eleva o piso).
+    let candidates = generation.variations;
+    const critique = await critiqueVariations({ channel, pillar: generation.pillar, variations: generation.variations });
+    if (Array.isArray(critique)) {
+      generation.critic = critique;
+      const survivors = generation.variations.filter(v => !critique.find(c => c.id === v.id)?.refuted);
+      if (survivors.length) candidates = survivors; // se todos refutados, mantém todos
+      log(`Crítico: ${candidates.length}/${generation.variations.length} sobreviveram`);
+    }
+    // Judge multidimensional escolhe entre os sobreviventes.
+    const verdict = await judgeVariations({ channel, pillar: generation.pillar, variations: candidates });
     if (verdict) {
       topId = verdict.chosenId;
-      how = `LLM-judge (${verdict.reason})`;
+      how = `judge ${verdict.reason}`;
+      generation.judge_reason = verdict.reason;
+      generation.judge_scores = verdict.scores;
     }
   }
   log(`Top-1: variação #${topId} via ${how}`);
@@ -93,6 +107,7 @@ export async function prepareGeneration({ channel, seed, regenNote }) {
       const polished = await polishPost({ channel, pillar: generation.pillar, variation: top });
       Object.assign(top, { hook: polished.hook, body: polished.body }); // muta a ref no array
       const guard = checkGuardrails(top, { pillar: generation.pillar });
+      generation.guardrail_flags = guard.flags;
       log(guard.clean ? 'Guardrails: ok' : `⚠️ Guardrails (top #${topId}): ${guard.flags.join(', ')}`);
     }
   }

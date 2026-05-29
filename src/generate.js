@@ -4,9 +4,11 @@
 import { GoogleGenAI } from '@google/genai';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
-import { chooseNextPillar, chooseNextAngle } from './utils/ranking.js';
-import { getPublished } from './utils/queue.js';
+import { chooseNextPillar, chooseNextAngle, pillarPosteriors } from './utils/ranking.js';
+import { getPublished, isRealPost } from './utils/queue.js';
+import { usingSupabase, supabase } from './utils/db.js';
 import { retrieve } from './utils/rag.js';
 
 const MODEL_GENERATE = 'gemini-2.5-flash';
@@ -121,13 +123,15 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     throw new Error(`Canal inválido: ${channel}`);
   }
 
-  const published = await getPublished();
+  // Só posts reais alimentam aprendizado/anti-repetição — dry-runs poluiriam.
+  const published = (await getPublished()).filter(isRealPost);
 
   let chosenPillar = pillar;
   let chosenAngle = angle;
   if (!chosenPillar) {
     chosenPillar = chooseNextPillar(published);
     chosenAngle = chooseNextAngle(chosenPillar, published);
+    await snapshotBandit(published); // observabilidade da evolução do aprendizado
   }
 
   if (dryRun) {
@@ -176,7 +180,32 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
 
   const text = response.text || '';
   const parsed = parseJsonResponse(text);
-  return { ...parsed, channel, pillar: chosenPillar, angle: chosenAngle };
+  // Observabilidade: hash do system prompt + modelo → atribuição causal no DB
+  // (qual prompt/modelo gerou o post que performou).
+  const promptHash = createHash('sha256').update(system).digest('hex').slice(0, 16);
+  // Persiste o template completo do prompt (atribuição: qual versão gerou o quê).
+  if (usingSupabase()) {
+    try {
+      await supabase().from('prompt_versions').upsert({ hash: promptHash, role: 'system', template: system }, { onConflict: 'hash' });
+    } catch (e) {
+      console.error(`[generate] falha ao gravar prompt_version: ${e.message}`);
+    }
+  }
+  return { ...parsed, channel, pillar: chosenPillar, angle: chosenAngle, model: MODEL_GENERATE, prompt_hash: promptHash };
+}
+
+// Snapshot dos posteriores Beta por pilar → bandit_snapshots (best-effort, só sob flag).
+async function snapshotBandit(published) {
+  if (!usingSupabase()) return;
+  try {
+    const post = pillarPosteriors(published);
+    const rows = Object.entries(post).map(([arm, p]) => ({
+      dimension: 'pillar', arm, alpha: p.alpha, beta: p.beta, n: p.n,
+    }));
+    if (rows.length) await supabase().from('bandit_snapshots').insert(rows);
+  } catch (e) {
+    console.error(`[generate] falha ao snapshot bandit: ${e.message}`);
+  }
 }
 
 // Últimos ganchos publicados, pra instruir o modelo a não repetir tema/abertura.
@@ -202,36 +231,91 @@ function buildUserMessage({ channel, pillar, angle, context, recentHooks = [] })
   return parts.join('\n');
 }
 
-// LLM-as-judge: escolhe a melhor variação usando o modelo simples (barato).
-// Retorna { chosenId, reason } ou null se a API não estiver disponível/falhar.
-export async function judgeVariations({ channel, pillar, variations }) {
+// Agente Crítico: tenta DERRUBAR cada variação (clichê, dor genérica, sem prova,
+// fora de voz). Roda no modelo barato. Quem é "refuted" sai antes do judge —
+// eleva o piso de qualidade sem custo relevante. Retorna verdicts ou null.
+export async function critiqueVariations({ channel, pillar, variations }) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || !variations?.length) return null;
 
   const client = new GoogleGenAI({ apiKey });
-  const list = variations
-    .map(v => `Variação ${v.id}:\nHook: ${v.hook}\nCorpo: ${v.body}`)
-    .join('\n\n');
-
+  const list = variations.map(v => `Variação ${v.id}:\nHook: ${v.hook}\nCorpo: ${v.body}`).join('\n\n');
   const prompt = [
-    `Você é editor de conteúdo de um SaaS B2B pra escritórios de engenharia.`,
-    `Escolha a MELHOR das ${variations.length} variações pra ${channel}, pilar "${pillar}".`,
-    `Critérios: hook que para o scroll, dor concreta (não abstrata), zero buzzword, frases curtas, autenticidade.`,
+    'Você é um crítico cético de conteúdo B2B pra escritórios de engenharia de projeto (não obra).',
+    'Pra CADA variação, tente DERRUBÁ-LA. Marque refuted=true se: o hook é clichê de LinkedIn,',
+    'a dor é genérica (serviria pra qualquer SaaS), faz afirmação sem prova, ou foge da voz (seca, concreta).',
+    'Seja exigente — mas NÃO marque tudo como refuted se houver opções claramente boas.',
     '',
     list,
     '',
-    'Responda só JSON: {"chosenId": <número>, "reason": "<1 frase>"}',
+    'Responda só JSON: {"verdicts":[{"id":<número>,"refuted":<bool>,"flags":["motivo curto"]}]}',
   ].join('\n');
 
   try {
     const response = await client.models.generateContent({
       model: MODEL_SIMPLE,
       contents: prompt,
-      config: { maxOutputTokens: 200, responseMimeType: 'application/json' },
+      config: { maxOutputTokens: 600, responseMimeType: 'application/json' },
     });
     const parsed = parseJsonResponse(response.text || '');
-    if (!variations.some(v => v.id === parsed.chosenId)) return null;
-    return { chosenId: parsed.chosenId, reason: parsed.reason || '' };
+    return Array.isArray(parsed.verdicts) ? parsed.verdicts : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Agrega as dimensões do judge em total ponderado e escolhe o vencedor. Pura
+// (testável). Pesos: hook e especificidade pesam mais (o que para o scroll em B2B).
+export function judgeFromScores(scores, variations) {
+  const W = { hook_stop: 3, especificidade: 3, fit_voz: 2, prova: 2 };
+  const valid = (scores || []).filter(s => variations.some(v => v.id === s.id));
+  if (!valid.length) return null;
+  const ranked = valid
+    .map(s => ({
+      id: s.id,
+      total: (s.hook_stop || 0) * W.hook_stop + (s.especificidade || 0) * W.especificidade
+           + (s.fit_voz || 0) * W.fit_voz + (s.prova || 0) * W.prova,
+      expected_engagement: s.expected_engagement ?? null,
+      dimensions: { hook_stop: s.hook_stop, especificidade: s.especificidade, fit_voz: s.fit_voz, prova: s.prova },
+    }))
+    .sort((a, b) => b.total - a.total);
+  const top = ranked[0];
+  const d = top.dimensions;
+  const reason = `score ${top.total} (hook ${d.hook_stop}, espec ${d.especificidade}, voz ${d.fit_voz}, prova ${d.prova})`;
+  return { chosenId: top.id, reason, scores: ranked };
+}
+
+// LLM-as-judge MULTIDIMENSIONAL: nota cada variação em 4 dimensões + previsão de
+// engajamento (pra calibração: previsto vs real depois). Retorna
+// { chosenId, reason, scores } ou null se a API falhar/indisponível.
+export async function judgeVariations({ channel, pillar, variations }) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || !variations?.length) return null;
+
+  const client = new GoogleGenAI({ apiKey });
+  const list = variations.map(v => `Variação ${v.id}:\nHook: ${v.hook}\nCorpo: ${v.body}`).join('\n\n');
+  const prompt = [
+    `Você é editor de conteúdo de um SaaS B2B pra escritórios de engenharia.`,
+    `Avalie CADA variação pra ${channel}, pilar "${pillar}", em 4 dimensões (0-10):`,
+    `- hook_stop: o hook para o scroll?`,
+    `- especificidade: a dor é concreta e específica (não genérica)?`,
+    `- fit_voz: tom seco, direto, zero buzzword?`,
+    `- prova: tem evidência/número/cena real (não só afirmação)?`,
+    `Dê também expected_engagement (0-100): sua previsão de quão bem vai engajar.`,
+    '',
+    list,
+    '',
+    'Responda só JSON: {"scores":[{"id":<n>,"hook_stop":<0-10>,"especificidade":<0-10>,"fit_voz":<0-10>,"prova":<0-10>,"expected_engagement":<0-100>}]}',
+  ].join('\n');
+
+  try {
+    const response = await client.models.generateContent({
+      model: MODEL_SIMPLE,
+      contents: prompt,
+      config: { maxOutputTokens: 600, responseMimeType: 'application/json' },
+    });
+    const parsed = parseJsonResponse(response.text || '');
+    return judgeFromScores(parsed.scores, variations);
   } catch (e) {
     return null;
   }
