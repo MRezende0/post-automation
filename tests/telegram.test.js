@@ -55,11 +55,11 @@ describe('buildKeyboard', () => {
   it('embute o pendingId em todo callback_data', () => {
     const variations = [{ id: 1 }, { id: 2 }, { id: 3 }];
     const kb = buildKeyboard('instagram-xyz', variations);
-    const approve = kb.inline_keyboard[0];
-    expect(approve.map(b => b.callback_data)).toEqual([
-      'a:instagram-xyz:1',
-      'a:instagram-xyz:2',
-      'a:instagram-xyz:3',
+    const captions = kb.inline_keyboard[0]; // passo 1: escolha da legenda (c:)
+    expect(captions.map(b => b.callback_data)).toEqual([
+      'c:instagram-xyz:1',
+      'c:instagram-xyz:2',
+      'c:instagram-xyz:3',
     ]);
     const actions = kb.inline_keyboard[1].map(b => b.callback_data);
     expect(actions).toEqual(['r:instagram-xyz', 'x:instagram-xyz']);

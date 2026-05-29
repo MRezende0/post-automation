@@ -208,7 +208,7 @@ async function markPublishedToDb(item, result) {
   await db.from('post_events').insert({
     post_id: post.id,
     type: 'published',
-    payload: { channel, chosen_variation: chosenId, channels: result.channels ?? {} },
+    payload: { channel, chosen_variation: chosenId, chosen_art: result.chosenArtId ?? null, channels: result.channels ?? {}, images: result.images ?? null },
   });
 
   // Decisão do judge + crítica → calibração depois (expected_engagement vs real).

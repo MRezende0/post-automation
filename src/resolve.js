@@ -6,7 +6,7 @@
 import 'dotenv/config';
 import { getPending, savePending, clearPending, markPublished, markRejected } from './utils/queue.js';
 import { prepareGeneration, publishToChannel } from './pipeline.js';
-import { sendApprovalRequest, fetchDecisions, confirmDecisions, finalizeKeyboard, notify, escapeHtml } from './telegram.js';
+import { sendApprovalRequest, fetchDecisions, confirmDecisions, finalizeKeyboard, showArtSelection, notify, escapeHtml } from './telegram.js';
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const MAX_REGEN = Number(process.env.MAX_REGEN || 3);
@@ -31,6 +31,54 @@ function publishedRecord(p, chosen) {
   };
 }
 
+// Passo 1: legenda escolhida → guarda e mostra o teclado de arte.
+async function handleCaption(p, captionId) {
+  const cap = p.generation.variations.find(v => v.id === captionId);
+  if (!cap) {
+    log(`Pending ${p.pending_id}: legenda ${captionId} inexistente — ignorando`);
+    return;
+  }
+  log(`Legenda #${captionId} escolhida (${p.channel}) — aguardando arte`);
+  await savePending({ ...p, chosen_caption_id: captionId, status: 'awaiting_art' });
+  await showArtSelection({
+    messageId: p.keyboard_message_id,
+    pendingId: p.pending_id,
+    images: p.images || [],
+    captionId,
+    dryRun: DRY_RUN,
+  });
+}
+
+// Passo 2: arte escolhida → publica legenda escolhida + arte escolhida.
+async function handleArt(p, artId) {
+  const gen = p.generation;
+  const captionId = p.chosen_caption_id ?? p.top_id;
+  const chosen = gen.variations.find(v => v.id === captionId) || gen.variations[0];
+  const imageUrl = p.images?.find(i => i.id === artId)?.url;
+  if (!chosen) {
+    log(`Pending ${p.pending_id}: legenda ${captionId} inexistente — ignorando`);
+    return;
+  }
+  log(`Publicando ${p.channel}: legenda #${captionId} + arte #${artId} (pending ${p.pending_id})`);
+
+  const result = await publishToChannel({ channel: p.channel, variation: chosen, imageUrl, pillar: gen.pillar });
+  await markPublished(publishedRecord(p, chosen), {
+    chosenVariationId: chosen.id,
+    channels: { [p.channel]: result },
+    generation: gen,
+    images: p.images,
+    chosenArtId: artId,
+  });
+  await clearPending(p.channel);
+  await finalizeKeyboard({
+    messageId: p.keyboard_message_id,
+    text: `✅ <b>Publicado em ${p.channel}</b> — legenda #${captionId} + arte #${artId}.`,
+    dryRun: DRY_RUN,
+  });
+  await notify(`✅ Publicado em ${p.channel} — legenda #${captionId} + arte #${artId}`, { dryRun: DRY_RUN });
+}
+
+// Compat (1 clique): legenda e arte da MESMA variação.
 async function handleApprove(p, chosenId) {
   const gen = p.generation;
   const chosen = gen.variations.find(v => v.id === chosenId) || gen.variations.find(v => v.id === p.top_id);
@@ -42,7 +90,7 @@ async function handleApprove(p, chosenId) {
   log(`Aprovado ${p.channel} #${chosen.id} (pending ${p.pending_id}) — publicando`);
 
   const result = await publishToChannel({ channel: p.channel, variation: chosen, imageUrl, pillar: gen.pillar });
-  await markPublished(publishedRecord(p, chosen), { chosenVariationId: chosen.id, channels: { [p.channel]: result }, generation: gen });
+  await markPublished(publishedRecord(p, chosen), { chosenVariationId: chosen.id, channels: { [p.channel]: result }, generation: gen, images: p.images, chosenArtId: chosen.id });
   await clearPending(p.channel);
   await finalizeKeyboard({
     messageId: p.keyboard_message_id,
@@ -134,23 +182,34 @@ async function main() {
   // Motivos de rejeição primeiro (consome textos de runs anteriores).
   await resolveReasons(pendings, texts);
 
-  // Última decisão por pending vence (evita processar cliques repetidos).
-  const latest = new Map();
+  // Processa em ORDEM cronológica com estado em memória — o fluxo de 2 cliques
+  // (legenda → arte) exige que a legenda seja aplicada antes da arte no mesmo run.
+  // _done trava ações terminais (publicou/rejeitou/regenerou) contra clique duplo.
+  const byId = new Map(pendings.map(p => [p.pending_id, { ...p }]));
   for (const d of decisions) {
-    if (d.pendingId) latest.set(d.pendingId, d);
-  }
-  const byId = new Map(pendings.map(p => [p.pending_id, p]));
-
-  for (const [pid, d] of latest) {
-    const p = byId.get(pid);
+    const p = byId.get(d.pendingId);
     if (!p) {
-      log(`Decisão pra pending desconhecido/resolvido (${pid}) — ignorando`);
+      log(`Decisão pra pending desconhecido/resolvido (${d.pendingId}) — ignorando`);
       continue;
     }
-    if (p.status === 'awaiting_reason') continue; // já rejeitado, esperando motivo
-    if (d.action === 'approve') await handleApprove(p, d.chosenId);
-    else if (d.action === 'regen') await handleRegen(p);
-    else if (d.action === 'reject') await handleReject(p);
+    if (p.status === 'awaiting_reason' || p._done) continue;
+    if (d.action === 'caption') {
+      await handleCaption(p, d.chosenCaptionId);
+      p.chosen_caption_id = d.chosenCaptionId;
+      p.status = 'awaiting_art';
+    } else if (d.action === 'art') {
+      await handleArt(p, d.chosenArtId);
+      p._done = true;
+    } else if (d.action === 'approve') {
+      await handleApprove(p, d.chosenId);
+      p._done = true;
+    } else if (d.action === 'regen') {
+      await handleRegen(p);
+      p._done = true;
+    } else if (d.action === 'reject') {
+      await handleReject(p);
+      p._done = true;
+    }
   }
 
   // Ack no servidor do Telegram só depois de processar tudo com sucesso.

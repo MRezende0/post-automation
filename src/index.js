@@ -135,7 +135,7 @@ async function publishApproved({ channel, generation, chosenId, images, seed }) 
       post: { hook: chosen.hook, body: chosen.body, format: chosen.format },
       generated_at: new Date().toISOString(),
     },
-    { chosenVariationId: chosen.id, channels: { [channel]: publishResult }, generation },
+    { chosenVariationId: chosen.id, channels: { [channel]: publishResult }, generation, images },
   );
   await notify(`✅ Publicado em: ${channel} (variação #${chosen.id}, sem aprovação)`, { dryRun: DRY_RUN });
 }

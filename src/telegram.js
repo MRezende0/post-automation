@@ -71,20 +71,41 @@ function chunkText(text, max = MESSAGE_LIMIT) {
   return out;
 }
 
+function controlRow(pendingId) {
+  return [
+    { text: '🔄 Regenerar', callback_data: `r:${pendingId}` },
+    { text: '❌ Rejeitar', callback_data: `x:${pendingId}` },
+  ];
+}
+
+// Passo 1: escolher a LEGENDA (texto). callback c:<pid>:<id>.
 function buildKeyboard(pendingId, variations) {
-  const approveRow = variations.map(v => ({
-    text: `✅ #${v.id}`,
-    callback_data: `a:${pendingId}:${v.id}`,
+  const captionRow = variations.map(v => ({
+    text: `📝 #${v.id}`,
+    callback_data: `c:${pendingId}:${v.id}`,
   }));
-  return {
-    inline_keyboard: [
-      approveRow,
-      [
-        { text: '🔄 Regenerar', callback_data: `r:${pendingId}` },
-        { text: '❌ Rejeitar', callback_data: `x:${pendingId}` },
-      ],
-    ],
-  };
+  return { inline_keyboard: [captionRow, controlRow(pendingId)] };
+}
+
+// Passo 2: escolher a ARTE (imagem). callback g:<pid>:<id>.
+function buildArtKeyboard(pendingId, images) {
+  const artRow = images.map(im => ({
+    text: `🖼️ #${im.id}`,
+    callback_data: `g:${pendingId}:${im.id}`,
+  }));
+  return { inline_keyboard: [artRow, controlRow(pendingId)] };
+}
+
+// Edita o rodapé pro passo 2 (escolha da arte) após a legenda ser escolhida.
+export async function showArtSelection({ messageId, pendingId, images = [], captionId, dryRun = false }) {
+  if (dryRun || !messageId) return;
+  const bot = makeBot();
+  await bot.editMessageText(`📝 Legenda #${captionId} escolhida. Agora a <b>ARTE</b> 🖼️`, {
+    chat_id: chatId(),
+    message_id: messageId,
+    parse_mode: 'HTML',
+    reply_markup: buildArtKeyboard(pendingId, images),
+  }).catch(() => {});
 }
 
 function formatHeader({ channel, pillar, angle, count }) {
@@ -140,7 +161,7 @@ export async function sendApprovalRequest({ channel, pillar, angle, variations, 
     }
   }
 
-  const footer = await bot.sendMessage(cid, 'Qual variação publicar?', {
+  const footer = await bot.sendMessage(cid, 'Escolha a <b>LEGENDA</b> 📝 (depois escolhe a arte):', {
     parse_mode: 'HTML',
     reply_markup: buildKeyboard(pendingId, variations),
   });
@@ -152,7 +173,9 @@ function parseCallback(data) {
   if (!data) return null;
   const parts = data.split(':');
   const [kind, pendingId, varId] = parts;
-  if (kind === 'a') return { action: 'approve', pendingId, chosenId: parseInt(varId, 10) };
+  if (kind === 'c') return { action: 'caption', pendingId, chosenCaptionId: parseInt(varId, 10) };
+  if (kind === 'g') return { action: 'art', pendingId, chosenArtId: parseInt(varId, 10) };
+  if (kind === 'a') return { action: 'approve', pendingId, chosenId: parseInt(varId, 10) }; // compat (1 clique)
   if (kind === 'r') return { action: 'regen', pendingId };
   if (kind === 'x') return { action: 'reject', pendingId };
   return null;
@@ -228,4 +251,4 @@ export async function notify(text, opts = {}) {
 }
 
 export { escapeHtml };
-export const _internal = { escapeHtml, chunkText, buildKeyboard, parseCallback, formatHeader, formatVariationBody };
+export const _internal = { escapeHtml, chunkText, buildKeyboard, buildArtKeyboard, parseCallback, formatHeader, formatVariationBody };
