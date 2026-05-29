@@ -2,6 +2,19 @@
 
 > Combustível pros posts de pilar "Dor nomeada". Cada dor vira 1–3 posts. Refinar com entrevistas reais. Marcar com `[validada]` quando ouvida de cliente real.
 
+## ⭐ Dores núcleo `[validada]` (vêm da estratégia do produto — priorizar)
+
+> Estas são as dores que o Pilar de fato resolve e que definem o ICP. Devem aparecer com mais frequência que as demais.
+
+1. **Não saber se cada projeto dá lucro.** `[validada]` — a dor #1. Fecha o mês, "parece ok", mas não sabe qual projeto puxou pra cima ou drenou margem.
+2. **Orçar no feeling.** `[validada]` — vende projeto sem base de quanto o último custou de verdade (hora vendida × hora gasta). Vende barato, margem some.
+3. **Projeto estoura prazo/orçamento e ele descobre tarde.** `[validada]` — sem acompanhamento de execução vs planejado por marco.
+4. **Financeiro não conversa com a operação.** `[validada]` — quem executa não vê número; quem vê número não sabe o que tá sendo executado.
+5. **Faturar por marco e perder o controle.** `[validada]` — não sabe o que já faturou, o que falta medir, o que o cliente já deve.
+6. **Medo de contratar sem saber se o caixa/capacidade aguenta.** `[validada]` — quer crescer mas não enxerga rentabilidade nem ocupação da equipe.
+
+> Gancho de topo = planilha/WhatsApp/feeling (abaixo). Promessa de fundo = resolver as 6 acima (lucro/controle). Ver `posicionamento.md`.
+
 ## Financeiro
 
 1. **Cliente que sumiu sem pagar a última parcela** e ninguém sabia quanto era devido. Descobre só meses depois revisando extrato.

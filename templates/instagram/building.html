@@ -3,16 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <style>
+  /* Paleta Pilar — ver docs/brand.md */
   :root {
-    --bg: #0a0e14;
-    --fg: #e6edf3;
-    --accent: #3b82f6;
-    --muted: #8b949e;
+    --paper: #FCFCFC;
+    --ink: #1A1A1A;
+    --ink-soft: #3C3C3C;
+    --muted: #6B6B6B;
+    --brand: #A4EC86;
+    --brand-ink: #2C5016;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     width: 1080px; height: 1350px;
-    background: var(--bg); color: var(--fg);
+    background: var(--paper); color: var(--ink);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -21,34 +24,35 @@
     padding: 110px 90px;
     display: flex; flex-direction: column;
     justify-content: space-between;
-    background: radial-gradient(120% 80% at 0% 0%, #11192b 0%, #0a0e14 60%);
+    background: linear-gradient(160deg, #FCFCFC 0%, #F2F2EF 100%);
   }
   .badge {
     display: inline-flex; align-items: center; gap: 12px;
-    padding: 12px 22px;
-    background: rgba(59,130,246,0.12);
-    border: 1px solid rgba(59,130,246,0.4);
-    color: var(--accent);
+    padding: 12px 24px;
+    background: rgba(164,236,134,0.25);
+    border: 1px solid var(--brand);
+    color: var(--brand-ink);
     font-size: 22px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
     border-radius: 999px;
     width: fit-content;
   }
-  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--brand-ink); }
   .hook {
-    font-size: 72px;
-    font-weight: 700;
-    line-height: 1.12;
-    letter-spacing: -0.02em;
+    font-size: 74px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    color: var(--ink);
   }
   .body {
     font-size: 32px;
     line-height: 1.55;
-    color: var(--muted);
+    color: var(--ink-soft);
     max-width: 900px;
-    border-left: 4px solid var(--accent);
+    border-left: 6px solid var(--brand);
     padding-left: 32px;
   }
   .footer {
@@ -56,7 +60,8 @@
     color: var(--muted);
     font-size: 22px;
   }
-  .brand { font-weight: 700; color: var(--fg); }
+  .brandwrap { display: flex; align-items: center; gap: 14px; }
+  .brand { font-weight: 700; color: var(--ink); }
 </style>
 </head>
 <body>
@@ -71,7 +76,19 @@
       <p class="body">{{subline}}</p>
     </div>
     <div class="footer">
-      <span class="brand">{{brand}}</span>
+      <span class="brandwrap">
+        <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <g transform="translate(2,4)" stroke="#1A1A1A" stroke-width="1.6" stroke-linecap="round">
+            <line x1="1" y1="2" x2="27" y2="2" />
+            <line x1="3" y1="6" x2="25" y2="6" opacity="0.85" />
+            <line x1="7" y1="9" x2="7" y2="23" />
+            <line x1="12" y1="9" x2="12" y2="23" />
+            <line x1="17" y1="9" x2="17" y2="23" />
+            <line x1="22" y1="9" x2="22" y2="23" />
+          </g>
+        </svg>
+        <span class="brand">{{brand}}</span>
+      </span>
       <span>{{handle}}</span>
     </div>
   </div>

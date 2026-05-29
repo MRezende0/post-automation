@@ -9,6 +9,8 @@
 | Building in public | 15% | Conexão pessoal, confiança |
 | Prova social | 15% | Conversão, DM, lead |
 
+> **Estratégia (ver `posicionamento.md`):** gancho de topo = planilha/WhatsApp/feeling; promessa de fundo = **lucro por projeto / controle**. As dores núcleo `[validada]` de `dores.md` (não saber se dá lucro, orçar no feeling, financeiro × operação desconectados) devem permear sobretudo **Dor** e **Dica**. Público: engenharia consultiva de projeto (não obra).
+
 ---
 
 ## 1. Dor nomeada (40%)
@@ -21,7 +23,7 @@
 
 **5 ângulos:**
 
-1. **Dor financeira** — perder dinheiro por descontrole (cobrança, precificação)
+1. **Dor financeira** `[núcleo]` — não saber se o projeto deu lucro; orçar no feeling e ver a margem evaporar; faturamento por marco que se perde
 2. **Dor de tempo** — domingo trabalhando, 23h ainda no escritório
 3. **Dor de versão/arquivo** — Rev errada, arquivo perdido, histórico na cabeça do funcionário
 4. **Dor relacional** — sócio brigando, cliente cobrando, funcionário sumindo
@@ -39,8 +41,8 @@
 
 **5 ângulos:**
 
-1. **Precificação** — hora-vendida vs hora-trabalhada, margem, BDI pra projeto
-2. **Controle de projeto** — quais 3 indicadores acompanhar, frequência, ferramenta
+1. **Precificação** `[núcleo]` — hora-vendida vs hora-trabalhada, margem real, como saber o custo do último projeto antes de orçar o próximo
+2. **Controle de projeto** `[núcleo]` — os 3 indicadores que dizem se o projeto dá lucro; acompanhar execução vs marco; quando o projeto começa a drenar margem
 3. **Cobrança** — script de cobrança WhatsApp, prazo, juros, quando demitir cliente
 4. **Documentação** — versionamento de Rev, nomenclatura de arquivo, backup
 5. **Time** — onboarding de estagiário, rotina semanal, divisão de tarefa

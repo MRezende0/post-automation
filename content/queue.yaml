@@ -1,17 +1,64 @@
-# Fila de posts. Sistema faz pop do primeiro a cada run.
+# Fila de posts. Sistema faz pop do primeiro elegível a cada run.
 # Se vazio, gera ideia automática baseada em rotação de pilar.
 #
 # Schema:
 #   - pillar: dor | dica | building | prova
 #     angle: financeira | tempo | versao_arquivo | ...    (ver docs/pilares.md)
-#     context: string com fato concreto pra post de building/prova
-#     channels: [instagram, linkedin]                     (opcional, default ambos)
+#     context: string com fato concreto pra orientar a geração
+#     channels: [instagram, linkedin]                     (opcional, default instagram)
 #     scheduled_for: ISO date                             (opcional)
 #
-# Exemplo:
-# - pillar: dor
-#   angle: tempo
-#   context: |
-#     Reflexão sobre domingo trabalhando — relevante essa semana.
-#
-[]
+# Banco maior de ideias em docs/ideias-posts.md.
+
+- pillar: dor
+  angle: financeira
+  context: |
+    Dor núcleo: fechou o mês, o extrato diz que sobrou, mas você não sabe se foi
+    margem real ou adiantamento de cliente. Gancho: planilha não responde "qual
+    projeto deu lucro". Promessa de fundo: lucro por projeto em tempo real.
+
+- pillar: dica
+  angle: precificacao
+  context: |
+    Como saber o custo real do último projeto (hora vendida × hora gasta) antes de
+    orçar o próximo. Lista 3-5 passos. Atacar o "orçar no feeling".
+
+- pillar: dica
+  angle: controle_projeto
+  context: |
+    Os 3 indicadores que dizem se um projeto de engenharia está dando lucro — e
+    nenhum deles é o saldo do banco. Quando o projeto começa a drenar margem.
+
+- pillar: building
+  angle: porque_construo
+  channels: [instagram, linkedin]
+  context: |
+    Por que estou construindo o Pilar: cansei de ver engenheiro competente no
+    técnico quebrar na gestão por não saber se o projeto dava lucro. Tom pessoal.
+
+- pillar: building
+  angle: decisao_produto
+  channels: [instagram, linkedin]
+  context: |
+    Decisão de produto: o Pilar NÃO vai ter diário de obra. Não somos pra obra,
+    somos pro escritório de projeto. Foco no fluxo lead → proposta → projeto →
+    financeiro. Confessar o trade-off de cortar escopo.
+
+- pillar: dor
+  angle: tempo
+  context: |
+    Domingo refazendo o orçamento porque a planilha-mestre desatualizou na sexta.
+    Gancho de tempo (descanso roubado) → promessa de controle sem planilha.
+
+- pillar: dica
+  angle: cobranca
+  context: |
+    Faturamento por marco: como não perder o controle do que já entregou e o
+    cliente ainda não pagou. Roteiro prático sem ser chato com o cliente.
+
+- pillar: prova
+  angle: antes_depois
+  context: |
+    Antes: fechar o mês levava 2 dias de planilha e ainda no escuro. Depois: lucro
+    por projeto na tela. ATENÇÃO: usar só quando houver cliente real autorizado —
+    não inventar número.

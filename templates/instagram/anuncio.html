@@ -3,17 +3,18 @@
 <head>
 <meta charset="utf-8" />
 <style>
+  /* Paleta Pilar — ver docs/brand.md (anúncio = fundo ink p/ destaque, acento verde) */
   :root {
-    --bg: #1d4ed8;
-    --fg: #ffffff;
-    --accent: #fbbf24;
-    --muted: #c7d2fe;
+    --ink: #1A1A1A;
+    --ink-2: #242424;
+    --paper: #FCFCFC;
+    --muted: #A7A7A7;
+    --brand: #A4EC86;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     width: 1080px; height: 1350px;
-    background: linear-gradient(160deg, #1d4ed8 0%, #1e3a8a 100%);
-    color: var(--fg);
+    background: var(--ink); color: var(--paper);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   }
   .card {
@@ -21,9 +22,10 @@
     padding: 110px 90px;
     display: flex; flex-direction: column;
     justify-content: space-between;
+    background: linear-gradient(160deg, #1A1A1A 0%, #242424 100%);
   }
   .eyebrow {
-    color: var(--accent);
+    color: var(--brand);
     font-size: 28px;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -33,7 +35,7 @@
     font-size: 84px;
     font-weight: 800;
     line-height: 1.05;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
   }
   .subtitle {
     font-size: 36px;
@@ -44,19 +46,20 @@
   .cta {
     display: inline-block;
     padding: 30px 50px;
-    background: var(--accent);
-    color: #1e3a8a;
+    background: var(--brand);
+    color: var(--ink);
     font-size: 32px;
-    font-weight: 700;
-    border-radius: 8px;
+    font-weight: 800;
+    border-radius: 999px;
     width: fit-content;
   }
   .footer {
-    display: flex; justify-content: space-between;
+    display: flex; justify-content: space-between; align-items: center;
     color: var(--muted);
     font-size: 22px;
   }
-  .brand { font-weight: 700; color: var(--fg); }
+  .brandwrap { display: flex; align-items: center; gap: 14px; }
+  .brand { font-weight: 700; color: var(--paper); }
 </style>
 </head>
 <body>
@@ -68,7 +71,19 @@
     <p class="subtitle">{{subtitle}}</p>
     <div class="cta">{{cta}}</div>
     <div class="footer">
-      <span class="brand">{{brand}}</span>
+      <span class="brandwrap">
+        <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <g transform="translate(2,4)" stroke="#A4EC86" stroke-width="1.6" stroke-linecap="round">
+            <line x1="1" y1="2" x2="27" y2="2" />
+            <line x1="3" y1="6" x2="25" y2="6" opacity="0.85" />
+            <line x1="7" y1="9" x2="7" y2="23" />
+            <line x1="12" y1="9" x2="12" y2="23" />
+            <line x1="17" y1="9" x2="17" y2="23" />
+            <line x1="22" y1="9" x2="22" y2="23" />
+          </g>
+        </svg>
+        <span class="brand">{{brand}}</span>
+      </span>
       <span>{{handle}}</span>
     </div>
   </div>

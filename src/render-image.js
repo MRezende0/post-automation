@@ -54,8 +54,8 @@ const BADGE_BY_PILLAR = {
 function applyVars(html, vars, pillar) {
   let out = html;
   const merged = {
-    brand: vars.brand || 'SaaS Engenharia',
-    handle: vars.handle || '@seu_handle',
+    brand: vars.brand || 'Pilar',
+    handle: vars.handle || '@pilar.software',
     badge: vars.badge || BADGE_BY_PILLAR[pillar] || 'DOR REAL',
     hook: vars.hook || '',
     subline: vars.subline || vars.body || '',
