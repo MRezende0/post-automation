@@ -85,3 +85,29 @@ describe('ranking.js', () => {
     });
   });
 });
+
+import { chooseNextFormat } from '../src/utils/ranking.js';
+
+describe('chooseNextFormat', () => {
+  it('histórico vazio → null (sem preferência)', () => {
+    expect(chooseNextFormat([])).toBeNull();
+  });
+
+  it('3 singles seguidos no cold start → varia pra carousel', () => {
+    const hist = [
+      { post: { format: 'single' } },
+      { post: { format: 'single' } },
+      { post: { format: 'single' } },
+    ];
+    expect(chooseNextFormat(hist)).toBe('carousel');
+  });
+
+  it('mistura recente → sem nudge (null)', () => {
+    const hist = [
+      { post: { format: 'single' } },
+      { post: { format: 'carousel' } },
+      { post: { format: 'single' } },
+    ];
+    expect(chooseNextFormat(hist)).toBeNull();
+  });
+});

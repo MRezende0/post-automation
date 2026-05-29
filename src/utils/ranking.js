@@ -106,6 +106,27 @@ export function chooseNextPillar(publishedHistory, windowSize = 20) {
   return chosen;
 }
 
+const FORMATS = ['single', 'carousel'];
+
+// Escolhe o formato da próxima leva (single/carrossel). Bandit por engajamento
+// quando há sinal; no cold start injeta VARIEDADE — quebra sequência monótona do
+// mesmo formato. Retorna null = sem preferência (modelo/pilar decide).
+export function chooseNextFormat(publishedHistory, { windowSize = 12 } = {}) {
+  // Normaliza: formato vive em post.format (YAML) ou format (DB) — achata pro bandit.
+  const hist = (publishedHistory || []).map(p => ({
+    format: p.format || p.post?.format,
+    engagement_score: p.engagement_score,
+    published_at: p.published_at,
+  }));
+  const bandit = thompsonChoose(FORMATS, hist, { keyField: 'format', priorStrength: 1, halfLifeDays: 45, minScored: 6 });
+  if (bandit) return bandit;
+
+  const recent = hist.slice(-windowSize).map(p => p.format).filter(Boolean);
+  const lastThree = recent.slice(-3);
+  if (lastThree.length === 3 && lastThree.every(f => f === 'single')) return 'carousel'; // 3 singles seguidos → varia
+  return null;
+}
+
 export function chooseNextAngle(pillar, publishedHistory, windowSize = 30) {
   const angles = ANGLES[pillar];
   if (!angles) return null;
