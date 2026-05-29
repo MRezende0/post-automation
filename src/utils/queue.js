@@ -5,6 +5,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
+import { usingSupabase, supabase } from './db.js';
 
 function paths() {
   const contentDir = path.resolve(process.cwd(), 'content');
@@ -44,7 +45,50 @@ export async function getQueue() {
 }
 
 export async function getPublished() {
+  if (usingSupabase()) return getPublishedFromDb();
   return readYaml(paths().PUBLISHED_FILE);
+}
+
+// Mapeia uma linha da tabela posts pro formato dos itens YAML — assim os
+// consumidores (bandit, extractRecentHooks, métricas) não precisam mudar.
+// engagement_score: numeric do Postgres volta como string no supabase-js;
+// converte pra number senão o bandit (typeof === 'number') ignora o sinal.
+export function dbRowToPublished(row) {
+  return {
+    id: row.id ?? undefined, // post_id — usado pela coleta de métricas pra gravar snapshots
+    pillar: row.pillar,
+    angle: row.angle ?? null,
+    context: row.context ?? undefined,
+    post: { hook: row.hook, body: row.body, format: row.format },
+    chosen_variation: row.chosen_variation ?? undefined,
+    channels: row.channels ?? {},
+    engagement_score: row.engagement_score != null ? Number(row.engagement_score) : undefined,
+    generated_at: row.generated_at ?? undefined,
+    published_at: row.published_at ?? undefined,
+  };
+}
+
+// Ordem cronológica (published_at asc) pra casar com a ordem de append do YAML —
+// extractRecentHooks e a janela do bandit dependem disso (slice(-N) = mais recentes).
+async function getPublishedFromDb() {
+  const { data, error } = await supabase()
+    .from('posts')
+    .select('id,pillar,angle,context,hook,body,format,chosen_variation,channels,engagement_score,generated_at,published_at')
+    .order('published_at', { ascending: true, nullsFirst: true })
+    .order('created_at', { ascending: true });
+  if (error) throw new Error(`Falha ao ler posts do Supabase: ${error.message}`);
+  return (data || []).map(dbRowToPublished);
+}
+
+// Um post é "real" se foi de fato publicado (não dry-run). Posts dry-run gravam
+// channels.<canal>.dryRun=true e poluiriam aprendizado/métricas se contados.
+// Posts sem info de canal (seeds antigos) são tratados como reais.
+export function isRealPost(item) {
+  const channels = item?.channels;
+  if (!channels || typeof channels !== 'object') return true;
+  const results = Object.values(channels);
+  if (results.length === 0) return true;
+  return results.some(r => r && typeof r === 'object' && r.dryRun !== true);
 }
 
 export async function getRejected() {
@@ -60,6 +104,7 @@ function isDue(item, now) {
 }
 
 export async function popNext(now = Date.now()) {
+  if (usingSupabase()) return popNextFromDb(now);
   const queue = await getQueue();
   if (queue.length === 0) return null;
   const idx = queue.findIndex(item => isDue(item, now));
@@ -69,8 +114,43 @@ export async function popNext(now = Date.now()) {
   return next;
 }
 
+// Consome o primeiro item elegível (não consumido, agendamento já vencido).
+// consumed_at em vez de delete → fila auditável. O update condicional
+// (.is consumed_at null) evita corrida: dois processos não consomem o mesmo item.
+async function popNextFromDb(now) {
+  const db = supabase();
+  const nowIso = new Date(now).toISOString();
+  const { data, error } = await db.from('queue_items')
+    .select('id,pillar,angle,context,channels,scheduled_for')
+    .is('consumed_at', null)
+    .or(`scheduled_for.is.null,scheduled_for.lte.${nowIso}`)
+    .order('scheduled_for', { ascending: true, nullsFirst: true })
+    .order('created_at', { ascending: true })
+    .limit(1);
+  if (error) throw new Error(`Falha ao ler queue do Supabase: ${error.message}`);
+  const row = data?.[0];
+  if (!row) return null;
+
+  const { data: claimed, error: ue } = await db.from('queue_items')
+    .update({ consumed_at: nowIso })
+    .eq('id', row.id)
+    .is('consumed_at', null)
+    .select('id');
+  if (ue) throw new Error(`Falha ao consumir queue item: ${ue.message}`);
+  if (!claimed?.length) return null; // outro processo já consumiu
+
+  return {
+    pillar: row.pillar ?? undefined,
+    angle: row.angle ?? undefined,
+    context: row.context ?? undefined,
+    channels: row.channels ?? undefined,
+    scheduled_for: row.scheduled_for ?? undefined,
+  };
+}
+
 export async function markPublished(item, result) {
-  const published = await getPublished();
+  if (usingSupabase()) return markPublishedToDb(item, result);
+  const published = await readYaml(paths().PUBLISHED_FILE);
   published.push({
     ...item,
     published_at: new Date().toISOString(),
@@ -80,7 +160,86 @@ export async function markPublished(item, result) {
   await writeYaml(paths().PUBLISHED_FILE, published);
 }
 
+// Grava o post durável + TODAS as variações geradas + evento de publicação.
+// result.generation (opcional) carrega as variações e a observabilidade
+// (prompt_hash, model, judge_reason, guardrail_flags, heuristic_scores).
+async function markPublishedToDb(item, result) {
+  const db = supabase();
+  const gen = result.generation || {};
+  const channel = Object.keys(result.channels || {})[0] || item.channel || 'instagram';
+  const chosenId = result.chosenVariationId;
+
+  const { data: post, error } = await db.from('posts').insert({
+    pillar: item.pillar,
+    angle: item.angle ?? null,
+    channel,
+    context: item.context ?? null,
+    hook: item.post?.hook ?? null,
+    body: item.post?.body ?? null,
+    format: item.post?.format ?? 'single',
+    chosen_variation: chosenId ?? null,
+    channels: result.channels ?? {},
+    is_dry_run: false,
+    prompt_hash: gen.prompt_hash ?? null,
+    model: gen.model ?? null,
+    judge_reason: gen.judge_reason ?? null,
+    guardrail_flags: gen.guardrail_flags ?? null,
+    generated_at: item.generated_at ?? null,
+    published_at: new Date().toISOString(),
+  }).select('id').single();
+  if (error) throw new Error(`Falha ao gravar post no Supabase: ${error.message}`);
+
+  const variations = gen.variations || [];
+  if (variations.length) {
+    const rows = variations.map(v => ({
+      post_id: post.id,
+      variation_id: v.id,
+      hook: v.hook ?? null,
+      body: v.body ?? null,
+      format: v.format ?? null,
+      slides: v.slides ?? null,
+      heuristic_score: gen.heuristic_scores?.[v.id] ?? null,
+      was_chosen: v.id === chosenId,
+    }));
+    const { error: ve } = await db.from('post_variants').insert(rows);
+    if (ve) console.error(`[queue] falha ao gravar variações: ${ve.message}`);
+  }
+
+  await db.from('post_events').insert({
+    post_id: post.id,
+    type: 'published',
+    payload: { channel, chosen_variation: chosenId, channels: result.channels ?? {} },
+  });
+
+  // Decisão do judge + crítica → calibração depois (expected_engagement vs real).
+  if (gen.judge_scores || gen.critic) {
+    const chosenScore = gen.judge_scores?.find(s => s.id === chosenId);
+    await db.from('post_events').insert({
+      post_id: post.id,
+      type: 'judge_decision',
+      payload: {
+        scores: gen.judge_scores ?? null,
+        critic: gen.critic ?? null,
+        expected_engagement: chosenScore?.expected_engagement ?? null,
+      },
+    });
+  }
+}
+
 export async function markRejected(item, reason) {
+  if (usingSupabase()) {
+    const { error } = await supabase().from('rejected_posts').insert({
+      pillar: item.pillar ?? null,
+      angle: item.angle ?? null,
+      channel: item.channel ?? null,
+      hook: item.post?.hook ?? null,
+      body: item.post?.body ?? null,
+      format: item.post?.format ?? null,
+      reason: reason || 'sem motivo informado',
+    });
+    if (error) throw new Error(`Falha ao gravar rejeição no Supabase: ${error.message}`);
+    return;
+  }
   const rejected = await getRejected();
   rejected.push({
     ...item,
@@ -91,25 +250,73 @@ export async function markRejected(item, reason) {
 }
 
 export async function pushToQueue(item) {
+  if (usingSupabase()) {
+    const { error } = await supabase().from('queue_items').insert({
+      pillar: item.pillar ?? null,
+      angle: item.angle ?? null,
+      context: item.context ?? null,
+      channels: item.channels ?? ['instagram'],
+      scheduled_for: item.scheduled_for ?? null,
+    });
+    if (error) throw new Error(`Falha ao enfileirar no Supabase: ${error.message}`);
+    return;
+  }
   const queue = await getQueue();
   queue.push(item);
   await writeYaml(paths().QUEUE_FILE, queue);
 }
 
-// Regrava a lista inteira de publicados — usado pelo coletor de métricas
-// pra anexar insights nos posts já existentes sem duplicar.
+// Regrava a lista inteira de publicados (legado YAML do coletor de métricas).
+// Sob Supabase é no-op: a coleta grava em metrics_snapshots, sem reescrita em massa.
 export async function writePublished(list) {
+  if (usingSupabase()) return;
   await writeYaml(paths().PUBLISHED_FILE, list);
 }
 
+// Mapeia uma linha de pending_approvals pro formato usado por index.js/resolve.js.
+function pendingRowToItem(row) {
+  return {
+    channel: row.channel,
+    pending_id: row.pending_id,
+    generation: row.generation,
+    top_id: row.top_id ?? undefined,
+    images: row.images ?? undefined,
+    seed: row.seed ?? undefined,
+    message_ids: row.message_ids ?? undefined,
+    keyboard_message_id: row.keyboard_message_id ?? undefined,
+    regen_count: row.regen_count ?? 0,
+    status: row.status,
+    reason_requested_at: row.reason_requested_at ?? undefined,
+    saved_at: row.saved_at,
+  };
+}
+
 export async function getPending() {
+  if (usingSupabase()) {
+    const { data, error } = await supabase().from('pending_approvals').select('*');
+    if (error) throw new Error(`Falha ao ler pending do Supabase: ${error.message}`);
+    return (data || []).map(pendingRowToItem);
+  }
   return readYaml(paths().PENDING_FILE);
 }
 
-// Retorna o pending do canal (ou null). Por padrão CONSOME (remove do arquivo);
-// com { peek: true } só lê — usado pra checar se já há post aguardando decisão.
+// Retorna o pending do canal (ou null). Por padrão CONSOME (remove); com
+// { peek: true } só lê — usado pra checar se já há post aguardando decisão.
 // Itens expirados (>TTL) são sempre limpos.
 export async function loadPending(channel, { peek = false } = {}) {
+  if (usingSupabase()) {
+    const db = supabase();
+    const { data, error } = await db.from('pending_approvals').select('*').eq('channel', channel).limit(1);
+    if (error) throw new Error(`Falha ao carregar pending do Supabase: ${error.message}`);
+    const row = data?.[0];
+    if (!row) return null;
+    if (Date.now() - new Date(row.saved_at).getTime() > PENDING_TTL_MS) {
+      await db.from('pending_approvals').delete().eq('channel', channel);
+      return null;
+    }
+    if (!peek) await db.from('pending_approvals').delete().eq('id', row.id);
+    return pendingRowToItem(row);
+  }
   const items = await getPending();
   const now = Date.now();
   const fresh = items.filter(i => now - new Date(i.saved_at).getTime() <= PENDING_TTL_MS);
@@ -122,6 +329,26 @@ export async function loadPending(channel, { peek = false } = {}) {
 }
 
 export async function savePending(item) {
+  if (usingSupabase()) {
+    const row = {
+      pending_id: item.pending_id,
+      channel: item.channel,
+      generation: item.generation ?? null,
+      top_id: item.top_id ?? null,
+      images: item.images ?? null,
+      seed: item.seed ?? null,
+      message_ids: item.message_ids ?? null,
+      keyboard_message_id: item.keyboard_message_id ?? null,
+      regen_count: item.regen_count ?? 0,
+      status: item.status ?? 'awaiting_decision',
+      reason_requested_at: item.reason_requested_at ?? null,
+      saved_at: new Date().toISOString(),
+    };
+    // upsert por canal (espelha o YAML, que sobrescreve o pending do canal)
+    const { error } = await supabase().from('pending_approvals').upsert(row, { onConflict: 'channel' });
+    if (error) throw new Error(`Falha ao salvar pending no Supabase: ${error.message}`);
+    return;
+  }
   const items = await getPending();
   const filtered = items.filter(i => i.channel !== item.channel);
   filtered.push({ ...item, saved_at: new Date().toISOString() });
@@ -129,6 +356,11 @@ export async function savePending(item) {
 }
 
 export async function clearPending(channel) {
+  if (usingSupabase()) {
+    const { error } = await supabase().from('pending_approvals').delete().eq('channel', channel);
+    if (error) throw new Error(`Falha ao limpar pending no Supabase: ${error.message}`);
+    return;
+  }
   const items = await getPending();
   const filtered = items.filter(i => i.channel !== channel);
   if (filtered.length !== items.length) {
@@ -137,6 +369,12 @@ export async function clearPending(channel) {
 }
 
 export async function expirePending() {
+  if (usingSupabase()) {
+    const cutoff = new Date(Date.now() - PENDING_TTL_MS).toISOString();
+    const { data, error } = await supabase().from('pending_approvals').delete().lt('saved_at', cutoff).select('*');
+    if (error) throw new Error(`Falha ao expirar pending no Supabase: ${error.message}`);
+    return (data || []).map(pendingRowToItem);
+  }
   const items = await getPending();
   const now = Date.now();
   const valid = items.filter(i => now - new Date(i.saved_at).getTime() <= PENDING_TTL_MS);

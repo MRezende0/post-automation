@@ -8,7 +8,9 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import { notify } from './telegram.js';
-import { getPublished } from './utils/queue.js';
+import { getPublished, isRealPost } from './utils/queue.js';
+import { usingSupabase, supabase } from './utils/db.js';
+import { engagementScore } from './utils/score.js';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
 
@@ -30,18 +32,6 @@ function daysAgo(iso) {
   return (Date.now() - t) / 86400000;
 }
 
-function sumMetrics(metrics) {
-  if (!metrics) return 0;
-  let total = 0;
-  for (const ch of Object.values(metrics)) {
-    if (!ch || typeof ch !== 'object') continue;
-    for (const v of Object.values(ch)) {
-      if (typeof v === 'number') total += v;
-    }
-  }
-  return total;
-}
-
 async function collectFor(item) {
   const channels = item.channels || {};
   const metrics = {};
@@ -52,6 +42,36 @@ async function collectFor(item) {
     metrics.linkedin = await linkedin.getInsights(channels.linkedin.id);
   }
   return metrics;
+}
+
+// Sob Supabase: grava um snapshot por canal (série temporal), atualiza o
+// engagement_score do post e registra o evento. Precisa do post_id (item.id).
+async function persistSnapshots(item, metrics) {
+  if (!item.id) return;
+  const db = supabase();
+  const at = new Date().toISOString();
+  for (const [ch, m] of Object.entries(metrics)) {
+    if (!m || typeof m !== 'object') continue;
+    await db.from('metrics_snapshots').insert({
+      post_id: item.id,
+      channel: ch,
+      likes: m.likes ?? null,
+      comments: m.comments ?? null,
+      saves: m.saved ?? m.saves ?? null,
+      shares: m.shares ?? null,
+      reach: m.reach ?? null,
+      impressions: m.impressions ?? null,
+      engagement_score: engagementScore({ [ch]: m }),
+      raw: m,
+      captured_at: at,
+    });
+  }
+  await db.from('posts').update({ engagement_score: item.engagement_score }).eq('id', item.id);
+  await db.from('post_events').insert({
+    post_id: item.id,
+    type: 'metrics_snapshot',
+    payload: { engagement_score: item.engagement_score },
+  });
 }
 
 // Reescreve os exemplos auto-gerados: top vira referência, bottom vira anti-exemplo.
@@ -98,6 +118,70 @@ async function writeExample(dir, { item, score }) {
   await writeFile(path.join(dir, slug), content, 'utf8');
 }
 
+// Correlação de Pearson — calibração do judge (expected_engagement × real).
+function pearson(x, y) {
+  const n = x.length;
+  if (n === 0) return 0;
+  const mx = x.reduce((a, b) => a + b, 0) / n;
+  const my = y.reduce((a, b) => a + b, 0) / n;
+  let nu = 0;
+  let dx = 0;
+  let dy = 0;
+  for (let i = 0; i < n; i++) {
+    const a = x[i] - mx;
+    const b = y[i] - my;
+    nu += a * b;
+    dx += a * a;
+    dy += b * b;
+  }
+  return dx && dy ? nu / Math.sqrt(dx * dy) : 0;
+}
+
+// O judge previu bem? Cruza expected_engagement (evento judge_decision) com o
+// engagement_score real. r alto = judge calibrado; r ~0 = judge é teatro.
+async function judgeCalibration() {
+  if (!usingSupabase()) return '';
+  try {
+    const db = supabase();
+    const { data: events } = await db.from('post_events').select('post_id,payload').eq('type', 'judge_decision');
+    if (!events?.length) return '';
+    const ids = events.map(e => e.post_id);
+    const { data: posts } = await db.from('posts').select('id,engagement_score').in('id', ids);
+    const scoreById = new Map((posts || []).map(p => [p.id, p.engagement_score != null ? Number(p.engagement_score) : null]));
+    const pairs = events
+      .map(e => [e.payload?.expected_engagement, scoreById.get(e.post_id)])
+      .filter(([ex, ac]) => typeof ex === 'number' && typeof ac === 'number');
+    if (pairs.length < 5) return `\n_Calibração do judge: ${pairs.length} amostras (mín. 5 pra calcular)._`;
+    const r = pearson(pairs.map(p => p[0]), pairs.map(p => p[1]));
+    return `\n_Calibração do judge (previsto×real): r=${r.toFixed(2)} em ${pairs.length} posts._`;
+  } catch (e) {
+    return '';
+  }
+}
+
+const WEEKDAYS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+
+// Melhor dia da semana por engajamento médio — insight de scheduling. Só sugere
+// com sinal mínimo (2+ dias com 2+ posts cada), senão fica quieto.
+function bestSlots(scored) {
+  const byDay = {};
+  for (const s of scored) {
+    const d = new Date(s.item.published_at);
+    if (Number.isNaN(d.getTime())) continue;
+    const k = d.getUTCDay();
+    byDay[k] = byDay[k] || { sum: 0, n: 0 };
+    byDay[k].sum += s.score;
+    byDay[k].n += 1;
+  }
+  const days = Object.entries(byDay)
+    .filter(([, v]) => v.n >= 2)
+    .map(([k, v]) => ({ day: WEEKDAYS[k], avg: v.sum / v.n, n: v.n }));
+  if (days.length < 2) return '';
+  days.sort((a, b) => b.avg - a.avg);
+  const best = days[0];
+  return `\n_Melhor dia (engajamento médio): ${best.day} — ${Math.round(best.avg)} em ${best.n} posts._`;
+}
+
 function buildReport(scored) {
   const week = scored.filter(s => daysAgo(s.item.published_at) <= REPORT_WINDOW_DAYS);
   const lines = ['📊 *Relatório semanal*', ''];
@@ -140,12 +224,14 @@ async function main() {
   let collected = 0;
   for (const item of published) {
     if (daysAgo(item.published_at) > COLLECT_WINDOW_DAYS) continue;
+    if (!isRealPost(item)) continue; // dry-run não tem métrica real
     if (DRY_RUN) continue;
     try {
       const metrics = await collectFor(item);
       if (Object.keys(metrics).length > 0) {
         item.metrics = { ...metrics, collected_at: new Date().toISOString() };
-        item.engagement_score = sumMetrics(metrics);
+        item.engagement_score = engagementScore(metrics);
+        if (usingSupabase()) await persistSnapshots(item, metrics);
         collected += 1;
       }
     } catch (e) {
@@ -153,12 +239,15 @@ async function main() {
     }
   }
 
-  if (!DRY_RUN && collected > 0) {
+  // Sob Supabase, a persistência de métricas vai pra metrics_snapshots (fase de
+  // escrita) — não reescreve o YAML a partir de dados do banco.
+  if (!DRY_RUN && !usingSupabase() && collected > 0) {
     await writeFile(PUBLISHED_FILE, yaml.dump(published, { lineWidth: 120, noRefs: true }), 'utf8');
   }
 
   const scored = published
-    .map(item => ({ item, score: item.engagement_score ?? sumMetrics(item.metrics) }))
+    .filter(isRealPost)
+    .map(item => ({ item, score: item.engagement_score ?? engagementScore(item.metrics) }))
     .filter(s => daysAgo(s.item.published_at) <= COLLECT_WINDOW_DAYS)
     .sort((a, b) => b.score - a.score);
 
@@ -168,7 +257,9 @@ async function main() {
   }
 
   const report = buildReport(scored)
-    + `\n\n_${collected} posts coletados · few-shot: ${synced.high}↑ / ${synced.low}↓ atualizados._`;
+    + `\n\n_${collected} posts coletados · few-shot: ${synced.high}↑ / ${synced.low}↓ atualizados._`
+    + bestSlots(scored)
+    + await judgeCalibration();
 
   await notify(report, { dryRun: DRY_RUN });
   console.log('[metrics] Relatório enviado.', { collected, synced });

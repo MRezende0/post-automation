@@ -124,6 +124,9 @@ async function publishApproved({ channel, generation, chosenId, images, seed }) 
   const publishResult = await publishToChannel({ channel, variation: chosen, imageUrl, pillar: generation.pillar });
   log(`Publicou em ${channel}: ${JSON.stringify(publishResult)}`);
 
+  // Dry-run não entra no histórico — poluiria aprendizado, métricas e anti-repetição.
+  if (DRY_RUN) return;
+
   await markPublished(
     {
       ...seed,
@@ -132,11 +135,9 @@ async function publishApproved({ channel, generation, chosenId, images, seed }) 
       post: { hook: chosen.hook, body: chosen.body, format: chosen.format },
       generated_at: new Date().toISOString(),
     },
-    { chosenVariationId: chosen.id, channels: { [channel]: publishResult } },
+    { chosenVariationId: chosen.id, channels: { [channel]: publishResult }, generation },
   );
-  if (!DRY_RUN) {
-    await notify(`✅ Publicado em: ${channel} (variação #${chosen.id}, sem aprovação)`, { dryRun: DRY_RUN });
-  }
+  await notify(`✅ Publicado em: ${channel} (variação #${chosen.id}, sem aprovação)`, { dryRun: DRY_RUN });
 }
 
 async function runPublishTest() {

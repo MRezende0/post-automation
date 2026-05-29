@@ -1,5 +1,9 @@
-// ranking.js — heurística pra escolher próximo pilar/ângulo e pra rankear variações no timeout.
-// Chamado por: src/generate.js (escolher pilar), src/index.js (top-1 no timeout).
+// ranking.js — escolhe próximo pilar/ângulo e rankeia variações no timeout.
+// Pilar/ângulo: Thompson sampling (bandit.js) quando há sinal de engajamento;
+// cold start cai na rotação ponderada por déficit. Chamado por: src/generate.js,
+// src/index.js (top-1 no timeout).
+
+import { thompsonChoose, computePosteriors } from './bandit.js';
 
 const PILLAR_WEIGHTS = {
   dor: 0.4,
@@ -7,6 +11,8 @@ const PILLAR_WEIGHTS = {
   building: 0.15,
   prova: 0.15,
 };
+
+const PILLARS = Object.keys(PILLAR_WEIGHTS);
 
 const ANGLES = {
   dor: ['financeira', 'tempo', 'versao_arquivo', 'relacional', 'identidade'],
@@ -51,7 +57,29 @@ export function adaptiveWeights(publishedHistory, base = PILLAR_WEIGHTS, { alpha
   return adjusted;
 }
 
+// Posteriores Beta por pilar (puro) — pra snapshot de observabilidade do bandit.
+export function pillarPosteriors(publishedHistory) {
+  return computePosteriors(PILLARS, publishedHistory, {
+    keyField: 'pillar',
+    priorWeights: PILLAR_WEIGHTS,
+    priorStrength: 2,
+    halfLifeDays: 30,
+  });
+}
+
 export function chooseNextPillar(publishedHistory, windowSize = 20) {
+  // Bandit primeiro: com engajamento coletado suficiente, Thompson decide o mix
+  // (explora/explota sozinho). O prior informativo (PILLAR_WEIGHTS) mantém o
+  // viés estratégico inicial até os dados dominarem.
+  const bandit = thompsonChoose(PILLARS, publishedHistory, {
+    keyField: 'pillar',
+    priorWeights: PILLAR_WEIGHTS,
+    priorStrength: 2,
+    halfLifeDays: 30,
+  });
+  if (bandit) return bandit;
+
+  // Cold start (pouco engajamento coletado): rotação ponderada por déficit.
   const weights = adaptiveWeights(publishedHistory);
   const recent = publishedHistory.slice(-windowSize);
   const counts = { dor: 0, dica: 0, building: 0, prova: 0 };
@@ -82,6 +110,18 @@ export function chooseNextAngle(pillar, publishedHistory, windowSize = 30) {
   const angles = ANGLES[pillar];
   if (!angles) return null;
 
+  // Bandit dentro do pilar: aprende qual ângulo engaja quando há dado.
+  // minScored maior (mais arms) e meia-vida mais longa (menos amostras/ângulo).
+  const samePillar = publishedHistory.filter(item => item.pillar === pillar);
+  const bandit = thompsonChoose(angles, samePillar, {
+    keyField: 'angle',
+    priorStrength: 1,
+    halfLifeDays: 45,
+    minScored: 6,
+  });
+  if (bandit) return bandit;
+
+  // Cold start: rotação — primeiro ângulo não usado recentemente.
   const recentAngles = publishedHistory
     .slice(-windowSize)
     .filter(item => item.pillar === pillar)
