@@ -1,13 +1,20 @@
-// telegram.js — envia preview de 3 variações + imagem + botões inline. Aguarda decisão.
-// Chamado por: src/index.js. Bot precisa estar online durante a janela de 90min.
+// telegram.js — camada de mensageria do fluxo de aprovação (assíncrono).
 //
-// Fluxo:
-//   1. sendApprovalRequest(variations, imagePath) → manda preview e botões
-//   2. waitForDecision(timeoutMs) → polling de updates até botão clicado OU timeout
-//   3. retorna { action, chosenId, reason } onde action ∈ aprovar|regenerar|rejeitar|timeout
+// Modelo desacoplado em 2 fases:
+//   - FASE GERAR (src/index.js): sendApprovalRequest() manda o preview premium
+//     (1 mensagem por variação + imagem própria + botões no fim) e retorna os
+//     message_ids. NÃO espera decisão — o processo encerra logo em seguida.
+//   - FASE RESOLVER (src/resolve.js): fetchDecisions() lê os cliques/textos via
+//     getUpdates e confirmDecisions() faz o ack no servidor do Telegram (o offset
+//     vive lá, não em arquivo — por isso runs efêmeros não reprocessam cliques).
+//
+// callback_data carrega o pendingId pra casar a decisão com o post certo mesmo
+// com múltiplos canais pendentes ao mesmo tempo: "a:<pid>:<varId>" | "r:<pid>" | "x:<pid>".
 
 import TelegramBot from 'node-telegram-bot-api';
-import { existsSync } from 'node:fs';
+
+const CAPTION_LIMIT = 1024;
+const MESSAGE_LIMIT = 4096;
 
 function botToken() {
   const t = process.env.TELEGRAM_BOT_TOKEN;
@@ -21,136 +28,204 @@ function chatId() {
   return c;
 }
 
-function buildKeyboard() {
+function makeBot() {
+  return new TelegramBot(botToken(), { polling: false });
+}
+
+// HTML é mais robusto que o Markdown legado: hashtags com underscore
+// (#gestao_de_engenharia) e asteriscos soltos não estouram o parser.
+function escapeHtml(s = '') {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// Quebra texto em pedaços <= max respeitando parágrafo/linha — nunca corta
+// no meio de uma palavra (o bug visível no preview antigo).
+function chunkText(text, max = MESSAGE_LIMIT) {
+  const out = [];
+  let buf = '';
+  for (const para of String(text).split('\n')) {
+    const candidate = buf ? `${buf}\n${para}` : para;
+    if (candidate.length <= max) {
+      buf = candidate;
+      continue;
+    }
+    if (buf) out.push(buf);
+    if (para.length <= max) {
+      buf = para;
+    } else {
+      // Parágrafo único maior que o limite: quebra por palavra.
+      let line = '';
+      for (const word of para.split(' ')) {
+        const c = line ? `${line} ${word}` : word;
+        if (c.length <= max) { line = c; continue; }
+        if (line) out.push(line);
+        line = word;
+      }
+      buf = line;
+    }
+  }
+  if (buf) out.push(buf);
+  return out;
+}
+
+function buildKeyboard(pendingId, variations) {
+  const approveRow = variations.map(v => ({
+    text: `✅ #${v.id}`,
+    callback_data: `a:${pendingId}:${v.id}`,
+  }));
   return {
     inline_keyboard: [
+      approveRow,
       [
-        { text: '✅ Aprovar #1', callback_data: 'approve:1' },
-        { text: '✅ Aprovar #2', callback_data: 'approve:2' },
-        { text: '✅ Aprovar #3', callback_data: 'approve:3' },
-      ],
-      [
-        { text: '🔄 Regenerar', callback_data: 'regen' },
-        { text: '❌ Rejeitar', callback_data: 'reject' },
+        { text: '🔄 Regenerar', callback_data: `r:${pendingId}` },
+        { text: '❌ Rejeitar', callback_data: `x:${pendingId}` },
       ],
     ],
   };
 }
 
-function formatPreview({ channel, pillar, angle, variations }) {
-  const head = `*📢 Post pronto — ${channel.toUpperCase()} / ${pillar}${angle ? ' / ' + angle : ''}*\n`;
-  const blocks = variations.map(v => {
-    const body = (v.body || '').slice(0, 700);
-    return `\n*— Variação ${v.id} —*\n${body}`;
-  }).join('\n');
-  return head + blocks;
+function formatHeader({ channel, pillar, angle, count }) {
+  const lines = [
+    `📢 <b>Post pronto — ${escapeHtml(channel.toUpperCase())}</b>`,
+    `Pilar: <b>${escapeHtml(pillar)}</b>${angle ? ` · Ângulo: <b>${escapeHtml(angle)}</b>` : ''}`,
+    `${count} variações — leia cada uma e escolha nos botões do fim 👇`,
+  ];
+  return lines.join('\n');
 }
 
-export async function sendApprovalRequest({ channel, pillar, angle, variations, imagePath, imageUrl, dryRun = false }) {
+function formatVariationCaption(v) {
+  return `<b>━━━ Variação ${v.id} ━━━</b>  <i>${escapeHtml(v.format || 'single')}</i>`;
+}
+
+function formatVariationBody(v) {
+  const hook = v.hook ? `<b>${escapeHtml(v.hook)}</b>\n\n` : '';
+  return hook + escapeHtml(v.body || '');
+}
+
+// Manda o preview completo e retorna os ids pra fase resolver editar depois.
+// images: [{ id, url }] (uma por variação). dryRun curto-circuita pra testes.
+export async function sendApprovalRequest({ channel, pillar, angle, variations, pendingId, images = [], dryRun = false }) {
   if (dryRun) {
-    return {
-      messageId: 'mock_msg_id',
-      dryRun: true,
-      preview: formatPreview({ channel, pillar, angle, variations }).slice(0, 200),
-    };
+    return { dryRun: true, pendingId, preview: formatHeader({ channel, pillar, angle, count: variations.length }) };
   }
 
-  const bot = new TelegramBot(botToken(), { polling: false });
+  const bot = makeBot();
   const cid = chatId();
-  const caption = formatPreview({ channel, pillar, angle, variations });
+  const messageIds = [];
 
-  const photo = imageUrl || (imagePath && existsSync(imagePath) ? imagePath : null);
+  const header = await bot.sendMessage(cid, formatHeader({ channel, pillar, angle, count: variations.length }), {
+    parse_mode: 'HTML',
+  });
+  messageIds.push(header.message_id);
 
-  let messageId;
-  if (photo) {
-    const truncated = caption.length > 1024 ? caption.slice(0, 1020) + '...' : caption;
-    const sent = await bot.sendPhoto(cid, photo, {
-      caption: truncated,
-      parse_mode: 'Markdown',
-      reply_markup: buildKeyboard(),
-    });
-    messageId = sent.message_id;
-    if (caption.length > 1024) {
-      await bot.sendMessage(cid, '*Variações completas:*\n' + caption.slice(1020), { parse_mode: 'Markdown' });
+  for (const v of variations) {
+    const img = images.find(i => i.id === v.id)?.url;
+    if (img) {
+      const sent = await bot.sendPhoto(cid, img, {
+        caption: formatVariationCaption(v).slice(0, CAPTION_LIMIT),
+        parse_mode: 'HTML',
+      });
+      messageIds.push(sent.message_id);
+    } else {
+      const sent = await bot.sendMessage(cid, formatVariationCaption(v), { parse_mode: 'HTML' });
+      messageIds.push(sent.message_id);
     }
-  } else {
-    const sent = await bot.sendMessage(cid, caption, {
-      parse_mode: 'Markdown',
-      reply_markup: buildKeyboard(),
-    });
-    messageId = sent.message_id;
+    // Corpo completo em mensagem de texto (4096 chars) — sem o corte de 1024 da caption.
+    for (const chunk of chunkText(formatVariationBody(v))) {
+      const sent = await bot.sendMessage(cid, chunk, { parse_mode: 'HTML' });
+      messageIds.push(sent.message_id);
+    }
   }
 
-  return { messageId, botInstance: bot };
+  const footer = await bot.sendMessage(cid, 'Qual variação publicar?', {
+    parse_mode: 'HTML',
+    reply_markup: buildKeyboard(pendingId, variations),
+  });
+
+  return { keyboardMessageId: footer.message_id, messageIds };
 }
 
-export async function waitForDecision({ botInstance, messageId, timeoutMs = 90 * 60 * 1000, pollIntervalMs = 5000, dryRun = false }) {
-  if (dryRun) {
-    return { action: 'timeout', chosenId: null, reason: 'dry-run' };
-  }
-
-  const bot = botInstance || new TelegramBot(botToken(), { polling: false });
-  const cid = chatId();
-  const deadline = Date.now() + timeoutMs;
-  let offset = 0;
-
-  while (Date.now() < deadline) {
-    const updates = await bot.getUpdates({ offset, timeout: 1 });
-
-    for (const update of updates) {
-      offset = update.update_id + 1;
-      const cb = update.callback_query;
-      if (!cb) continue;
-      if (String(cb.message?.chat?.id) !== String(cid)) continue;
-
-      const data = cb.data;
-      await bot.answerCallbackQuery(cb.id, { text: 'Recebido' });
-
-      if (data.startsWith('approve:')) {
-        const id = parseInt(data.split(':')[1], 10);
-        return { action: 'approve', chosenId: id };
-      }
-      if (data === 'regen') return { action: 'regen', chosenId: null };
-      if (data === 'reject') {
-        await bot.sendMessage(cid, 'Por favor envie o motivo da rejeição (próxima mensagem texto). Tempo: 5min.');
-        const reason = await collectReasonMessage({ bot, cid, offset, timeoutMs: 5 * 60 * 1000 });
-        return { action: 'reject', chosenId: null, reason };
-      }
-    }
-
-    await sleep(pollIntervalMs);
-  }
-
-  return { action: 'timeout', chosenId: null };
+function parseCallback(data) {
+  if (!data) return null;
+  const parts = data.split(':');
+  const [kind, pendingId, varId] = parts;
+  if (kind === 'a') return { action: 'approve', pendingId, chosenId: parseInt(varId, 10) };
+  if (kind === 'r') return { action: 'regen', pendingId };
+  if (kind === 'x') return { action: 'reject', pendingId };
+  return null;
 }
 
-async function collectReasonMessage({ bot, cid, offset, timeoutMs }) {
-  const deadline = Date.now() + timeoutMs;
-  let off = offset;
-  while (Date.now() < deadline) {
-    const updates = await bot.getUpdates({ offset: off, timeout: 1 });
-    for (const u of updates) {
-      off = u.update_id + 1;
-      const msg = u.message;
-      if (msg && String(msg.chat?.id) === String(cid) && msg.text) {
-        return msg.text;
+// Lê todos os updates não confirmados. NÃO confirma (ack) — isso só acontece em
+// confirmDecisions(), depois do processamento bem-sucedido, pra não perder uma
+// decisão se o run crashar no meio.
+export async function fetchDecisions({ dryRun = false } = {}) {
+  if (dryRun) return { decisions: [], texts: [], maxUpdateId: null, callbackAcks: [] };
+
+  const bot = makeBot();
+  const cid = String(chatId());
+  const updates = await bot.getUpdates({ timeout: 0, allowed_updates: ['callback_query', 'message'] });
+
+  const decisions = [];
+  const texts = [];
+  const callbackAcks = [];
+  let maxUpdateId = null;
+
+  for (const u of updates) {
+    maxUpdateId = u.update_id;
+    const cb = u.callback_query;
+    if (cb) {
+      if (String(cb.message?.chat?.id) !== cid) continue;
+      const parsed = parseCallback(cb.data);
+      if (parsed) {
+        decisions.push({ ...parsed, callbackQueryId: cb.id });
+        callbackAcks.push(cb.id);
       }
+      continue;
     }
-    await sleep(3000);
+    const msg = u.message;
+    if (msg && String(msg.chat?.id) === cid && msg.text) {
+      texts.push({ text: msg.text, date: msg.date });
+    }
   }
-  return 'sem motivo informado';
+
+  return { decisions, texts, maxUpdateId, callbackAcks };
+}
+
+// Confirma os updates no servidor do Telegram (offset = max+1) pra não reentregar
+// no próximo run. Também responde os callbacks (best-effort: cliques antigos expiram).
+export async function confirmDecisions({ maxUpdateId, callbackAcks = [], dryRun = false }) {
+  if (dryRun || maxUpdateId == null) return;
+  const bot = makeBot();
+  for (const id of callbackAcks) {
+    await bot.answerCallbackQuery(id, { text: 'Recebido ✅' }).catch(() => {});
+  }
+  await bot.getUpdates({ offset: maxUpdateId + 1, timeout: 0 }).catch(() => {});
+}
+
+// Substitui a mensagem dos botões pelo resultado final e remove o teclado,
+// evitando clique duplo. Best-effort.
+export async function finalizeKeyboard({ messageId, text, dryRun = false }) {
+  if (dryRun || !messageId) return;
+  const bot = makeBot();
+  await bot.editMessageText(text, {
+    chat_id: chatId(),
+    message_id: messageId,
+    parse_mode: 'HTML',
+  }).catch(() => {});
+  await bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
+    chat_id: chatId(),
+    message_id: messageId,
+  }).catch(() => {});
 }
 
 export async function notify(text, opts = {}) {
-  if (opts.dryRun) {
-    return { dryRun: true, text };
-  }
-  const bot = new TelegramBot(botToken(), { polling: false });
-  return bot.sendMessage(chatId(), text, { parse_mode: 'Markdown' });
+  if (opts.dryRun) return { dryRun: true, text };
+  const bot = makeBot();
+  return bot.sendMessage(chatId(), text, { parse_mode: 'HTML' });
 }
 
-function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
-}
-
-export const _internal = { formatPreview, buildKeyboard };
+export { escapeHtml };
+export const _internal = { escapeHtml, chunkText, buildKeyboard, parseCallback, formatHeader, formatVariationBody };

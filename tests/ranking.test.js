@@ -1,5 +1,36 @@
 import { describe, it, expect } from 'vitest';
-import { chooseNextPillar, chooseNextAngle, rankVariations } from '../src/utils/ranking.js';
+import { chooseNextPillar, chooseNextAngle, rankVariations, _internal } from '../src/utils/ranking.js';
+
+describe('adaptiveWeights', () => {
+  it('devolve pesos-base quando há menos de 2 pilares com engajamento', () => {
+    const w = _internal.adaptiveWeights([{ pillar: 'dor', engagement_score: 100 }]);
+    expect(w).toEqual(_internal.PILLAR_WEIGHTS);
+  });
+
+  it('aumenta o peso do pilar que mais engaja (vs base)', () => {
+    const history = [
+      { pillar: 'dor', engagement_score: 10 },
+      { pillar: 'dica', engagement_score: 200 },
+      { pillar: 'building', engagement_score: 10 },
+      { pillar: 'prova', engagement_score: 10 },
+    ];
+    const w = _internal.adaptiveWeights(history);
+    expect(w.dica).toBeGreaterThan(_internal.PILLAR_WEIGHTS.dica);
+    const total = Object.values(w).reduce((a, b) => a + b, 0);
+    expect(total).toBeCloseTo(1, 5); // normalizado
+  });
+
+  it('respeita o piso de exploração (nenhum peso zera)', () => {
+    const history = [
+      { pillar: 'dor', engagement_score: 1000 },
+      { pillar: 'dica', engagement_score: 0 },
+      { pillar: 'building', engagement_score: 0 },
+      { pillar: 'prova', engagement_score: 0 },
+    ];
+    const w = _internal.adaptiveWeights(history);
+    for (const v of Object.values(w)) expect(v).toBeGreaterThan(0);
+  });
+});
 
 describe('ranking.js', () => {
   describe('chooseNextPillar', () => {

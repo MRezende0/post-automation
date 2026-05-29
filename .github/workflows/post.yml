@@ -18,10 +18,16 @@ on:
 permissions:
   contents: write
 
+# Serializa com o workflow Resolve pra não dar corrida no push de content/.
+concurrency:
+  group: content-state
+  cancel-in-progress: false
+
 jobs:
   post:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    # Só gera e manda o preview — não espera decisão (resolve.yml cuida disso).
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -34,7 +40,7 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Run post pipeline
+      - name: Run generation (sends preview, saves pending)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}

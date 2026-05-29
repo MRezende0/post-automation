@@ -106,22 +106,17 @@ export async function getPending() {
   return readYaml(paths().PENDING_FILE);
 }
 
-export async function loadPending(channel) {
+// Retorna o pending do canal (ou null). Por padrão CONSOME (remove do arquivo);
+// com { peek: true } só lê — usado pra checar se já há post aguardando decisão.
+// Itens expirados (>TTL) são sempre limpos.
+export async function loadPending(channel, { peek = false } = {}) {
   const items = await getPending();
   const now = Date.now();
-  const valid = [];
-  let found = null;
-  for (const item of items) {
-    const age = now - new Date(item.saved_at).getTime();
-    if (age > PENDING_TTL_MS) continue;
-    if (!found && item.channel === channel) {
-      found = item;
-    } else {
-      valid.push(item);
-    }
-  }
-  if (found || valid.length !== items.length) {
-    await writeYaml(paths().PENDING_FILE, valid);
+  const fresh = items.filter(i => now - new Date(i.saved_at).getTime() <= PENDING_TTL_MS);
+  const found = fresh.find(i => i.channel === channel) || null;
+  const next = !peek && found ? fresh.filter(i => i !== found) : fresh;
+  if (next.length !== items.length) {
+    await writeYaml(paths().PENDING_FILE, next);
   }
   return found;
 }

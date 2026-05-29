@@ -7,11 +7,13 @@ Automação de postagens Instagram + LinkedIn pra SaaS B2B. Geração via Claude
 - Roda 3x/semana (seg/qua/sex 9h BRT)
 - Lê próximo post da fila (`content/queue.yaml`) ou gera ideia automática baseada em pilar
 - Pede 3 variações ao Claude (few-shot com seus high-performers)
-- Renderiza preview de imagem via Puppeteer
-- Manda no Telegram com botões "aprovar #1 / #2 / #3 / regenerar / rejeitar"
-- Timeout 90min → publica top-1 automático
-- Publica em IG e LinkedIn
-- Atualiza histórico (`content/published.yaml`)
+- Renderiza um preview de imagem por variação via Puppeteer
+- **Fase gerar** (`post.yml`): manda no Telegram 1 mensagem por variação + botões
+  "aprovar #1 / #2 / #3 / regenerar / rejeitar", salva o pending e encerra
+- **Fase resolver** (`resolve.yml`, cron a cada 10min na janela útil): lê sua
+  decisão e publica / regenera / rejeita — o runner nunca fica preso esperando
+- Você decide quando quiser; publica no próximo tick (≤10min)
+- Publica em IG e LinkedIn e atualiza histórico (`content/published.yaml`)
 
 ## Setup rápido
 
@@ -27,7 +29,8 @@ Automação de postagens Instagram + LinkedIn pra SaaS B2B. Geração via Claude
 | `npm test` | Roda testes Vitest |
 | `npm run dry-run` | Pipeline completo mockando APIs externas |
 | `npm run publish:test` | Posta 1 item hardcoded em sandbox (precisa credencial) |
-| `npm start` | Executa fluxo normal (usado pelo workflow `post.yml`) |
+| `npm start` | Fase gerar: gera, manda preview, salva pending (workflow `post.yml`) |
+| `npm run resolve` | Fase resolver: processa decisões do Telegram (workflow `resolve.yml`) |
 | `npm run metrics` | Coleta insights da semana (TODO) |
 | `npm run refresh-tokens` | Renova tokens IG + LinkedIn |
 
