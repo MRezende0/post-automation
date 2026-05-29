@@ -63,8 +63,20 @@ npm run check:db   # valida conexão + presença das tabelas
 
 - Root directory: `platform/`
 - Variáveis de ambiente: as do `.env.local.example` (use valores reais).
-- O `vercel.json` registra o cron `*/10 * * * *` → `/api/cron/publish-due`.
-- Defina `CRON_SECRET`; o Vercel manda `Authorization: Bearer <CRON_SECRET>` nos crons.
+
+### Scheduler (cron)
+
+O plano **Hobby** do Vercel só roda cron 1×/dia, então o `*/10` não cabe lá. O
+disparo do scheduler vive num **GitHub Action** (`.github/workflows/publish-due.yml`,
+a cada 10min) que faz `POST /api/cron/publish-due` com `Authorization: Bearer
+$CRON_SECRET`. Configure no repositório os secrets:
+
+- `PLATFORM_URL` — a URL do app no Vercel (ex: `https://post-automation.vercel.app`)
+- `CRON_SECRET` — o mesmo valor das env vars do Vercel
+
+Se migrar pra **Vercel Pro**, basta recriar `platform/vercel.json` com
+`{ "crons": [{ "path": "/api/cron/publish-due", "schedule": "*/10 * * * *" }] }`
+e desativar o Action.
 
 ## Telas
 
