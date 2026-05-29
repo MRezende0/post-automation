@@ -12,6 +12,10 @@
     "publish:test": "PUBLISH_TEST=true node src/index.js",
     "refresh-tokens": "node src/refresh-tokens.js",
     "metrics": "node src/metrics.js",
+    "repurpose": "node src/repurpose.js",
+    "reel": "node src/reel.js",
+    "engage": "node src/engage.js",
+    "backfill": "node scripts/backfill-supabase.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -20,8 +24,10 @@
   },
   "dependencies": {
     "@google/genai": "^1.52.0",
+    "@supabase/supabase-js": "^2.45.0",
     "dotenv": "^16.4.5",
     "js-yaml": "^4.1.0",
+    "libsodium-wrappers": "^0.7.15",
     "node-telegram-bot-api": "^0.66.0",
     "puppeteer": "^23.0.0"
   },
