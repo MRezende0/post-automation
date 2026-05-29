@@ -14,12 +14,14 @@ import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
 import { sendApprovalRequest, notify } from './telegram.js';
 import { getUpcomingHoliday, holidayContext } from './utils/holidays.js';
+import { getActiveCampaign, campaignContext } from './utils/calendar.js';
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const PUBLISH_TEST = process.env.PUBLISH_TEST === 'true';
 const SKIP_APPROVAL = process.env.SKIP_APPROVAL === 'true' || DRY_RUN;
 const HOLIDAY_AWARE = process.env.HOLIDAY_AWARE !== 'false';
 const HOLIDAY_WINDOW_DAYS = Number(process.env.HOLIDAY_WINDOW_DAYS || 7);
+const CAMPAIGN_AWARE = process.env.CAMPAIGN_AWARE !== 'false';
 
 const CHANNELS = (process.env.CHANNELS || 'instagram').split(',').map(s => s.trim());
 
@@ -44,8 +46,21 @@ async function main() {
   const seed = queueItem || {};
   log(`Item da fila: ${queueItem ? JSON.stringify(queueItem) : 'vazio, gera automático'}`);
 
-  // Sem item forçado na fila, um feriado próximo tem prioridade sobre a rotação.
-  if (HOLIDAY_AWARE && !seed.pillar) {
+  // Prioridade no modo automático: campanha ativa > feriado próximo > rotação.
+  let campaignActive = false;
+  if (CAMPAIGN_AWARE && !seed.pillar) {
+    const campaign = await getActiveCampaign(new Date());
+    if (campaign) {
+      campaignActive = true;
+      if (campaign.pillar) seed.pillar = campaign.pillar;
+      if (campaign.angle) seed.angle = campaign.angle;
+      seed.context = [seed.context, campaignContext(campaign)].filter(Boolean).join('\n\n');
+      log(`Campanha ativa → "${campaign.name}" (pilar=${campaign.pillar || 'rotação'}, ângulo=${campaign.angle || 'rotação'})`);
+    }
+  }
+
+  // Sem campanha nem item forçado, um feriado próximo tem prioridade sobre a rotação.
+  if (HOLIDAY_AWARE && !campaignActive && !seed.pillar) {
     const holiday = getUpcomingHoliday(new Date(), HOLIDAY_WINDOW_DAYS);
     if (holiday) {
       seed.pillar = holiday.pillar;

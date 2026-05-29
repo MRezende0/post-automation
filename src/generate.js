@@ -7,6 +7,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { chooseNextPillar, chooseNextAngle } from './utils/ranking.js';
 import { getPublished } from './utils/queue.js';
+import { retrieve } from './utils/rag.js';
 
 const MODEL_GENERATE = 'gemini-2.5-flash';
 const MODEL_SIMPLE = 'gemini-2.5-flash-lite';
@@ -100,6 +101,21 @@ function buildFewShot({ high = [], low = [] }) {
   return sections.length > 0 ? `\n\n${sections.join('\n\n')}` : '';
 }
 
+// RAG opt-in (RAG_ENABLED=true): recupera trechos relevantes da base indexada.
+// Best-effort — sem índice/sem chave/erro → string vazia (não quebra a geração).
+async function retrieveKnowledge({ pillar, angle, context }) {
+  if (process.env.RAG_ENABLED !== 'true') return '';
+  try {
+    const query = [pillar, angle, context].filter(Boolean).join(' ');
+    const hits = await retrieve(query, { topK: 5 });
+    if (!hits.length) return '';
+    const blocks = hits.map(h => `- (${h.source}) ${h.text}`).join('\n\n');
+    return `## Conhecimento recuperado (use o relevante; não invente)\n\n${blocks}`;
+  } catch (e) {
+    return '';
+  }
+}
+
 export async function generatePost({ channel, pillar, angle, context, dryRun = false }) {
   if (!['instagram', 'linkedin'].includes(channel)) {
     throw new Error(`Canal inválido: ${channel}`);
@@ -134,14 +150,17 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     loadExamples(),
   ]);
 
+  const ragBlock = await retrieveKnowledge({ pillar: chosenPillar, angle: chosenAngle, context });
+
   const system = [
     systemBase,
     `## Canal alvo: ${channel}`,
     channelPrompt,
     `## Pilar alvo: ${chosenPillar}`,
     pillarPrompt,
+    ragBlock,
     buildFewShot(examples),
-  ].join('\n\n---\n\n');
+  ].filter(Boolean).join('\n\n---\n\n');
 
   const userMessage = buildUserMessage({ channel, pillar: chosenPillar, angle: chosenAngle, context, recentHooks });
 
