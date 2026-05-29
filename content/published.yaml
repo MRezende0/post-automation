@@ -1,21 +1,3 @@
-- generated_at: '2026-05-28T15:33:38.850Z'
-  published_at: '2026-05-28T15:33:38.850Z'
-  chosen_variation: 3
-  channels:
-    instagram:
-      variationId: 3
-      id: mock_ig_post_id
-      dryRun: true
-      channel: instagram
-      imageUrl: file:///Users/matheus.rezende/Documents/Pessoal/post-automation/tmp/instagram-dor-1779982415703.png
-      captionLength: 66
-    linkedin:
-      variationId: 3
-      id: mock_li_post_id
-      dryRun: true
-      channel: linkedin
-      textLength: 66
-      hasImage: true
 - generated_at: '2026-05-28T17:41:23.299Z'
   published_at: '2026-05-28T17:41:23.300Z'
   chosen_variation: 1
@@ -24,49 +6,6 @@
       variationId: 1
       id: '18076315661260194'
       channel: instagram
-- generated_at: '2026-05-28T18:03:05.162Z'
-  published_at: '2026-05-28T18:03:05.163Z'
-  chosen_variation: 3
-  channels:
-    instagram:
-      variationId: 3
-      id: mock_ig_post_id
-      dryRun: true
-      channel: instagram
-      captionLength: 66
-- generated_at: '2026-05-28T18:05:18.897Z'
-  published_at: '2026-05-28T18:05:18.898Z'
-  chosen_variation: 3
-  channels:
-    instagram:
-      variationId: 3
-      id: mock_ig_post_id
-      dryRun: true
-      channel: instagram
-      captionLength: 66
-- pillar: dor
-  angle: financeira
-  post:
-    hook: '[MOCK instagram/dor #3] 5 sinais que você tá refém da planilha'
-    body: |-
-      [MOCK] Variação em lista.
-
-      1. Item
-      2. Item
-      3. Item
-      4. Item
-      5. Item
-    format: single
-  generated_at: '2026-05-28T18:10:56.798Z'
-  published_at: '2026-05-28T18:10:56.799Z'
-  chosen_variation: 3
-  channels:
-    instagram:
-      variationId: 3
-      id: mock_ig_post_id
-      dryRun: true
-      channel: instagram
-      captionLength: 66
 - pillar: dica
   angle: precificacao
   post:
