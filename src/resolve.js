@@ -42,7 +42,7 @@ async function handleApprove(p, chosenId) {
   log(`Aprovado ${p.channel} #${chosen.id} (pending ${p.pending_id}) — publicando`);
 
   const result = await publishToChannel({ channel: p.channel, variation: chosen, imageUrl, pillar: gen.pillar });
-  await markPublished(publishedRecord(p, chosen), { chosenVariationId: chosen.id, channels: { [p.channel]: result } });
+  await markPublished(publishedRecord(p, chosen), { chosenVariationId: chosen.id, channels: { [p.channel]: result }, generation: gen });
   await clearPending(p.channel);
   await finalizeKeyboard({
     messageId: p.keyboard_message_id,
