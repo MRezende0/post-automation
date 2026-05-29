@@ -218,6 +218,58 @@ export async function judgeVariations({ channel, pillar, variations }) {
   }
 }
 
+// Guardrails programáticos — flags que NÃO deviam passar (ICP de engenharia de projeto).
+const GUARD_BUZZWORDS = ['sinergia', 'otimizar', 'escalável', 'ecossistema', 'disruptivo', 'solução integrada', 'gestão eficiente'];
+const GUARD_FORA_ICP = ['canteiro', 'diário de obra', 'diario de obra'];
+const GUARD_FORA_RECORTE = ['arquitet']; // conteúdo é só engenharia por ora
+
+export function checkGuardrails(variation, { pillar } = {}) {
+  const text = `${variation?.hook || ''}\n${variation?.body || ''}`.toLowerCase();
+  const flags = [];
+  for (const w of GUARD_BUZZWORDS) if (text.includes(w)) flags.push(`buzzword:${w}`);
+  for (const w of GUARD_FORA_ICP) if (text.includes(w)) flags.push(`fora-icp:${w}`);
+  for (const w of GUARD_FORA_RECORTE) if (text.includes(w)) flags.push(`fora-recorte:${w}`);
+  if (pillar === 'prova' && /\d/.test(text)) flags.push('prova-com-numero:verificar-fonte');
+  return { clean: flags.length === 0, flags };
+}
+
+// Etapa de auto-edição: um "editor" reescreve o post aplicando o checklist de voz.
+// Best-effort — devolve a variação original se a API falhar. Não inventa fatos.
+export async function polishPost({ channel, pillar, variation }) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || !variation) return variation;
+  const client = new GoogleGenAI({ apiKey });
+
+  const prompt = [
+    'Você é editor de copy do Pilar (SaaS pra escritório de engenharia de projeto — não obra).',
+    'Revise o post abaixo aplicando o checklist de voz, SEM inventar fato novo:',
+    '- Hook curto que para o scroll.',
+    '- Dor concreta e específica; zero buzzword (sinergia, otimizar, performance, ecossistema, escalável).',
+    '- Frases curtas — nenhuma com mais de 25 palavras.',
+    '- NÃO falar de obra/canteiro. NÃO citar arquitetura. NÃO inventar número.',
+    '- Tom seco e direto, estilo: "Proposta no feeling. Financeiro descolado da operação."',
+    '',
+    `Canal: ${channel} | Pilar: ${pillar}`,
+    `Hook: ${variation.hook}`,
+    `Corpo: ${variation.body}`,
+    '',
+    'Devolva só JSON: {"hook":"...","body":"..."} — mesmo idioma e formato, só melhor.',
+  ].join('\n');
+
+  try {
+    const response = await client.models.generateContent({
+      model: MODEL_SIMPLE,
+      contents: prompt,
+      config: { maxOutputTokens: 1500, responseMimeType: 'application/json' },
+    });
+    const parsed = parseJsonResponse(response.text || '');
+    if (parsed.hook && parsed.body) return { ...variation, hook: parsed.hook, body: parsed.body };
+    return variation;
+  } catch (e) {
+    return variation;
+  }
+}
+
 function parseJsonResponse(text) {
   const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
   try {

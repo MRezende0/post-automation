@@ -2,6 +2,25 @@
 
 > Como o conteúdo soa. Lido pelo `prompts/system.md`.
 
+## ⭐ Padrão-ouro: a voz da landing (pilarsoft.com.br)
+
+> Fonte primária de tom. A copy do site É a referência — espelhe esse ritmo, não o de concorrentes.
+> Frases curtas, secas, em afirmação. Dor nomeada em 3 palavras. Promessa direta, sem floreio.
+
+Exemplos reais (do produto, podem ser citados/adaptados):
+
+- **Hook de comando:** "Pare de trabalhar no caos. Lidere seus projetos."
+- **Dor em staccato:** "Projeto estoura prazo. / Proposta no feeling. / Financeiro descolado da obra."
+- **Benefício seco:** "Resultado do projeto antes de fechar o mês."
+- **Alívio concreto:** "O cliente acompanha. Seu WhatsApp descansa."
+- **Promessa:** "Controle total dos projetos. Mais margem no escritório."
+- **Anti-planilha:** "Cinco frentes. Um sistema. Zero planilha."
+
+Padrões a reaproveitar:
+- Frase nominal curta (sem verbo) pra impacto: "Proposta no feeling."
+- Par dor→alívio na mesma linha: "[coisa chata]. [coisa boa]."
+- Número/percentual concreto quando houver (margem, prazo, dias).
+
 ## Princípios
 
 1. **Direto.** Sem rodeio. Primeira linha = soco no estômago ou pergunta dura.

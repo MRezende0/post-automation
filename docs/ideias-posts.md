@@ -36,6 +36,17 @@
 2. **"Do lead ao recebimento"** — 1 post por etapa do funil, ao longo de uma semana.
 3. **"3 números que todo dono de escritório devia olhar toda segunda"** — dica, carrossel.
 
+## Atomização automática (`src/atomize.js`)
+
+Pega 1 ativo seu (landing, feature, doc, transcrição) e gera N ideias de post já mapeadas pra pilar/ângulo:
+
+```bash
+node src/atomize.js docs/posicionamento.md 8 --queue   # gera 8 e enfileira
+node src/atomize.js caminho/landing.txt 6              # só imprime as ideias
+```
+
+Use com **fontes primárias** (sua landing, suas features, transcrição de call) — reaproveitar o que é seu rende mais que copiar terceiro.
+
 ## Regras
 
 - Dor núcleo (`dores.md` ⭐) primeiro; feature só aparece como alívio, nunca como abertura.

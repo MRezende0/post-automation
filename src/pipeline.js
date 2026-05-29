@@ -1,0 +1,130 @@
+// pipeline.js — lógica de geração, renderização e publicação compartilhada
+// entre a fase GERAR (index.js) e a fase RESOLVER (resolve.js).
+
+import { generatePost, judgeVariations, polishPost, checkGuardrails } from './generate.js';
+import { renderImage, renderCarousel } from './render-image.js';
+import { rankVariations } from './utils/ranking.js';
+import { uploadImage } from './utils/storage.js';
+import * as instagram from './channels/instagram.js';
+import * as linkedin from './channels/linkedin.js';
+
+const DRY_RUN = process.env.DRY_RUN === 'true';
+
+function log(...args) {
+  console.log('[pipeline]', ...args);
+}
+
+// Renderiza o card de preview de uma variação (single image ilustrativa).
+async function renderPreview({ channel, pillar, variation }) {
+  try {
+    return await renderImage({
+      channel,
+      pillar,
+      vars: {
+        hook: variation.hook,
+        body: variation.body,
+        subline: variation.body?.split('\n').slice(1).join(' ').slice(0, 200),
+        title: variation.hook,
+        description: variation.body?.slice(0, 280),
+        quote: variation.hook,
+      },
+    });
+  } catch (e) {
+    log(`Falha render imagem ${channel}/${pillar}: ${e.message}`);
+    return null;
+  }
+}
+
+// Gera as 3 variações, elege o top-1 (LLM-judge com fallback heurístico) e
+// renderiza+sobe uma imagem PRA CADA variação — assim o preview mostra a imagem
+// real de cada opção e a publicação não precisa re-renderizar a escolhida.
+export async function prepareGeneration({ channel, seed, regenNote }) {
+  const context = [seed.context, regenNote].filter(Boolean).join('\n\n') || undefined;
+  const generation = await generatePost({
+    channel,
+    pillar: seed.pillar,
+    angle: seed.angle,
+    context,
+    dryRun: DRY_RUN,
+  });
+  log(`Gerou ${generation.variations.length} variações | pilar=${generation.pillar} | ângulo=${generation.angle}`);
+
+  const ranked = rankVariations(generation.variations);
+  let topId = ranked[0].variation.id;
+  let how = `heurística (score ${ranked[0].score})`;
+  if (!DRY_RUN) {
+    const verdict = await judgeVariations({ channel, pillar: generation.pillar, variations: generation.variations });
+    if (verdict) {
+      topId = verdict.chosenId;
+      how = `LLM-judge (${verdict.reason})`;
+    }
+  }
+  log(`Top-1: variação #${topId} via ${how}`);
+
+  // Auto-edição: o editor refina o top-1 aplicando o checklist de voz, e os
+  // guardrails sinalizam o que escapou (buzzword, fora-ICP, número em prova).
+  if (!DRY_RUN) {
+    const top = generation.variations.find(v => v.id === topId);
+    if (top) {
+      const polished = await polishPost({ channel, pillar: generation.pillar, variation: top });
+      Object.assign(top, { hook: polished.hook, body: polished.body }); // muta a ref no array
+      const guard = checkGuardrails(top, { pillar: generation.pillar });
+      log(guard.clean ? 'Guardrails: ok' : `⚠️ Guardrails (top #${topId}): ${guard.flags.join(', ')}`);
+    }
+  }
+
+  const images = [];
+  for (const v of generation.variations) {
+    const imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: v });
+    if (imagePath && !DRY_RUN) {
+      const uploaded = await uploadImage(imagePath);
+      images.push({ id: v.id, url: uploaded.url });
+      log(`Imagem variação #${v.id}: ${uploaded.url}`);
+    } else if (imagePath) {
+      images.push({ id: v.id, url: null, path: imagePath });
+    }
+  }
+
+  return { generation, topId, images };
+}
+
+// Renderiza cada slide do carrossel e sobe pro storage, retornando as URLs.
+async function buildCarouselUrls({ channel, pillar, variation }) {
+  const files = await renderCarousel({ channel, pillar, slides: variation.slides || [] });
+  const urls = [];
+  for (const file of files) {
+    const uploaded = await uploadImage(file);
+    urls.push(uploaded.url);
+  }
+  return urls;
+}
+
+export async function publishToChannel({ channel, variation, imageUrl, pillar }) {
+  if (channel === 'instagram') {
+    if (variation.format === 'carousel' && variation.slides?.length) {
+      if (DRY_RUN) {
+        return instagram.publishCarousel({ imageUrls: variation.slides, caption: variation.body, dryRun: true });
+      }
+      const imageUrls = variation.slideUrls?.length
+        ? variation.slideUrls
+        : await buildCarouselUrls({ channel, pillar, variation });
+      log(`Carousel ${channel}: ${imageUrls.length} slides renderizados/enviados`);
+      return instagram.publishCarousel({ imageUrls, caption: variation.body, dryRun: false });
+    }
+    return instagram.publishSingle({
+      imageUrl: variation.imageUrl || imageUrl,
+      caption: variation.body,
+      dryRun: DRY_RUN,
+    });
+  }
+  if (channel === 'linkedin') {
+    return linkedin.publishText({
+      text: variation.body,
+      imageUrl,
+      dryRun: DRY_RUN,
+    });
+  }
+  throw new Error(`Canal desconhecido: ${channel}`);
+}
+
+export { renderPreview };

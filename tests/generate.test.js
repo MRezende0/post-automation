@@ -1,5 +1,30 @@
 import { describe, it, expect } from 'vitest';
-import { generatePost, _internal } from '../src/generate.js';
+import { generatePost, checkGuardrails, _internal } from '../src/generate.js';
+
+describe('checkGuardrails', () => {
+  it('aprova post limpo', () => {
+    const r = checkGuardrails({ hook: 'Você sabe se o projeto deu lucro?', body: 'Fecha o mês no escuro.' }, { pillar: 'dor' });
+    expect(r.clean).toBe(true);
+    expect(r.flags).toHaveLength(0);
+  });
+
+  it('flagra buzzword', () => {
+    const r = checkGuardrails({ hook: 'Vamos otimizar a sinergia', body: 'ecossistema disruptivo' }, { pillar: 'dor' });
+    expect(r.clean).toBe(false);
+    expect(r.flags.some(f => f.startsWith('buzzword'))).toBe(true);
+  });
+
+  it('flagra termo fora do ICP (obra) e fora do recorte (arquitetura)', () => {
+    const r = checkGuardrails({ hook: 'No canteiro de obras', body: 'pra arquitetura também' }, { pillar: 'dica' });
+    expect(r.flags.some(f => f.startsWith('fora-icp'))).toBe(true);
+    expect(r.flags.some(f => f.startsWith('fora-recorte'))).toBe(true);
+  });
+
+  it('flagra número em pilar prova (verificar fonte)', () => {
+    const r = checkGuardrails({ hook: 'Cliente economizou 40%', body: 'em 3 meses' }, { pillar: 'prova' });
+    expect(r.flags.some(f => f.startsWith('prova-com-numero'))).toBe(true);
+  });
+});
 
 describe('generate.js', () => {
   describe('parseJsonResponse', () => {
