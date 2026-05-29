@@ -1,5 +1,5 @@
 // rag.js — RAG leve sobre a base de conhecimento (docs + exemplos).
-// Embeddings via Gemini (text-embedding-004), índice em arquivo JSON e busca por
+// Embeddings via Gemini (gemini-embedding-001, 3072 dims), índice em JSON e busca por
 // similaridade de cosseno em memória. Sem infra externa — adequado a um corpus
 // pequeno (centenas de chunks). Pra milhares, migrar pra pgvector/Chroma.
 //
@@ -11,7 +11,7 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-const EMBED_MODEL = 'text-embedding-004';
+const EMBED_MODEL = 'gemini-embedding-001';
 const INDEX_FILE = path.resolve(process.cwd(), 'content/kb-index.json');
 
 // Quebra texto em chunks por parágrafo, agrupando até ~maxChars.

@@ -11,3 +11,6 @@ tmp/
 !templates/**/*.png
 !docs/**/*.png
 !content/images/**/*.png
+
+# RAG: índice de embeddings gerado por src/build-index.js (regenerar localmente/CI)
+content/kb-index.json
