@@ -10,6 +10,7 @@
 
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { withRetry } from '../utils/retry.js';
 
 const GRAPH_VERSION = 'v21.0';
 const API_BASE = `https://graph.instagram.com/${GRAPH_VERSION}`;
@@ -26,19 +27,26 @@ function accountId() {
   return id;
 }
 
-async function apiPost(endpoint, params) {
-  const url = new URL(`${API_BASE}${endpoint}`);
-  const form = new URLSearchParams({ ...params, access_token: token() });
-  const res = await fetch(url, {
-    method: 'POST',
-    body: form,
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`IG API ${res.status}: ${text}`);
-  }
-  return res.json();
+// retry:false no publish final (media_publish) — re-tentar após sucesso com
+// resposta perdida geraria post duplicado. Criação de container/status é seguro.
+async function apiPost(endpoint, params, { retry = true } = {}) {
+  const run = async () => {
+    const url = new URL(`${API_BASE}${endpoint}`);
+    const form = new URLSearchParams({ ...params, access_token: token() });
+    const res = await fetch(url, {
+      method: 'POST',
+      body: form,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      const err = new Error(`IG API ${res.status}: ${text}`);
+      err.status = res.status;
+      throw err;
+    }
+    return res.json();
+  };
+  return retry ? withRetry(run, { label: `IG ${endpoint}` }) : run();
 }
 
 async function waitContainerReady(containerId, { timeoutMs = 60000, intervalMs = 2000 } = {}) {
@@ -74,7 +82,7 @@ export async function publishSingle({ imageUrl, caption, dryRun = false }) {
 
   const published = await apiPost(`/${accountId()}/media_publish`, {
     creation_id: container.id,
-  });
+  }, { retry: false });
 
   return { id: published.id, channel: 'instagram' };
 }
@@ -107,9 +115,32 @@ export async function publishCarousel({ imageUrls, caption, dryRun = false }) {
 
   const published = await apiPost(`/${accountId()}/media_publish`, {
     creation_id: container.id,
-  });
+  }, { retry: false });
 
   return { id: published.id, channel: 'instagram', slides: imageUrls.length };
+}
+
+// Publica um Reel. videoUrl precisa ser URL pública (mp4). O processamento de
+// vídeo demora mais que imagem — timeout maior no polling. media_publish sem retry.
+// NOTA: a renderização do vídeo (TTS + ffmpeg/Remotion) é etapa anterior, fora
+// deste módulo — aqui só publicamos o mp4 já pronto.
+export async function publishReel({ videoUrl, caption, coverUrl, dryRun = false }) {
+  if (dryRun) {
+    return { id: 'mock_ig_reel_id', dryRun: true, channel: 'instagram', kind: 'reel', videoUrl };
+  }
+  if (!videoUrl) throw new Error('videoUrl obrigatório (URL pública do mp4)');
+
+  const params = { media_type: 'REELS', video_url: videoUrl, caption: caption || '' };
+  if (coverUrl) params.cover_url = coverUrl;
+  const container = await apiPost(`/${accountId()}/media`, params);
+
+  await waitContainerReady(container.id, { timeoutMs: 180000, intervalMs: 5000 }); // vídeo: até 3min
+
+  const published = await apiPost(`/${accountId()}/media_publish`, {
+    creation_id: container.id,
+  }, { retry: false });
+
+  return { id: published.id, channel: 'instagram', kind: 'reel' };
 }
 
 // Coleta engajamento de um post publicado. Combina campos diretos (like_count,

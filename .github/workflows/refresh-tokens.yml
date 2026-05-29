@@ -27,8 +27,7 @@ jobs:
           LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # PAT fine-grained com "Secrets: write" — o GITHUB_TOKEN padrão não basta.
+          GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: npm run refresh-tokens
-
-      # TODO: atualizar secrets do repo via gh CLI quando tokens novos forem retornados.
-      # Por ora workflow apenas executa refresh + manda alerta Telegram com novo token,
-      # e você atualiza manualmente. Implementar GH API update_secret depois.

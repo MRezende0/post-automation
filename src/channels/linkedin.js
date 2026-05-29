@@ -8,6 +8,7 @@
 
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { withRetry } from '../utils/retry.js';
 
 const API_BASE = 'https://api.linkedin.com/rest';
 const VERSION = '202405';
@@ -33,20 +34,27 @@ function headers(extra = {}) {
   };
 }
 
-async function apiJson(method, endpoint, body) {
-  const res = await fetch(`${API_BASE}${endpoint}`, {
-    method,
-    headers: headers({ 'Content-Type': 'application/json' }),
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`LinkedIn API ${res.status}: ${text}`);
-  }
-  if (res.status === 201 || res.status === 204) {
-    return { id: res.headers.get('x-restli-id') || res.headers.get('x-linkedin-id') };
-  }
-  return res.json();
+// retry:false no POST /posts (publicação) — evita post duplicado se a resposta
+// se perder após sucesso. Init/upload de imagem são seguros pra re-tentar.
+async function apiJson(method, endpoint, body, { retry = true } = {}) {
+  const run = async () => {
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      method,
+      headers: headers({ 'Content-Type': 'application/json' }),
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      const err = new Error(`LinkedIn API ${res.status}: ${text}`);
+      err.status = res.status;
+      throw err;
+    }
+    if (res.status === 201 || res.status === 204) {
+      return { id: res.headers.get('x-restli-id') || res.headers.get('x-linkedin-id') };
+    }
+    return res.json();
+  };
+  return retry ? withRetry(run, { label: `LinkedIn ${endpoint}` }) : run();
 }
 
 async function uploadImage(localPath) {
@@ -95,7 +103,7 @@ export async function publishText({ text, imagePath, dryRun = false }) {
     body.content = { media: { id: mediaUrn } };
   }
 
-  return apiJson('POST', '/posts', body);
+  return apiJson('POST', '/posts', body, { retry: false });
 }
 
 export async function publishCarousel({ text, imagePaths, dryRun = false }) {
