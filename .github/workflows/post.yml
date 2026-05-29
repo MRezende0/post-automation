@@ -40,9 +40,16 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Build RAG index
+        if: ${{ !inputs.dry_run }}
+        run: node src/build-index.js
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
       - name: Run generation (sends preview, saves pending)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          RAG_ENABLED: 'true'
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           IG_BUSINESS_ACCOUNT_ID: ${{ secrets.IG_BUSINESS_ACCOUNT_ID }}
           META_APP_ID: ${{ secrets.META_APP_ID }}

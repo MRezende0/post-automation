@@ -1,14 +1,38 @@
 // pipeline.js — lógica de geração, renderização e publicação compartilhada
 // entre a fase GERAR (index.js) e a fase RESOLVER (resolve.js).
 
+import { readFile } from 'node:fs/promises';
 import { generatePost, judgeVariations, polishPost, checkGuardrails } from './generate.js';
 import { renderImage, renderCarousel } from './render-image.js';
 import { rankVariations } from './utils/ranking.js';
 import { uploadImage } from './utils/storage.js';
+import { generateBackground, SCENE_BY_PILLAR } from './utils/image-gen.js';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
+const IMAGE_BG = process.env.IMAGE_BG === 'true'; // híbrido: fundo IA + texto via template
+const BADGE_BY_PILLAR = { dor: 'DOR REAL', dica: 'DICA PRÁTICA', building: 'BUILDING IN PUBLIC', prova: 'CLIENTE REAL' };
+
+// Híbrido: gera ilustração de fundo (nano banana) e sobrepõe o hook via template hero.
+// Só Instagram, best-effort — se a geração falhar, devolve null (cai no card normal).
+async function renderHero({ channel, pillar, variation }) {
+  if (channel !== 'instagram') return null;
+  try {
+    const scene = SCENE_BY_PILLAR[pillar] || SCENE_BY_PILLAR.default;
+    const bgPath = await generateBackground({ scene });
+    if (!bgPath) return null;
+    const bg = `data:image/png;base64,${(await readFile(bgPath)).toString('base64')}`;
+    return await renderImage({
+      channel,
+      pillar: 'hero',
+      vars: { bg, badge: BADGE_BY_PILLAR[pillar] || 'PILAR', hook: variation.hook },
+    });
+  } catch (e) {
+    log(`Falha hero ${channel}/${pillar}: ${e.message}`);
+    return null;
+  }
+}
 
 function log(...args) {
   console.log('[pipeline]', ...args);
@@ -75,7 +99,11 @@ export async function prepareGeneration({ channel, seed, regenNote }) {
 
   const images = [];
   for (const v of generation.variations) {
-    const imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: v });
+    let imagePath = null;
+    if (IMAGE_BG && v.id === topId && !DRY_RUN) {
+      imagePath = await renderHero({ channel, pillar: generation.pillar, variation: v });
+    }
+    if (!imagePath) imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: v });
     if (imagePath && !DRY_RUN) {
       const uploaded = await uploadImage(imagePath);
       images.push({ id: v.id, url: uploaded.url });

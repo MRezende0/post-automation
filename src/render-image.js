@@ -23,6 +23,7 @@ const TEMPLATE_MAP = {
     anuncio: 'templates/instagram/anuncio.html',
     building: 'templates/instagram/building.html',
     prova: 'templates/instagram/prova.html',
+    hero: 'templates/instagram/hero.html',
   },
   linkedin: {
     dor: 'templates/linkedin/single.html',

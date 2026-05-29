@@ -14,16 +14,16 @@
 # (1 item por dia). O calendário cobre o tema do período; a fila cobre a ordem.
 #
 # Desliga via env CAMPAIGN_AWARE=false.
-#
-# Exemplo (descomente e ajuste as datas):
-# - name: Lançamento do Portal do Cliente
-#   start: 2026-06-01
-#   end: 2026-06-07
-#   pillar: building
-#   angle: proximo_marco
-#   context: |
-#     Semana de lançamento do Portal do Cliente. Tema: parar de ser o "status
-#     ambulante" do projeto no WhatsApp. Cada post puxa uma faceta (entregas,
-#     pagamento via PIX, documentos) e termina convidando pra testar.
 
-[]
+# >>> AJUSTE AS DATAS antes de usar. Como estão no futuro, esta campanha NÃO
+#     dispara até a janela chegar — e mesmo assim passa pela sua aprovação.
+- name: Semana do Lucro por Projeto
+  start: 2026-06-09
+  end: 2026-06-15
+  context: |
+    Tema da semana: o diferencial nº 1 do Pilar — saber, em tempo real, se cada
+    projeto dá lucro. Gancho de topo: planilha/feeling não respondem "esse projeto
+    valeu a pena?". Promessa de fundo: lucro por projeto na tela, do lead ao
+    recebimento. Cada post puxa uma faceta (orçar no feeling, fechar o mês no
+    escuro, projeto que drena margem) e termina conectando ao controle real.
+    Mantenha o foco em engenharia de projeto (não obra).
