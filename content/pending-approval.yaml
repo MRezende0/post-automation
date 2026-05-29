@@ -1,0 +1,103 @@
+- channel: instagram
+  pending_id: instagram-mpqa7um1
+  generation:
+    variations:
+      - id: 1
+        hook: Seu escritório fechou no azul, mas você não sabe por quê?
+        body: >-
+          Saldo positivo no extrato. Mas essa grana é lucro ou só adiantamento? A planilha mostra o que entrou e o que
+          saiu. Ela nunca dirá qual projeto deu lucro real. E qual te drenou a margem. Contar com o extrato para medir
+          sucesso é dirigir olhando o retrovisor. Qual projeto te deu mais dor de cabeça e menos lucro?
+        format: single
+        slides: []
+      - id: 2
+        hook: Aquela sensação de 'dinheiro na conta, mas sem controle'...
+        body: >-
+          Aquela sensação de 'dinheiro na conta, mas sem controle'...
+
+
+          É a cena clássica do dono de escritório de engenharia.
+
+
+          Um cliente adiantou uma parcela, o outro pagou um marco.
+
+
+          O caixa respira por um instante. 
+
+
+          Mas a verdade é que você não consegue distinguir o que é **margem real** do que é **capital de giro** que já
+          tem destino certo.
+
+
+          Sem visibilidade do lucro por projeto, você fica refém do extrato. E a planilha, que deveria ajudar, só
+          esconde a verdade.
+
+
+          Você sabe qual foi seu lucro líquido por projeto no último trimestre, sem adivinhar?
+        format: single
+        slides: []
+      - id: 3
+        hook: Por que o extrato do banco é a pior bússola para o lucro real?
+        body: >-
+          Por que o extrato do banco é a pior bússola para o lucro real?
+
+
+          Ele mente. Não de propósito, mas por omissão.
+
+
+          Um adiantamento de cliente entra na conta e parece que o mês bombou.
+
+
+          Mas foi lucro? Ou só dinheiro que vai sair amanhã para pagar o material, a equipe, o imposto daquele mesmo
+          projeto?
+
+
+          Sem ligar o financeiro diretamente aos marcos e entregas de cada projeto, você está operando no escuro.
+
+
+          A planilha não faz essa mágica. Ela soma, mas não cruza os dados que importam.
+
+
+          Você já teve a 'surpresa' de ver um extrato positivo, mas o caixa no fim do mês estava apertado?
+        format: single
+        slides: []
+    meta:
+      pillar: dor
+      angle: financeira
+      reasoning: >-
+        As 3 variações abordam a dor de não saber o lucro real do escritório vs. adiantamento/extrato, com ganchos
+        distintos (pergunta direta, sensação, e pergunta provocativa) e mantendo o foco na ineficácia da planilha para
+        essa dor núcleo.
+    channel: instagram
+    pillar: dor
+    angle: financeira
+  top_id: 1
+  images:
+    - id: 1
+      url: >-
+        https://raw.githubusercontent.com/MRezende0/post-automation/main/content/images/1780020441998-instagram-hero-1780020438541.png
+    - id: 2
+      url: >-
+        https://raw.githubusercontent.com/MRezende0/post-automation/main/content/images/1780020446561-instagram-dor-1780020444925.png
+    - id: 3
+      url: >-
+        https://raw.githubusercontent.com/MRezende0/post-automation/main/content/images/1780020449924-instagram-dor-1780020448265.png
+  seed:
+    pillar: dor
+    angle: financeira
+    context: |
+      Dor núcleo: fechou o mês, o extrato diz que sobrou, mas você não sabe se foi
+      margem real ou adiantamento de cliente. Gancho: planilha não responde "qual
+      projeto deu lucro". Promessa de fundo: lucro por projeto em tempo real.
+  message_ids:
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+  keyboard_message_id: 26
+  regen_count: 0
+  status: awaiting_decision
+  saved_at: '2026-05-29T02:07:37.294Z'
