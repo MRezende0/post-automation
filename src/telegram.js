@@ -87,11 +87,13 @@ function buildKeyboard(pendingId, variations) {
   return { inline_keyboard: [captionRow, controlRow(pendingId)] };
 }
 
-// Passo 2: escolher a ARTE (imagem). callback g:<pid>:<id>.
-function buildArtKeyboard(pendingId, images) {
+// Passo 2: escolher a ARTE. O callback CARREGA a legenda escolhida
+// (g:<pid>:<captionId>:<artId>) — stateless, sobrevive entre runs do resolve
+// sem precisar persistir a escolha da legenda.
+function buildArtKeyboard(pendingId, images, captionId) {
   const artRow = images.map(im => ({
     text: `🖼️ #${im.id}`,
-    callback_data: `g:${pendingId}:${im.id}`,
+    callback_data: `g:${pendingId}:${captionId}:${im.id}`,
   }));
   return { inline_keyboard: [artRow, controlRow(pendingId)] };
 }
@@ -104,7 +106,7 @@ export async function showArtSelection({ messageId, pendingId, images = [], capt
     chat_id: chatId(),
     message_id: messageId,
     parse_mode: 'HTML',
-    reply_markup: buildArtKeyboard(pendingId, images),
+    reply_markup: buildArtKeyboard(pendingId, images, captionId),
   }).catch(() => {});
 }
 
@@ -172,9 +174,10 @@ export async function sendApprovalRequest({ channel, pillar, angle, variations, 
 function parseCallback(data) {
   if (!data) return null;
   const parts = data.split(':');
-  const [kind, pendingId, varId] = parts;
+  const [kind, pendingId, varId, artId] = parts;
   if (kind === 'c') return { action: 'caption', pendingId, chosenCaptionId: parseInt(varId, 10) };
-  if (kind === 'g') return { action: 'art', pendingId, chosenArtId: parseInt(varId, 10) };
+  // g:<pid>:<captionId>:<artId> — a arte carrega a legenda escolhida (stateless)
+  if (kind === 'g') return { action: 'art', pendingId, chosenCaptionId: parseInt(varId, 10), chosenArtId: parseInt(artId, 10) };
   if (kind === 'a') return { action: 'approve', pendingId, chosenId: parseInt(varId, 10) }; // compat (1 clique)
   if (kind === 'r') return { action: 'regen', pendingId };
   if (kind === 'x') return { action: 'reject', pendingId };

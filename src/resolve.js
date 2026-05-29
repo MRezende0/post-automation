@@ -49,17 +49,18 @@ async function handleCaption(p, captionId) {
   });
 }
 
-// Passo 2: arte escolhida → publica legenda escolhida + arte escolhida.
-async function handleArt(p, artId) {
+// Passo 2: arte escolhida → publica legenda + arte. captionId vem do callback
+// (g:pid:caption:art), não do estado persistido — robusto entre runs.
+async function handleArt(p, captionId, artId) {
   const gen = p.generation;
-  const captionId = p.chosen_caption_id ?? p.top_id;
-  const chosen = gen.variations.find(v => v.id === captionId) || gen.variations[0];
+  const capId = captionId ?? p.chosen_caption_id ?? p.top_id;
+  const chosen = gen.variations.find(v => v.id === capId) || gen.variations[0];
   const imageUrl = p.images?.find(i => i.id === artId)?.url;
   if (!chosen) {
-    log(`Pending ${p.pending_id}: legenda ${captionId} inexistente — ignorando`);
+    log(`Pending ${p.pending_id}: legenda ${capId} inexistente — ignorando`);
     return;
   }
-  log(`Publicando ${p.channel}: legenda #${captionId} + arte #${artId} (pending ${p.pending_id})`);
+  log(`Publicando ${p.channel}: legenda #${capId} + arte #${artId} (pending ${p.pending_id})`);
 
   const result = await publishToChannel({ channel: p.channel, variation: chosen, imageUrl, pillar: gen.pillar });
   await markPublished(publishedRecord(p, chosen), {
@@ -72,10 +73,10 @@ async function handleArt(p, artId) {
   await clearPending(p.channel);
   await finalizeKeyboard({
     messageId: p.keyboard_message_id,
-    text: `✅ <b>Publicado em ${p.channel}</b> — legenda #${captionId} + arte #${artId}.`,
+    text: `✅ <b>Publicado em ${p.channel}</b> — legenda #${capId} + arte #${artId}.`,
     dryRun: DRY_RUN,
   });
-  await notify(`✅ Publicado em ${p.channel} — legenda #${captionId} + arte #${artId}`, { dryRun: DRY_RUN });
+  await notify(`✅ Publicado em ${p.channel} — legenda #${capId} + arte #${artId}`, { dryRun: DRY_RUN });
 }
 
 // Compat (1 clique): legenda e arte da MESMA variação.
@@ -198,7 +199,7 @@ async function main() {
       p.chosen_caption_id = d.chosenCaptionId;
       p.status = 'awaiting_art';
     } else if (d.action === 'art') {
-      await handleArt(p, d.chosenArtId);
+      await handleArt(p, d.chosenCaptionId, d.chosenArtId);
       p._done = true;
     } else if (d.action === 'approve') {
       await handleApprove(p, d.chosenId);

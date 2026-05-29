@@ -7,8 +7,8 @@ describe('parseCallback — cockpit desacoplado', () => {
   it('c: → escolha de legenda', () => {
     expect(parseCallback('c:instagram-abc:2')).toEqual({ action: 'caption', pendingId: 'instagram-abc', chosenCaptionId: 2 });
   });
-  it('g: → escolha de arte', () => {
-    expect(parseCallback('g:instagram-abc:3')).toEqual({ action: 'art', pendingId: 'instagram-abc', chosenArtId: 3 });
+  it('g: → escolha de arte (carrega a legenda escolhida)', () => {
+    expect(parseCallback('g:instagram-abc:2:3')).toEqual({ action: 'art', pendingId: 'instagram-abc', chosenCaptionId: 2, chosenArtId: 3 });
   });
   it('a: → compat (1 clique)', () => {
     expect(parseCallback('a:instagram-abc:1')).toEqual({ action: 'approve', pendingId: 'instagram-abc', chosenId: 1 });
@@ -30,8 +30,8 @@ describe('teclados', () => {
     expect(kb.inline_keyboard[0].map(b => b.callback_data)).toEqual(['c:pid:1', 'c:pid:2', 'c:pid:3']);
     expect(kb.inline_keyboard[1].map(b => b.callback_data)).toEqual(['r:pid', 'x:pid']);
   });
-  it('passo 2 (arte) usa callback g:', () => {
-    const kb = buildArtKeyboard('pid', [{ id: 1 }, { id: 2 }, { id: 3 }]);
-    expect(kb.inline_keyboard[0].map(b => b.callback_data)).toEqual(['g:pid:1', 'g:pid:2', 'g:pid:3']);
+  it('passo 2 (arte) carrega a legenda no callback (g:pid:caption:art)', () => {
+    const kb = buildArtKeyboard('pid', [{ id: 1 }, { id: 2 }, { id: 3 }], 2);
+    expect(kb.inline_keyboard[0].map(b => b.callback_data)).toEqual(['g:pid:2:1', 'g:pid:2:2', 'g:pid:2:3']);
   });
 });
