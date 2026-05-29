@@ -6,7 +6,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
-import { chooseNextPillar, chooseNextAngle, pillarPosteriors } from './utils/ranking.js';
+import { chooseNextPillar, chooseNextAngle, chooseNextFormat, pillarPosteriors } from './utils/ranking.js';
 import { getPublished, isRealPost } from './utils/queue.js';
 import { usingSupabase, supabase } from './utils/db.js';
 import { retrieve } from './utils/rag.js';
@@ -166,7 +166,8 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     buildFewShot(examples),
   ].filter(Boolean).join('\n\n---\n\n');
 
-  const userMessage = buildUserMessage({ channel, pillar: chosenPillar, angle: chosenAngle, context, recentHooks });
+  const targetFormat = channel === 'instagram' ? chooseNextFormat(published) : null;
+  const userMessage = buildUserMessage({ channel, pillar: chosenPillar, angle: chosenAngle, context, recentHooks, targetFormat });
 
   const response = await client.models.generateContent({
     model: MODEL_GENERATE,
@@ -216,13 +217,14 @@ function extractRecentHooks(published, limit = 12) {
     .filter(Boolean);
 }
 
-function buildUserMessage({ channel, pillar, angle, context, recentHooks = [] }) {
+function buildUserMessage({ channel, pillar, angle, context, recentHooks = [], targetFormat = null }) {
   const avoidBlock = recentHooks.length
     ? `Ganchos já usados recentemente (NÃO repita o tema nem a abertura destes):\n${recentHooks.map(h => `- ${h}`).join('\n')}`
     : '';
   const parts = [
     `Gere 3 variações de post pra ${channel} no pilar "${pillar}".`,
     angle ? `Ângulo sugerido: ${angle}.` : '',
+    targetFormat ? `Formato preferido pra esta leva: ${targetFormat} (use se fizer sentido pro conteúdo; varie o feed).` : '',
     context ? `Contexto adicional: ${context}` : '',
     avoidBlock,
     '',
@@ -371,6 +373,18 @@ export async function polishPost({ channel, pillar, variation }) {
   } catch (e) {
     return variation;
   }
+}
+
+// Monta a legenda final = corpo + hashtags (campo estruturado). Mantém o body
+// limpo (sem # grudada) e dá controle/consistência sobre as tags. Pura (testável).
+export function composeCaption(variation) {
+  const body = (variation?.body || '').trim();
+  const tags = Array.isArray(variation?.hashtags) ? variation.hashtags : [];
+  const norm = tags
+    .map(t => String(t).trim())
+    .filter(Boolean)
+    .map(t => (t.startsWith('#') ? t : `#${t}`));
+  return norm.length ? `${body}\n\n${norm.join(' ')}` : body;
 }
 
 function parseJsonResponse(text) {

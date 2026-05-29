@@ -36,7 +36,8 @@ Retorne JSON puro, sem markdown fence, sem comentário:
     {
       "id": 1,
       "hook": "primeira linha, a mais importante",
-      "body": "texto completo do post, inclui hook",
+      "body": "texto completo do post, inclui o hook — SEM hashtags no final",
+      "hashtags": ["#engenhariadeprojetos", "#gestaodeengenharia"],  // 4-7, mix nicho+médio; campo separado, NUNCA dentro do body
       "format": "single" | "carousel" | "text",
       "slides": ["slide 1", "slide 2", ...]  // só se format=carousel
     },

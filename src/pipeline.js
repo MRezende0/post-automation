@@ -2,11 +2,11 @@
 // entre a fase GERAR (index.js) e a fase RESOLVER (resolve.js).
 
 import { readFile } from 'node:fs/promises';
-import { generatePost, judgeVariations, critiqueVariations, polishPost, checkGuardrails } from './generate.js';
+import { generatePost, judgeVariations, critiqueVariations, polishPost, checkGuardrails, composeCaption } from './generate.js';
 import { renderImage, renderCarousel } from './render-image.js';
 import { rankVariations } from './utils/ranking.js';
 import { uploadImage } from './utils/storage.js';
-import { generateBackground, SCENE_BY_PILLAR } from './utils/image-gen.js';
+import { generateBackground, SCENE_BY_PILLAR, pickScenes } from './utils/image-gen.js';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
 
@@ -16,11 +16,11 @@ const BADGE_BY_PILLAR = { dor: 'DOR REAL', dica: 'DICA PRÁTICA', building: 'BUI
 
 // Híbrido: gera ilustração de fundo (nano banana) e sobrepõe o hook via template hero.
 // Só Instagram, best-effort — se a geração falhar, devolve null (cai no card normal).
-async function renderHero({ channel, pillar, variation }) {
+async function renderHero({ channel, pillar, variation, scene }) {
   if (channel !== 'instagram') return null;
   try {
-    const scene = SCENE_BY_PILLAR[pillar] || SCENE_BY_PILLAR.default;
-    const bgPath = await generateBackground({ scene });
+    const chosenScene = scene || SCENE_BY_PILLAR[pillar] || SCENE_BY_PILLAR.default;
+    const bgPath = await generateBackground({ scene: chosenScene });
     if (!bgPath) return null;
     const bg = `data:image/png;base64,${(await readFile(bgPath)).toString('base64')}`;
     return await renderImage({
@@ -112,11 +112,15 @@ export async function prepareGeneration({ channel, seed, regenNote }) {
     }
   }
 
+  // 3 artes VISUALMENTE DISTINTAS: cada variação ganha uma cena de IA diferente
+  // (antes só a top ganhava arte de IA; as outras caíam no mesmo template → pareciam iguais).
+  const scenes = pickScenes(generation.pillar, generation.variations.length);
   const images = [];
-  for (const v of generation.variations) {
+  for (let i = 0; i < generation.variations.length; i += 1) {
+    const v = generation.variations[i];
     let imagePath = null;
-    if (IMAGE_BG && v.id === topId && !DRY_RUN) {
-      imagePath = await renderHero({ channel, pillar: generation.pillar, variation: v });
+    if (IMAGE_BG && !DRY_RUN) {
+      imagePath = await renderHero({ channel, pillar: generation.pillar, variation: v, scene: scenes[i] });
     }
     if (!imagePath) imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: v });
     if (imagePath && !DRY_RUN) {
@@ -143,29 +147,25 @@ async function buildCarouselUrls({ channel, pillar, variation }) {
 }
 
 export async function publishToChannel({ channel, variation, imageUrl, pillar }) {
+  const caption = composeCaption(variation); // corpo + hashtags estruturadas
   if (channel === 'instagram') {
     if (variation.format === 'carousel' && variation.slides?.length) {
       if (DRY_RUN) {
-        return instagram.publishCarousel({ imageUrls: variation.slides, caption: variation.body, dryRun: true });
+        return instagram.publishCarousel({ imageUrls: variation.slides, caption, dryRun: true });
       }
       const imageUrls = variation.slideUrls?.length
         ? variation.slideUrls
         : await buildCarouselUrls({ channel, pillar, variation });
       log(`Carousel ${channel}: ${imageUrls.length} slides renderizados/enviados`);
-      return instagram.publishCarousel({ imageUrls, caption: variation.body, dryRun: false });
+      return instagram.publishCarousel({ imageUrls, caption, dryRun: false });
     }
-    return instagram.publishSingle({
-      imageUrl: variation.imageUrl || imageUrl,
-      caption: variation.body,
-      dryRun: DRY_RUN,
-    });
+    const used = variation.imageUrl || imageUrl;
+    const r = await instagram.publishSingle({ imageUrl: used, caption, dryRun: DRY_RUN });
+    return { ...r, imageUrl: used };
   }
   if (channel === 'linkedin') {
-    return linkedin.publishText({
-      text: variation.body,
-      imageUrl,
-      dryRun: DRY_RUN,
-    });
+    const r = await linkedin.publishText({ text: caption, imageUrl, dryRun: DRY_RUN });
+    return { ...r, imageUrl: imageUrl || null };
   }
   throw new Error(`Canal desconhecido: ${channel}`);
 }
