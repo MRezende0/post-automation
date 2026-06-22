@@ -6,6 +6,14 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import { usingSupabase, supabase } from './db.js';
+import { resolveTenant } from '../tenant.js';
+
+// Tenant atual do processo/job (env TENANT_ID; default 'pilar'). O backend roda
+// um tenant por execução, então o escopo do estado é por job. Só o caminho
+// Supabase filtra/grava por tenant; o YAML é legado single-tenant (Pilar).
+function currentTenantId() {
+  return resolveTenant().id;
+}
 
 function paths() {
   const contentDir = path.resolve(process.cwd(), 'content');
@@ -74,6 +82,7 @@ async function getPublishedFromDb() {
   const { data, error } = await supabase()
     .from('posts')
     .select('id,pillar,angle,context,hook,body,format,chosen_variation,channels,engagement_score,generated_at,published_at')
+    .eq('tenant_id', currentTenantId())
     .order('published_at', { ascending: true, nullsFirst: true })
     .order('created_at', { ascending: true });
   if (error) throw new Error(`Falha ao ler posts do Supabase: ${error.message}`);
@@ -122,6 +131,7 @@ async function popNextFromDb(now) {
   const nowIso = new Date(now).toISOString();
   const { data, error } = await db.from('queue_items')
     .select('id,pillar,angle,context,channels,scheduled_for')
+    .eq('tenant_id', currentTenantId())
     .is('consumed_at', null)
     .or(`scheduled_for.is.null,scheduled_for.lte.${nowIso}`)
     .order('scheduled_for', { ascending: true, nullsFirst: true })
@@ -168,8 +178,10 @@ async function markPublishedToDb(item, result) {
   const gen = result.generation || {};
   const channel = Object.keys(result.channels || {})[0] || item.channel || 'instagram';
   const chosenId = result.chosenVariationId;
+  const tenantId = currentTenantId();
 
   const { data: post, error } = await db.from('posts').insert({
+    tenant_id: tenantId,
     pillar: item.pillar,
     angle: item.angle ?? null,
     channel,
@@ -193,6 +205,7 @@ async function markPublishedToDb(item, result) {
   if (variations.length) {
     const rows = variations.map(v => ({
       post_id: post.id,
+      tenant_id: tenantId,
       variation_id: v.id,
       hook: v.hook ?? null,
       body: v.body ?? null,
@@ -207,6 +220,7 @@ async function markPublishedToDb(item, result) {
 
   await db.from('post_events').insert({
     post_id: post.id,
+    tenant_id: tenantId,
     type: 'published',
     payload: { channel, chosen_variation: chosenId, chosen_art: result.chosenArtId ?? null, channels: result.channels ?? {}, images: result.images ?? null },
   });
@@ -216,6 +230,7 @@ async function markPublishedToDb(item, result) {
     const chosenScore = gen.judge_scores?.find(s => s.id === chosenId);
     await db.from('post_events').insert({
       post_id: post.id,
+      tenant_id: tenantId,
       type: 'judge_decision',
       payload: {
         scores: gen.judge_scores ?? null,
@@ -229,6 +244,7 @@ async function markPublishedToDb(item, result) {
 export async function markRejected(item, reason) {
   if (usingSupabase()) {
     const { error } = await supabase().from('rejected_posts').insert({
+      tenant_id: currentTenantId(),
       pillar: item.pillar ?? null,
       angle: item.angle ?? null,
       channel: item.channel ?? null,
@@ -252,6 +268,7 @@ export async function markRejected(item, reason) {
 export async function pushToQueue(item) {
   if (usingSupabase()) {
     const { error } = await supabase().from('queue_items').insert({
+      tenant_id: currentTenantId(),
       pillar: item.pillar ?? null,
       angle: item.angle ?? null,
       context: item.context ?? null,
@@ -293,7 +310,7 @@ function pendingRowToItem(row) {
 
 export async function getPending() {
   if (usingSupabase()) {
-    const { data, error } = await supabase().from('pending_approvals').select('*');
+    const { data, error } = await supabase().from('pending_approvals').select('*').eq('tenant_id', currentTenantId());
     if (error) throw new Error(`Falha ao ler pending do Supabase: ${error.message}`);
     return (data || []).map(pendingRowToItem);
   }
@@ -306,12 +323,12 @@ export async function getPending() {
 export async function loadPending(channel, { peek = false } = {}) {
   if (usingSupabase()) {
     const db = supabase();
-    const { data, error } = await db.from('pending_approvals').select('*').eq('channel', channel).limit(1);
+    const { data, error } = await db.from('pending_approvals').select('*').eq('tenant_id', currentTenantId()).eq('channel', channel).limit(1);
     if (error) throw new Error(`Falha ao carregar pending do Supabase: ${error.message}`);
     const row = data?.[0];
     if (!row) return null;
     if (Date.now() - new Date(row.saved_at).getTime() > PENDING_TTL_MS) {
-      await db.from('pending_approvals').delete().eq('channel', channel);
+      await db.from('pending_approvals').delete().eq('tenant_id', currentTenantId()).eq('channel', channel);
       return null;
     }
     if (!peek) await db.from('pending_approvals').delete().eq('id', row.id);
@@ -331,6 +348,7 @@ export async function loadPending(channel, { peek = false } = {}) {
 export async function savePending(item) {
   if (usingSupabase()) {
     const row = {
+      tenant_id: currentTenantId(),
       pending_id: item.pending_id,
       channel: item.channel,
       generation: item.generation ?? null,
@@ -345,7 +363,7 @@ export async function savePending(item) {
       saved_at: new Date().toISOString(),
     };
     // upsert por canal (espelha o YAML, que sobrescreve o pending do canal)
-    const { error } = await supabase().from('pending_approvals').upsert(row, { onConflict: 'channel' });
+    const { error } = await supabase().from('pending_approvals').upsert(row, { onConflict: 'tenant_id,channel' });
     if (error) throw new Error(`Falha ao salvar pending no Supabase: ${error.message}`);
     return;
   }
@@ -357,7 +375,7 @@ export async function savePending(item) {
 
 export async function clearPending(channel) {
   if (usingSupabase()) {
-    const { error } = await supabase().from('pending_approvals').delete().eq('channel', channel);
+    const { error } = await supabase().from('pending_approvals').delete().eq('tenant_id', currentTenantId()).eq('channel', channel);
     if (error) throw new Error(`Falha ao limpar pending no Supabase: ${error.message}`);
     return;
   }
@@ -371,7 +389,7 @@ export async function clearPending(channel) {
 export async function expirePending() {
   if (usingSupabase()) {
     const cutoff = new Date(Date.now() - PENDING_TTL_MS).toISOString();
-    const { data, error } = await supabase().from('pending_approvals').delete().lt('saved_at', cutoff).select('*');
+    const { data, error } = await supabase().from('pending_approvals').delete().eq('tenant_id', currentTenantId()).lt('saved_at', cutoff).select('*');
     if (error) throw new Error(`Falha ao expirar pending no Supabase: ${error.message}`);
     return (data || []).map(pendingRowToItem);
   }

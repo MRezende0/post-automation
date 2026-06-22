@@ -10,6 +10,7 @@ import yaml from 'js-yaml';
 import { notify } from './telegram.js';
 import { getPublished, isRealPost } from './utils/queue.js';
 import { usingSupabase, supabase } from './utils/db.js';
+import { resolveTenant } from './tenant.js';
 import { engagementScore } from './utils/score.js';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
@@ -49,11 +50,13 @@ async function collectFor(item) {
 async function persistSnapshots(item, metrics) {
   if (!item.id) return;
   const db = supabase();
+  const tenantId = resolveTenant().id;
   const at = new Date().toISOString();
   for (const [ch, m] of Object.entries(metrics)) {
     if (!m || typeof m !== 'object') continue;
     await db.from('metrics_snapshots').insert({
       post_id: item.id,
+      tenant_id: tenantId,
       channel: ch,
       likes: m.likes ?? null,
       comments: m.comments ?? null,
@@ -69,6 +72,7 @@ async function persistSnapshots(item, metrics) {
   await db.from('posts').update({ engagement_score: item.engagement_score }).eq('id', item.id);
   await db.from('post_events').insert({
     post_id: item.id,
+    tenant_id: tenantId,
     type: 'metrics_snapshot',
     payload: { engagement_score: item.engagement_score },
   });
@@ -143,7 +147,7 @@ async function judgeCalibration() {
   if (!usingSupabase()) return '';
   try {
     const db = supabase();
-    const { data: events } = await db.from('post_events').select('post_id,payload').eq('type', 'judge_decision');
+    const { data: events } = await db.from('post_events').select('post_id,payload').eq('tenant_id', resolveTenant().id).eq('type', 'judge_decision');
     if (!events?.length) return '';
     const ids = events.map(e => e.post_id);
     const { data: posts } = await db.from('posts').select('id,engagement_score').in('id', ids);
