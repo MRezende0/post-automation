@@ -15,6 +15,7 @@ import * as linkedin from './channels/linkedin.js';
 import { sendApprovalRequest, notify } from './telegram.js';
 import { getUpcomingHoliday, holidayContext } from './utils/holidays.js';
 import { getActiveCampaign, campaignContext } from './utils/calendar.js';
+import { resolveTenant } from './tenant.js';
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const PUBLISH_TEST = process.env.PUBLISH_TEST === 'true';
@@ -30,7 +31,8 @@ function newPendingId(channel) {
 }
 
 async function main() {
-  log(`Iniciando GERAÇÃO | DRY_RUN=${DRY_RUN} | PUBLISH_TEST=${PUBLISH_TEST} | SKIP_APPROVAL=${SKIP_APPROVAL}`);
+  const tenant = resolveTenant();
+  log(`Iniciando GERAÇÃO | tenant=${tenant.id} | DRY_RUN=${DRY_RUN} | PUBLISH_TEST=${PUBLISH_TEST} | SKIP_APPROVAL=${SKIP_APPROVAL}`);
 
   if (PUBLISH_TEST) {
     return runPublishTest();
@@ -81,7 +83,7 @@ async function main() {
       continue;
     }
 
-    const prepared = await prepareGeneration({ channel, seed });
+    const prepared = await prepareGeneration({ channel, seed, tenant });
     const { generation, topId, images } = prepared;
 
     if (SKIP_APPROVAL) {

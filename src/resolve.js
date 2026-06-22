@@ -7,6 +7,7 @@ import 'dotenv/config';
 import { getPending, savePending, clearPending, markPublished, markRejected } from './utils/queue.js';
 import { prepareGeneration, publishToChannel } from './pipeline.js';
 import { sendApprovalRequest, fetchDecisions, confirmDecisions, finalizeKeyboard, showArtSelection, notify, escapeHtml } from './telegram.js';
+import { resolveTenant } from './tenant.js';
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const MAX_REGEN = Number(process.env.MAX_REGEN || 3);
@@ -101,7 +102,7 @@ async function handleApprove(p, chosenId) {
   await notify(`✅ Publicado em ${p.channel} — variação #${chosen.id}`, { dryRun: DRY_RUN });
 }
 
-async function handleRegen(p) {
+async function handleRegen(p, tenant) {
   if (p.regen_count >= MAX_REGEN) {
     log(`Pending ${p.pending_id}: limite de ${MAX_REGEN} regen atingido`);
     await notify(`🔄 Limite de ${MAX_REGEN} regenerações em ${p.channel}. Aprove ou rejeite o preview atual.`, { dryRun: DRY_RUN });
@@ -117,7 +118,7 @@ async function handleRegen(p) {
   await notify(`🔄 Regenerando ${p.channel} (tentativa ${attempt}/${MAX_REGEN})...`, { dryRun: DRY_RUN });
 
   const regenNote = `Tentativa ${attempt + 1}: as variações anteriores foram recusadas. Mude o ÂNGULO e a ABERTURA — não repita o mesmo gancho.`;
-  const prepared = await prepareGeneration({ channel: p.channel, seed: p.seed, regenNote });
+  const prepared = await prepareGeneration({ channel: p.channel, seed: p.seed, regenNote, tenant });
   const pendingId = newPendingId(p.channel);
   const { keyboardMessageId, messageIds } = await sendApprovalRequest({
     channel: p.channel,
@@ -175,7 +176,8 @@ async function resolveReasons(pendings, texts) {
 }
 
 async function main() {
-  log(`Iniciando RESOLVE | DRY_RUN=${DRY_RUN}`);
+  const tenant = resolveTenant();
+  log(`Iniciando RESOLVE | tenant=${tenant.id} | DRY_RUN=${DRY_RUN}`);
   const pendings = await getPending();
   const { decisions, texts, maxUpdateId, callbackAcks } = await fetchDecisions({ dryRun: DRY_RUN });
   log(`${pendings.length} pending(s) | ${decisions.length} clique(s) | ${texts.length} texto(s)`);
@@ -205,7 +207,7 @@ async function main() {
       await handleApprove(p, d.chosenId);
       p._done = true;
     } else if (d.action === 'regen') {
-      await handleRegen(p);
+      await handleRegen(p, tenant);
       p._done = true;
     } else if (d.action === 'reject') {
       await handleReject(p);
