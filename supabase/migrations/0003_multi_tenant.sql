@@ -31,8 +31,11 @@ alter table prompt_versions   add column if not exists tenant_id text not null d
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- pending_approvals: era UM pending por canal; agora um por (tenant, canal).
+-- ADITIVO: cria o índice novo SEM dropar o legado (pending_channel_idx) — assim
+-- esta migration é compatível com o código ANTIGO ainda em produção (usa
+-- onConflict:'channel'). O índice legado é removido na 0004, DEPOIS do deploy do
+-- código novo e ANTES de entrar um 2º tenant.
 -- ─────────────────────────────────────────────────────────────────────────────
-drop index if exists pending_channel_idx;
 create unique index if not exists pending_tenant_channel_idx on pending_approvals (tenant_id, channel);
 
 -- ─────────────────────────────────────────────────────────────────────────────
