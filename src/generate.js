@@ -195,7 +195,7 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
   // Persiste o template completo do prompt (atribuição: qual versão gerou o quê).
   if (usingSupabase()) {
     try {
-      await supabase().from('prompt_versions').upsert({ hash: promptHash, role: 'system', template: system }, { onConflict: 'hash' });
+      await supabase().from('prompt_versions').upsert({ hash: promptHash, tenant_id: tenant.id, role: 'system', template: system }, { onConflict: 'hash' });
     } catch (e) {
       console.error(`[generate] falha ao gravar prompt_version: ${e.message}`);
     }
@@ -209,7 +209,7 @@ async function snapshotBandit(published, tenant) {
   try {
     const post = pillarPosteriors(published, tenant.taxonomy);
     const rows = Object.entries(post).map(([arm, p]) => ({
-      dimension: 'pillar', arm, alpha: p.alpha, beta: p.beta, n: p.n,
+      tenant_id: tenant.id, dimension: 'pillar', arm, alpha: p.alpha, beta: p.beta, n: p.n,
     }));
     if (rows.length) await supabase().from('bandit_snapshots').insert(rows);
   } catch (e) {
