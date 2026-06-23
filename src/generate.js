@@ -159,9 +159,14 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
 
   const ragBlock = await retrieveKnowledge({ pillar: chosenPillar, angle: chosenAngle, context });
 
+  const plat = tenant.platforms?.[channel];
+  const platformLine = plat
+    ? `Características da plataforma: tom ${plat.tone}; limite ${plat.maxChars} caracteres${plat.thread ? ' por tweet — use THREAD quando a ideia não couber em um' : ''}; formatos ${plat.formats.join(' / ')}.`
+    : '';
   const system = [
     systemBase,
     `## Canal alvo: ${channel}`,
+    platformLine,
     channelPrompt,
     `## Pilar alvo: ${chosenPillar}`,
     pillarPrompt,

@@ -18,7 +18,16 @@ const PILAR = {
   id: 'pilar',
   name: 'Pilar',
   niche: 'SaaS B2B de gestão para escritórios de engenharia de projeto (não obra)',
-  channels: ['instagram', 'linkedin'],
+  channels: ['instagram', 'linkedin', 'twitter'],
+
+  // Características por plataforma — o "adaptador por plataforma". Injetadas na
+  // geração (generate.js) pra diferenciar tom/limite/formato. `publish:false` =
+  // canal gerável mas ainda não publicável (Twitter aguarda API/app review).
+  platforms: {
+    instagram: { tone: 'visual e direto, leve', maxChars: 2200, formats: ['single', 'carousel'], thread: false, rendersImage: true, publish: true },
+    linkedin:  { tone: 'profissional, parágrafos espaçados', maxChars: 3000, formats: ['text', 'carousel'], thread: false, rendersImage: true, publish: true },
+    twitter:   { tone: 'informal, cru, conversado', maxChars: 280, formats: ['single', 'thread'], thread: true, rendersImage: false, publish: false },
+  },
 
   // Taxonomia de conteúdo — alimenta o bandit de seleção (ranking.js).
   taxonomy: {

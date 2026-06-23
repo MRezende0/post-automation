@@ -10,6 +10,7 @@ import { uploadImage } from './utils/storage.js';
 import { generateBackground, SCENE_BY_PILLAR, pickScenes } from './utils/image-gen.js';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
+import * as twitter from './channels/twitter.js';
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const IMAGE_BG = process.env.IMAGE_BG === 'true'; // híbrido: fundo IA + texto via template
@@ -115,15 +116,17 @@ export async function prepareGeneration({ channel, seed, regenNote, tenant = res
 
   // 3 artes VISUALMENTE DISTINTAS: cada variação ganha uma cena de IA diferente
   // (antes só a top ganhava arte de IA; as outras caíam no mesmo template → pareciam iguais).
+  // Canais text-first (ex: Twitter) não geram card de imagem.
+  const rendersImage = tenant.platforms?.[channel]?.rendersImage !== false;
   const scenes = pickScenes(generation.pillar, generation.variations.length);
   const images = [];
   for (let i = 0; i < generation.variations.length; i += 1) {
     const v = generation.variations[i];
     let imagePath = null;
-    if (IMAGE_BG && !DRY_RUN) {
+    if (rendersImage && IMAGE_BG && !DRY_RUN) {
       imagePath = await renderHero({ channel, pillar: generation.pillar, variation: v, scene: scenes[i], tenant });
     }
-    if (!imagePath) imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: v });
+    if (!imagePath && rendersImage) imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: v });
     if (imagePath && !DRY_RUN) {
       const uploaded = await uploadImage(imagePath);
       images.push({ id: v.id, url: uploaded.url });
@@ -166,6 +169,13 @@ export async function publishToChannel({ channel, variation, imageUrl, pillar })
   }
   if (channel === 'linkedin') {
     const r = await linkedin.publishText({ text: caption, imageUrl, dryRun: DRY_RUN });
+    return { ...r, imageUrl: imageUrl || null };
+  }
+  if (channel === 'twitter') {
+    const tweets = twitter.splitThread(caption);
+    const r = tweets.length > 1
+      ? await twitter.publishThread({ tweets, imageUrl, dryRun: DRY_RUN })
+      : await twitter.publishText({ text: tweets[0] || caption, imageUrl, dryRun: DRY_RUN });
     return { ...r, imageUrl: imageUrl || null };
   }
   throw new Error(`Canal desconhecido: ${channel}`);
