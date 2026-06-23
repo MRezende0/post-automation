@@ -1,18 +1,22 @@
-// ranking.js — escolhe próximo pilar/ângulo e rankeia variações no timeout.
+// ranking.js — escolhe próximo pilar/ângulo/formato e rankeia variações no timeout.
 // Pilar/ângulo: Thompson sampling (bandit.js) quando há sinal de engajamento;
 // cold start cai na rotação ponderada por déficit. Chamado por: src/generate.js,
 // src/index.js (top-1 no timeout).
+//
+// Multi-tenant: as funções de escolha recebem a `taxonomy` do tenant
+// ({ pillarWeights, angles, formats }). Sem ela, usam a taxonomia DEFAULT (Pilar),
+// o que mantém os testes e o caminho single-tenant intactos.
 
 import { thompsonChoose, computePosteriors } from './bandit.js';
 
+// Taxonomia DEFAULT (Pilar). Tenants definem a própria em src/tenant.js; estes
+// defaults mantêm as funções utilizáveis sem config (retrocompat + testes).
 const PILLAR_WEIGHTS = {
   dor: 0.4,
   dica: 0.3,
   building: 0.15,
   prova: 0.15,
 };
-
-const PILLARS = Object.keys(PILLAR_WEIGHTS);
 
 const ANGLES = {
   dor: ['financeira', 'tempo', 'versao_arquivo', 'relacional', 'identidade'],
@@ -21,10 +25,24 @@ const ANGLES = {
   prova: ['citacao_direta', 'antes_depois', 'lista_uso', 'case_curto', 'cliente_dificil'],
 };
 
+const FORMATS = ['single', 'carousel'];
+
+// Normaliza a taxonomia recebida: aceita parcial (cai nos defaults Pilar campo a
+// campo) ou ausente. Único ponto que conhece os defaults — o resto é genérico.
+function withTaxonomy(taxonomy) {
+  return {
+    pillarWeights: taxonomy?.pillarWeights ?? PILLAR_WEIGHTS,
+    angles: taxonomy?.angles ?? ANGLES,
+    formats: taxonomy?.formats ?? FORMATS,
+  };
+}
+
 // Engajamento médio por pilar a partir do histórico (usa item.engagement_score
 // gravado pelo coletor de métricas). null = sem dado pra aquele pilar.
-export function pillarPerformance(publishedHistory) {
-  const acc = { dor: { s: 0, n: 0 }, dica: { s: 0, n: 0 }, building: { s: 0, n: 0 }, prova: { s: 0, n: 0 } };
+export function pillarPerformance(publishedHistory, taxonomy) {
+  const { pillarWeights } = withTaxonomy(taxonomy);
+  const acc = {};
+  for (const p of Object.keys(pillarWeights)) acc[p] = { s: 0, n: 0 };
   for (const item of publishedHistory) {
     const p = item.pillar;
     if (!acc[p]) continue;
@@ -38,8 +56,9 @@ export function pillarPerformance(publishedHistory) {
 
 // Ajusta os pesos-base pela performance real, mantendo um piso (exploração) e
 // teto (não deixar um pilar dominar). Sem sinal suficiente, devolve os pesos-base.
-export function adaptiveWeights(publishedHistory, base = PILLAR_WEIGHTS, { alpha = 0.5, floor = 0.5 } = {}) {
-  const perf = pillarPerformance(publishedHistory);
+export function adaptiveWeights(publishedHistory, taxonomy, { alpha = 0.5, floor = 0.5 } = {}) {
+  const base = withTaxonomy(taxonomy).pillarWeights;
+  const perf = pillarPerformance(publishedHistory, taxonomy);
   const known = Object.values(perf).filter(v => v != null);
   if (known.length < 2) return { ...base }; // sinal insuficiente → base fixa
   const mean = known.reduce((a, b) => a + b, 0) / known.length;
@@ -58,31 +77,36 @@ export function adaptiveWeights(publishedHistory, base = PILLAR_WEIGHTS, { alpha
 }
 
 // Posteriores Beta por pilar (puro) — pra snapshot de observabilidade do bandit.
-export function pillarPosteriors(publishedHistory) {
-  return computePosteriors(PILLARS, publishedHistory, {
+export function pillarPosteriors(publishedHistory, taxonomy) {
+  const { pillarWeights } = withTaxonomy(taxonomy);
+  return computePosteriors(Object.keys(pillarWeights), publishedHistory, {
     keyField: 'pillar',
-    priorWeights: PILLAR_WEIGHTS,
+    priorWeights: pillarWeights,
     priorStrength: 2,
     halfLifeDays: 30,
   });
 }
 
-export function chooseNextPillar(publishedHistory, windowSize = 20) {
+export function chooseNextPillar(publishedHistory, windowSize = 20, taxonomy) {
+  const { pillarWeights } = withTaxonomy(taxonomy);
+  const pillars = Object.keys(pillarWeights);
+
   // Bandit primeiro: com engajamento coletado suficiente, Thompson decide o mix
-  // (explora/explota sozinho). O prior informativo (PILLAR_WEIGHTS) mantém o
+  // (explora/explota sozinho). O prior informativo (pesos do tenant) mantém o
   // viés estratégico inicial até os dados dominarem.
-  const bandit = thompsonChoose(PILLARS, publishedHistory, {
+  const bandit = thompsonChoose(pillars, publishedHistory, {
     keyField: 'pillar',
-    priorWeights: PILLAR_WEIGHTS,
+    priorWeights: pillarWeights,
     priorStrength: 2,
     halfLifeDays: 30,
   });
   if (bandit) return bandit;
 
   // Cold start (pouco engajamento coletado): rotação ponderada por déficit.
-  const weights = adaptiveWeights(publishedHistory);
+  const weights = adaptiveWeights(publishedHistory, taxonomy);
   const recent = publishedHistory.slice(-windowSize);
-  const counts = { dor: 0, dica: 0, building: 0, prova: 0 };
+  const counts = {};
+  for (const p of pillars) counts[p] = 0;
 
   for (const item of recent) {
     if (item.pillar && counts[item.pillar] !== undefined) {
@@ -91,7 +115,7 @@ export function chooseNextPillar(publishedHistory, windowSize = 20) {
   }
 
   const total = recent.length || 1;
-  let chosen = 'dor';
+  let chosen = pillars[0];
   let maxDeficit = -Infinity;
 
   for (const [pillar, weight] of Object.entries(weights)) {
@@ -106,29 +130,30 @@ export function chooseNextPillar(publishedHistory, windowSize = 20) {
   return chosen;
 }
 
-const FORMATS = ['single', 'carousel'];
-
 // Escolhe o formato da próxima leva (single/carrossel). Bandit por engajamento
 // quando há sinal; no cold start injeta VARIEDADE — quebra sequência monótona do
 // mesmo formato. Retorna null = sem preferência (modelo/pilar decide).
-export function chooseNextFormat(publishedHistory, { windowSize = 12 } = {}) {
+export function chooseNextFormat(publishedHistory, { windowSize = 12 } = {}, taxonomy) {
+  const { formats } = withTaxonomy(taxonomy);
   // Normaliza: formato vive em post.format (YAML) ou format (DB) — achata pro bandit.
   const hist = (publishedHistory || []).map(p => ({
     format: p.format || p.post?.format,
     engagement_score: p.engagement_score,
     published_at: p.published_at,
   }));
-  const bandit = thompsonChoose(FORMATS, hist, { keyField: 'format', priorStrength: 1, halfLifeDays: 45, minScored: 6 });
+  const bandit = thompsonChoose(formats, hist, { keyField: 'format', priorStrength: 1, halfLifeDays: 45, minScored: 6 });
   if (bandit) return bandit;
 
   const recent = hist.slice(-windowSize).map(p => p.format).filter(Boolean);
   const lastThree = recent.slice(-3);
-  if (lastThree.length === 3 && lastThree.every(f => f === 'single')) return 'carousel'; // 3 singles seguidos → varia
+  // 3 do formato primário seguidos → varia pro próximo formato (se houver)
+  if (lastThree.length === 3 && lastThree.every(f => f === formats[0])) return formats[1] ?? null;
   return null;
 }
 
-export function chooseNextAngle(pillar, publishedHistory, windowSize = 30) {
-  const angles = ANGLES[pillar];
+export function chooseNextAngle(pillar, publishedHistory, windowSize = 30, taxonomy) {
+  const { angles: anglesMap } = withTaxonomy(taxonomy);
+  const angles = anglesMap[pillar];
   if (!angles) return null;
 
   // Bandit dentro do pilar: aprende qual ângulo engaja quando há dado.
@@ -189,4 +214,4 @@ function scoreVariation(v) {
   return score;
 }
 
-export const _internal = { PILLAR_WEIGHTS, ANGLES, scoreVariation, pillarPerformance, adaptiveWeights };
+export const _internal = { PILLAR_WEIGHTS, ANGLES, FORMATS, withTaxonomy, scoreVariation, pillarPerformance, adaptiveWeights };

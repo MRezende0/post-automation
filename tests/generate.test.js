@@ -72,9 +72,15 @@ describe('generate.js', () => {
       expect(carouselVars[0].slides).toBeDefined();
     });
 
+    it('gera 3 variações mock pra Twitter', async () => {
+      const result = await generatePost({ channel: 'twitter', pillar: 'dor', dryRun: true });
+      expect(result.variations).toHaveLength(3);
+      expect(result.channel).toBe('twitter');
+    });
+
     it('rejeita canal inválido', async () => {
       await expect(
-        generatePost({ channel: 'twitter', pillar: 'dor', dryRun: true }),
+        generatePost({ channel: 'tiktok', pillar: 'dor', dryRun: true }),
       ).rejects.toThrow(/Canal inválido/);
     });
   });

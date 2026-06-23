@@ -3,20 +3,21 @@
 
 import { readFile } from 'node:fs/promises';
 import { generatePost, judgeVariations, critiqueVariations, polishPost, checkGuardrails, composeCaption } from './generate.js';
+import { resolveTenant } from './tenant.js';
 import { renderImage, renderCarousel } from './render-image.js';
 import { rankVariations } from './utils/ranking.js';
 import { uploadImage } from './utils/storage.js';
 import { generateBackground, SCENE_BY_PILLAR, pickScenes } from './utils/image-gen.js';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
+import * as twitter from './channels/twitter.js';
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const IMAGE_BG = process.env.IMAGE_BG === 'true'; // híbrido: fundo IA + texto via template
-const BADGE_BY_PILLAR = { dor: 'DOR REAL', dica: 'DICA PRÁTICA', building: 'BUILDING IN PUBLIC', prova: 'CLIENTE REAL' };
 
 // Híbrido: gera ilustração de fundo (nano banana) e sobrepõe o hook via template hero.
 // Só Instagram, best-effort — se a geração falhar, devolve null (cai no card normal).
-async function renderHero({ channel, pillar, variation, scene }) {
+async function renderHero({ channel, pillar, variation, scene, tenant }) {
   if (channel !== 'instagram') return null;
   try {
     const chosenScene = scene || SCENE_BY_PILLAR[pillar] || SCENE_BY_PILLAR.default;
@@ -26,7 +27,7 @@ async function renderHero({ channel, pillar, variation, scene }) {
     return await renderImage({
       channel,
       pillar: 'hero',
-      vars: { bg, badge: BADGE_BY_PILLAR[pillar] || 'PILAR', hook: variation.hook },
+      vars: { bg, badge: tenant.badges[pillar] || 'PILAR', hook: variation.hook },
     });
   } catch (e) {
     log(`Falha hero ${channel}/${pillar}: ${e.message}`);
@@ -62,7 +63,7 @@ async function renderPreview({ channel, pillar, variation }) {
 // Gera as 3 variações, elege o top-1 (LLM-judge com fallback heurístico) e
 // renderiza+sobe uma imagem PRA CADA variação — assim o preview mostra a imagem
 // real de cada opção e a publicação não precisa re-renderizar a escolhida.
-export async function prepareGeneration({ channel, seed, regenNote }) {
+export async function prepareGeneration({ channel, seed, regenNote, tenant = resolveTenant() }) {
   const context = [seed.context, regenNote].filter(Boolean).join('\n\n') || undefined;
   const generation = await generatePost({
     channel,
@@ -70,6 +71,7 @@ export async function prepareGeneration({ channel, seed, regenNote }) {
     angle: seed.angle,
     context,
     dryRun: DRY_RUN,
+    tenant,
   });
   log(`Gerou ${generation.variations.length} variações | pilar=${generation.pillar} | ângulo=${generation.angle}`);
 
@@ -81,7 +83,7 @@ export async function prepareGeneration({ channel, seed, regenNote }) {
   if (!DRY_RUN) {
     // Agente Crítico: derruba variações fracas ANTES do judge (eleva o piso).
     let candidates = generation.variations;
-    const critique = await critiqueVariations({ channel, pillar: generation.pillar, variations: generation.variations });
+    const critique = await critiqueVariations({ channel, pillar: generation.pillar, variations: generation.variations, tenant });
     if (Array.isArray(critique)) {
       generation.critic = critique;
       const survivors = generation.variations.filter(v => !critique.find(c => c.id === v.id)?.refuted);
@@ -89,7 +91,7 @@ export async function prepareGeneration({ channel, seed, regenNote }) {
       log(`Crítico: ${candidates.length}/${generation.variations.length} sobreviveram`);
     }
     // Judge multidimensional escolhe entre os sobreviventes.
-    const verdict = await judgeVariations({ channel, pillar: generation.pillar, variations: candidates });
+    const verdict = await judgeVariations({ channel, pillar: generation.pillar, variations: candidates, tenant });
     if (verdict) {
       topId = verdict.chosenId;
       how = `judge ${verdict.reason}`;
@@ -104,9 +106,9 @@ export async function prepareGeneration({ channel, seed, regenNote }) {
   if (!DRY_RUN) {
     const top = generation.variations.find(v => v.id === topId);
     if (top) {
-      const polished = await polishPost({ channel, pillar: generation.pillar, variation: top });
+      const polished = await polishPost({ channel, pillar: generation.pillar, variation: top, tenant });
       Object.assign(top, { hook: polished.hook, body: polished.body }); // muta a ref no array
-      const guard = checkGuardrails(top, { pillar: generation.pillar });
+      const guard = checkGuardrails(top, { pillar: generation.pillar, tenant });
       generation.guardrail_flags = guard.flags;
       log(guard.clean ? 'Guardrails: ok' : `⚠️ Guardrails (top #${topId}): ${guard.flags.join(', ')}`);
     }
@@ -114,15 +116,17 @@ export async function prepareGeneration({ channel, seed, regenNote }) {
 
   // 3 artes VISUALMENTE DISTINTAS: cada variação ganha uma cena de IA diferente
   // (antes só a top ganhava arte de IA; as outras caíam no mesmo template → pareciam iguais).
+  // Canais text-first (ex: Twitter) não geram card de imagem.
+  const rendersImage = tenant.platforms?.[channel]?.rendersImage !== false;
   const scenes = pickScenes(generation.pillar, generation.variations.length);
   const images = [];
   for (let i = 0; i < generation.variations.length; i += 1) {
     const v = generation.variations[i];
     let imagePath = null;
-    if (IMAGE_BG && !DRY_RUN) {
-      imagePath = await renderHero({ channel, pillar: generation.pillar, variation: v, scene: scenes[i] });
+    if (rendersImage && IMAGE_BG && !DRY_RUN) {
+      imagePath = await renderHero({ channel, pillar: generation.pillar, variation: v, scene: scenes[i], tenant });
     }
-    if (!imagePath) imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: v });
+    if (!imagePath && rendersImage) imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: v });
     if (imagePath && !DRY_RUN) {
       const uploaded = await uploadImage(imagePath);
       images.push({ id: v.id, url: uploaded.url });
@@ -165,6 +169,13 @@ export async function publishToChannel({ channel, variation, imageUrl, pillar })
   }
   if (channel === 'linkedin') {
     const r = await linkedin.publishText({ text: caption, imageUrl, dryRun: DRY_RUN });
+    return { ...r, imageUrl: imageUrl || null };
+  }
+  if (channel === 'twitter') {
+    const tweets = twitter.splitThread(caption);
+    const r = tweets.length > 1
+      ? await twitter.publishThread({ tweets, imageUrl, dryRun: DRY_RUN })
+      : await twitter.publishText({ text: tweets[0] || caption, imageUrl, dryRun: DRY_RUN });
     return { ...r, imageUrl: imageUrl || null };
   }
   throw new Error(`Canal desconhecido: ${channel}`);

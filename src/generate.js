@@ -11,6 +11,7 @@ import { getPublished, isRealPost } from './utils/queue.js';
 import { usingSupabase, supabase } from './utils/db.js';
 import { retrieve } from './utils/rag.js';
 import { withRetry } from './utils/retry.js';
+import { resolveTenant } from './tenant.js';
 
 const MODEL_GENERATE = 'gemini-2.5-flash';
 const MODEL_SIMPLE = 'gemini-2.5-flash-lite';
@@ -23,14 +24,15 @@ async function readDoc(rel) {
   return readFile(file, 'utf8');
 }
 
-async function loadSystemPrompt() {
-  const template = await readDoc('prompts/system.md');
+async function loadSystemPrompt(tenant) {
+  const template = await readDoc(tenant.prompts.system);
+  const { docs } = tenant;
   const replacements = {
-    '{{ICP}}': await readDoc('docs/icp.md'),
-    '{{POSICIONAMENTO}}': await readDoc('docs/posicionamento.md'),
-    '{{VOICE}}': await readDoc('docs/voice.md'),
-    '{{PILARES}}': await readDoc('docs/pilares.md'),
-    '{{DORES}}': await readDoc('docs/dores.md'),
+    '{{ICP}}': await readDoc(docs.icp),
+    '{{POSICIONAMENTO}}': await readDoc(docs.posicionamento),
+    '{{VOICE}}': await readDoc(docs.voice),
+    '{{PILARES}}': await readDoc(docs.pilares),
+    '{{DORES}}': await readDoc(docs.dores),
   };
   let prompt = template;
   for (const [key, value] of Object.entries(replacements)) {
@@ -39,12 +41,12 @@ async function loadSystemPrompt() {
   return prompt;
 }
 
-async function loadChannelPrompt(channel) {
-  return readDoc(`prompts/channels/${channel}.md`);
+async function loadChannelPrompt(channel, tenant) {
+  return readDoc(`${tenant.prompts.channelsDir}/${channel}.md`);
 }
 
-async function loadPillarPrompt(pillar) {
-  return readDoc(`prompts/pillars/${pillar}.md`);
+async function loadPillarPrompt(pillar, tenant) {
+  return readDoc(`${tenant.prompts.pillarsDir}/${pillar}.md`);
 }
 
 // Lê a linha "Engajamento: 312 likes, 47 salvamentos, ..." e soma os números
@@ -71,10 +73,10 @@ async function loadExamplesFrom(rel) {
   return examples;
 }
 
-async function loadExamples() {
+async function loadExamples(tenant) {
   const [high, low] = await Promise.all([
-    loadExamplesFrom('content/examples/high-performers'),
-    loadExamplesFrom('content/examples/low-performers'),
+    loadExamplesFrom(tenant.examplesDir.high),
+    loadExamplesFrom(tenant.examplesDir.low),
   ]);
   // Maior engajamento primeiro; seeds (score 0) ficam no fim.
   high.sort((a, b) => b.score - a.score);
@@ -119,8 +121,8 @@ async function retrieveKnowledge({ pillar, angle, context }) {
   }
 }
 
-export async function generatePost({ channel, pillar, angle, context, dryRun = false }) {
-  if (!['instagram', 'linkedin'].includes(channel)) {
+export async function generatePost({ channel, pillar, angle, context, dryRun = false, tenant = resolveTenant() }) {
+  if (!tenant.channels.includes(channel)) {
     throw new Error(`Canal inválido: ${channel}`);
   }
 
@@ -130,9 +132,9 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
   let chosenPillar = pillar;
   let chosenAngle = angle;
   if (!chosenPillar) {
-    chosenPillar = chooseNextPillar(published);
-    chosenAngle = chooseNextAngle(chosenPillar, published);
-    await snapshotBandit(published); // observabilidade da evolução do aprendizado
+    chosenPillar = chooseNextPillar(published, 20, tenant.taxonomy);
+    chosenAngle = chooseNextAngle(chosenPillar, published, 30, tenant.taxonomy);
+    await snapshotBandit(published, tenant); // observabilidade da evolução do aprendizado
   }
 
   if (dryRun) {
@@ -149,17 +151,22 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
   const client = new GoogleGenAI({ apiKey });
 
   const [systemBase, channelPrompt, pillarPrompt, examples] = await Promise.all([
-    loadSystemPrompt(),
-    loadChannelPrompt(channel),
-    loadPillarPrompt(chosenPillar),
-    loadExamples(),
+    loadSystemPrompt(tenant),
+    loadChannelPrompt(channel, tenant),
+    loadPillarPrompt(chosenPillar, tenant),
+    loadExamples(tenant),
   ]);
 
   const ragBlock = await retrieveKnowledge({ pillar: chosenPillar, angle: chosenAngle, context });
 
+  const plat = tenant.platforms?.[channel];
+  const platformLine = plat
+    ? `Características da plataforma: tom ${plat.tone}; limite ${plat.maxChars} caracteres${plat.thread ? ' por tweet — use THREAD quando a ideia não couber em um' : ''}; formatos ${plat.formats.join(' / ')}.`
+    : '';
   const system = [
     systemBase,
     `## Canal alvo: ${channel}`,
+    platformLine,
     channelPrompt,
     `## Pilar alvo: ${chosenPillar}`,
     pillarPrompt,
@@ -167,7 +174,7 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     buildFewShot(examples),
   ].filter(Boolean).join('\n\n---\n\n');
 
-  const targetFormat = channel === 'instagram' ? chooseNextFormat(published) : null;
+  const targetFormat = channel === 'instagram' ? chooseNextFormat(published, {}, tenant.taxonomy) : null;
   const userMessage = buildUserMessage({ channel, pillar: chosenPillar, angle: chosenAngle, context, recentHooks, targetFormat });
 
   // Retry com backoff: o Gemini dá 503 "high demand" / 429 com frequência.
@@ -193,7 +200,7 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
   // Persiste o template completo do prompt (atribuição: qual versão gerou o quê).
   if (usingSupabase()) {
     try {
-      await supabase().from('prompt_versions').upsert({ hash: promptHash, role: 'system', template: system }, { onConflict: 'hash' });
+      await supabase().from('prompt_versions').upsert({ hash: promptHash, tenant_id: tenant.id, role: 'system', template: system }, { onConflict: 'hash' });
     } catch (e) {
       console.error(`[generate] falha ao gravar prompt_version: ${e.message}`);
     }
@@ -202,12 +209,12 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
 }
 
 // Snapshot dos posteriores Beta por pilar → bandit_snapshots (best-effort, só sob flag).
-async function snapshotBandit(published) {
+async function snapshotBandit(published, tenant) {
   if (!usingSupabase()) return;
   try {
-    const post = pillarPosteriors(published);
+    const post = pillarPosteriors(published, tenant.taxonomy);
     const rows = Object.entries(post).map(([arm, p]) => ({
-      dimension: 'pillar', arm, alpha: p.alpha, beta: p.beta, n: p.n,
+      tenant_id: tenant.id, dimension: 'pillar', arm, alpha: p.alpha, beta: p.beta, n: p.n,
     }));
     if (rows.length) await supabase().from('bandit_snapshots').insert(rows);
   } catch (e) {
@@ -242,14 +249,14 @@ function buildUserMessage({ channel, pillar, angle, context, recentHooks = [], t
 // Agente Crítico: tenta DERRUBAR cada variação (clichê, dor genérica, sem prova,
 // fora de voz). Roda no modelo barato. Quem é "refuted" sai antes do judge —
 // eleva o piso de qualidade sem custo relevante. Retorna verdicts ou null.
-export async function critiqueVariations({ channel, pillar, variations }) {
+export async function critiqueVariations({ channel, pillar, variations, tenant = resolveTenant() }) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || !variations?.length) return null;
 
   const client = new GoogleGenAI({ apiKey });
   const list = variations.map(v => `Variação ${v.id}:\nHook: ${v.hook}\nCorpo: ${v.body}`).join('\n\n');
   const prompt = [
-    'Você é um crítico cético de conteúdo B2B pra escritórios de engenharia de projeto (não obra).',
+    `Você é um ${tenant.persona.critic}.`,
     'Pra CADA variação, tente DERRUBÁ-LA. Marque refuted=true se: o hook é clichê de LinkedIn,',
     'a dor é genérica (serviria pra qualquer SaaS), faz afirmação sem prova, ou foge da voz (seca, concreta).',
     'Seja exigente — mas NÃO marque tudo como refuted se houver opções claramente boas.',
@@ -296,14 +303,14 @@ export function judgeFromScores(scores, variations) {
 // LLM-as-judge MULTIDIMENSIONAL: nota cada variação em 4 dimensões + previsão de
 // engajamento (pra calibração: previsto vs real depois). Retorna
 // { chosenId, reason, scores } ou null se a API falhar/indisponível.
-export async function judgeVariations({ channel, pillar, variations }) {
+export async function judgeVariations({ channel, pillar, variations, tenant = resolveTenant() }) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || !variations?.length) return null;
 
   const client = new GoogleGenAI({ apiKey });
   const list = variations.map(v => `Variação ${v.id}:\nHook: ${v.hook}\nCorpo: ${v.body}`).join('\n\n');
   const prompt = [
-    `Você é editor de conteúdo de um SaaS B2B pra escritórios de engenharia.`,
+    `Você é ${tenant.persona.judge}.`,
     `Avalie CADA variação pra ${channel}, pilar "${pillar}", em 4 dimensões (0-10):`,
     `- hook_stop: o hook para o scroll?`,
     `- especificidade: a dor é concreta e específica (não genérica)?`,
@@ -329,36 +336,31 @@ export async function judgeVariations({ channel, pillar, variations }) {
   }
 }
 
-// Guardrails programáticos — flags que NÃO deviam passar (ICP de engenharia de projeto).
-const GUARD_BUZZWORDS = ['sinergia', 'otimizar', 'escalável', 'ecossistema', 'disruptivo', 'solução integrada', 'gestão eficiente'];
-const GUARD_FORA_ICP = ['canteiro', 'diário de obra', 'diario de obra'];
-const GUARD_FORA_RECORTE = ['arquitet']; // conteúdo é só engenharia por ora
-
-export function checkGuardrails(variation, { pillar } = {}) {
+// Guardrails programáticos — flags que NÃO deviam passar. As listas vêm do tenant
+// (tenant.guardrails); sem tenant explícito, usa o default (Pilar).
+export function checkGuardrails(variation, { pillar, tenant = resolveTenant() } = {}) {
+  const { buzzwords, foraIcp, foraRecorte } = tenant.guardrails;
   const text = `${variation?.hook || ''}\n${variation?.body || ''}`.toLowerCase();
   const flags = [];
-  for (const w of GUARD_BUZZWORDS) if (text.includes(w)) flags.push(`buzzword:${w}`);
-  for (const w of GUARD_FORA_ICP) if (text.includes(w)) flags.push(`fora-icp:${w}`);
-  for (const w of GUARD_FORA_RECORTE) if (text.includes(w)) flags.push(`fora-recorte:${w}`);
+  for (const w of buzzwords) if (text.includes(w)) flags.push(`buzzword:${w}`);
+  for (const w of foraIcp) if (text.includes(w)) flags.push(`fora-icp:${w}`);
+  for (const w of foraRecorte) if (text.includes(w)) flags.push(`fora-recorte:${w}`);
   if (pillar === 'prova' && /\d/.test(text)) flags.push('prova-com-numero:verificar-fonte');
   return { clean: flags.length === 0, flags };
 }
 
 // Etapa de auto-edição: um "editor" reescreve o post aplicando o checklist de voz.
 // Best-effort — devolve a variação original se a API falhar. Não inventa fatos.
-export async function polishPost({ channel, pillar, variation }) {
+export async function polishPost({ channel, pillar, variation, tenant = resolveTenant() }) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || !variation) return variation;
   const client = new GoogleGenAI({ apiKey });
 
+  const checklist = tenant.voiceChecklist.map(rule => `- ${rule}`).join('\n');
   const prompt = [
-    'Você é editor de copy do Pilar (SaaS pra escritório de engenharia de projeto — não obra).',
+    `Você é ${tenant.persona.editor}.`,
     'Revise o post abaixo aplicando o checklist de voz, SEM inventar fato novo:',
-    '- Hook curto que para o scroll.',
-    '- Dor concreta e específica; zero buzzword (sinergia, otimizar, performance, ecossistema, escalável).',
-    '- Frases curtas — nenhuma com mais de 25 palavras.',
-    '- NÃO falar de obra/canteiro. NÃO citar arquitetura. NÃO inventar número.',
-    '- Tom seco e direto, estilo: "Proposta no feeling. Financeiro descolado da operação."',
+    checklist,
     '',
     `Canal: ${channel} | Pilar: ${pillar}`,
     `Hook: ${variation.hook}`,
