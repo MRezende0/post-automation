@@ -15,6 +15,7 @@
     "repurpose": "node src/repurpose.js",
     "reel": "node src/reel.js",
     "engage": "node src/engage.js",
+    "reflect": "node src/reflect.js",
     "backfill": "node scripts/backfill-supabase.js",
     "test": "vitest run",
     "test:watch": "vitest"

@@ -12,6 +12,7 @@ import { usingSupabase, supabase } from './utils/db.js';
 import { retrieve } from './utils/rag.js';
 import { withRetry } from './utils/retry.js';
 import { resolveTenant } from './tenant.js';
+import { getActiveStyleRules, buildReflectionBlock } from './utils/reflections.js';
 
 const MODEL_GENERATE = 'gemini-2.5-flash';
 const MODEL_SIMPLE = 'gemini-2.5-flash-lite';
@@ -158,6 +159,8 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
   ]);
 
   const ragBlock = await retrieveKnowledge({ pillar: chosenPillar, angle: chosenAngle, context });
+  // Regras de estilo aprendidas com edições anteriores (reflection). Best-effort.
+  const reflectionBlock = buildReflectionBlock(await getActiveStyleRules(tenant.id, { channel }));
 
   const plat = tenant.platforms?.[channel];
   const platformLine = plat
@@ -171,6 +174,7 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     `## Pilar alvo: ${chosenPillar}`,
     pillarPrompt,
     ragBlock,
+    reflectionBlock,
     buildFewShot(examples),
   ].filter(Boolean).join('\n\n---\n\n');
 
