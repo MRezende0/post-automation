@@ -1,7 +1,7 @@
 // queries.ts — leituras (lado read) usadas pelos Server Components.
 
 import { db } from './supabase';
-import type { PendingApproval, ScheduledPost, PublishedPost, PublishSlot } from './types';
+import type { PendingApproval, ScheduledPost, PublishedPost, PublishSlot, Campaign } from './types';
 
 export async function getPendings(): Promise<PendingApproval[]> {
   const { data, error } = await db()
@@ -48,6 +48,20 @@ export async function getRecentlyPublishedScheduled(limit = 30): Promise<Schedul
     .limit(limit);
   if (error) throw new Error(`Falha ao ler publicados: ${error.message}`);
   return (data || []) as ScheduledPost[];
+}
+
+// Campanha ativa hoje (janela inclusiva). Se duas se sobrepõem, vence a de início mais antigo.
+export async function getActiveCampaign(today = new Date().toISOString().slice(0, 10)): Promise<Campaign | null> {
+  const { data, error } = await db()
+    .from('campaigns')
+    .select('id,slug,name,start_date,end_date,status')
+    .eq('status', 'active')
+    .or(`start_date.is.null,start_date.lte.${today}`)
+    .or(`end_date.is.null,end_date.gte.${today}`)
+    .order('start_date', { ascending: true, nullsFirst: false })
+    .limit(1);
+  if (error) throw new Error(`Falha ao ler campanha ativa: ${error.message}`);
+  return (data?.[0] as Campaign) ?? null;
 }
 
 export async function getSlots(): Promise<PublishSlot[]> {
