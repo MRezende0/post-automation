@@ -1,5 +1,7 @@
 // Tipos compartilhados — espelham as tabelas do Supabase relevantes pra plataforma.
 
+import type { Utm } from './utm';
+
 export type Channel = 'instagram' | 'linkedin';
 
 export type Variation = {
@@ -40,6 +42,17 @@ export type PendingApproval = {
   saved_at: string;
 };
 
+export type MediaKind = 'image' | 'carousel' | 'text' | 'document' | 'video' | 'thread' | 'story';
+
+export type Campaign = {
+  id: string;
+  slug: string;
+  name: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  status: string;
+};
+
 export type ScheduledStatus = 'scheduled' | 'publishing' | 'published' | 'failed';
 
 export type ScheduledPost = {
@@ -62,6 +75,14 @@ export type ScheduledPost = {
   attempts: number;
   last_error?: string | null;
   source_pending_id?: string | null;
+  // distribuição (ADR 0001): vínculos com campanha/brief/ativo e o UTM do link
+  asset_id?: string | null;
+  brief_id?: string | null;
+  campaign_id?: string | null;
+  media_kind?: MediaKind | null;
+  video_url?: string | null;
+  document_url?: string | null;
+  utm?: Utm | null;
   approved_at: string;
   created_at: string;
   updated_at: string;

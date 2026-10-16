@@ -7,6 +7,7 @@ import { db } from './supabase';
 import { notify, escapeHtml } from './telegram';
 import * as instagram from './channels/instagram';
 import * as linkedin from './channels/linkedin';
+import { LINK_POLICY, linkCommentText } from './utm';
 import type { ScheduledPost, Generation, Variation } from './types';
 
 const MAX_ATTEMPTS = 3;
@@ -31,6 +32,7 @@ async function persistPublishedPost(s: ScheduledPost, result: Record<string, unk
       chosen_variation: chosenId,
       channels: { [s.channel]: result },
       is_dry_run: false,
+      scheduled_post_id: s.id,
       prompt_hash: gen.prompt_hash ?? null,
       model: gen.model ?? null,
       judge_reason: gen.judge_reason ?? null,
@@ -68,6 +70,7 @@ async function persistPublishedPost(s: ScheduledPost, result: Record<string, unk
       chosen_art: s.chosen_art_id ?? null,
       channels: { [s.channel]: result },
       image_url: s.image_url ?? null,
+      utm: s.utm ?? null,
       via: 'platform',
     },
   });
@@ -98,9 +101,25 @@ async function publishToChannel(s: ScheduledPost): Promise<Record<string, unknow
     return instagram.publishSingle(s.image_url, caption);
   }
   if (s.channel === 'linkedin') {
-    return linkedin.publishText(caption, s.image_url);
+    const result: Record<string, unknown> = await linkedin.publishText(caption, s.image_url);
+    if (LINK_POLICY.linkedin === 'first_comment' && s.utm?.url && result.id) {
+      result.link_comment = await postLinkComment(String(result.id), linkCommentText(s.utm));
+    }
+    return result;
   }
   throw new Error(`Canal desconhecido: ${s.channel}`);
+}
+
+// O post já está no ar: falha no comentário NÃO pode virar retry (duplicaria o post).
+// Registra o erro no resultado e avisa; o link pode ser colado à mão.
+async function postLinkComment(postUrn: string, text: string): Promise<Record<string, unknown>> {
+  try {
+    return { ok: true, ...(await linkedin.commentOnPost(postUrn, text)) };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    await notify(`⚠️ Post no LinkedIn saiu, mas o comentário com o link falhou: ${escapeHtml(msg)}`);
+    return { ok: false, error: msg, text };
+  }
 }
 
 // Tenta publicar UM scheduled_post já travado em 'publishing'. Em sucesso grava

@@ -6,7 +6,8 @@ import { db } from './supabase';
 import { notify, escapeHtml } from './telegram';
 import { composeCaption } from './caption';
 import { nextFreeSlot } from './slots';
-import type { PendingApproval, Variation, ImageRef } from './types';
+import { distributionUtm } from './utm';
+import type { PendingApproval, Variation, ImageRef, MediaKind } from './types';
 
 function fmtLocal(iso: string): string {
   const offset = Number(process.env.PUBLISH_TZ_OFFSET ?? -3);
@@ -20,6 +21,19 @@ async function loadPending(pendingId: string): Promise<PendingApproval | null> {
   const { data, error } = await db().from('pending_approvals').select('*').eq('pending_id', pendingId).limit(1);
   if (error) throw new Error(`Falha ao ler pending: ${error.message}`);
   return (data?.[0] as PendingApproval) ?? null;
+}
+
+function mediaKindOf(channel: string, variation: Variation, imageUrl: string | null): MediaKind {
+  if (variation.format === 'carousel') return 'carousel';
+  if (channel === 'linkedin' && !imageUrl) return 'text';
+  return 'image';
+}
+
+// Campanha da tabela (sincronizada do campaigns.yaml). Ausente não bloqueia a aprovação.
+async function findCampaignId(slug: string): Promise<string | null> {
+  const { data, error } = await db().from('campaigns').select('id').eq('slug', slug).limit(1);
+  if (error) return null;
+  return (data?.[0]?.id as string) ?? null;
 }
 
 export type ApproveInput = {
@@ -49,9 +63,16 @@ export async function approvePending(input: ApproveInput): Promise<{ scheduledFo
     throw new Error('Sem slot livre na grade. Defina um horário manual ou adicione slots.');
   }
 
+  // O id nasce aqui pra entrar no utm_content antes do insert.
+  const id = crypto.randomUUID();
+  const campaignSlug = typeof p.seed?.campaign === 'string' ? p.seed.campaign : null;
+  const campaignId = campaignSlug ? await findCampaignId(campaignSlug) : null;
+  const utm = distributionUtm({ channel: p.channel, distributionId: id, campaignSlug, baseUrl: process.env.SITE_URL });
+
   const { data, error } = await db()
     .from('scheduled_posts')
     .insert({
+      id,
       channel: p.channel,
       pillar: p.generation?.pillar ?? null,
       angle: p.generation?.angle ?? null,
@@ -66,6 +87,9 @@ export async function approvePending(input: ApproveInput): Promise<{ scheduledFo
       status: 'scheduled',
       scheduled_for: scheduledFor,
       source_pending_id: p.pending_id,
+      campaign_id: campaignId,
+      media_kind: mediaKindOf(p.channel, variation, imageUrl),
+      utm,
     })
     .select('id')
     .single();

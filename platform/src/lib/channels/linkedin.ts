@@ -61,6 +61,18 @@ async function uploadImageFromUrl(imageUrl: string): Promise<string> {
   return imageUrn;
 }
 
+// Comentário do autor no próprio post (link no 1º comentário: LinkedIn derruba alcance
+// de post com link no corpo). O URN do post vai codificado no path (Rest.li 2.0).
+// Docs: learn.microsoft.com/linkedin/marketing/community-management/shares/comments-api
+export async function commentOnPost(postUrn: string, text: string): Promise<{ id: string | null }> {
+  const r = await apiJson('POST', `/socialActions/${encodeURIComponent(postUrn)}/comments`, {
+    actor: authorUrn(),
+    object: postUrn,
+    message: { text },
+  });
+  return { id: r?.id ?? null };
+}
+
 export async function publishText(text: string, imageUrl?: string | null): Promise<{ id: string; channel: 'linkedin' }> {
   let mediaUrn: string | null = null;
   if (imageUrl) mediaUrn = await uploadImageFromUrl(imageUrl);
