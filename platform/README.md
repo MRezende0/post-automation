@@ -28,20 +28,18 @@ Inbox (pending_approvals)  →  aprovar + agendar  →  scheduled_posts (status=
 
 ## Setup
 
-### 1. Aplicar a migration (única ação que exige acesso ao projeto pessoal)
+### 1. Migrations (automáticas)
 
-O schema das tabelas novas está em `../supabase/migrations/0002_platform_scheduling.sql`.
-Aplique de uma das formas:
+As migrations ficam em `../supabase/migrations/` e são aplicadas pelo CI
+(`.github/workflows/ci.yml`, ADR 0003): toda PR testa todas num Postgres limpo e o merge
+na `main` roda `supabase db push` no banco de produção. Ninguém aplica migration à mão.
 
-**SQL Editor (mais rápido):** copie o conteúdo do arquivo e rode no SQL Editor do
-projeto `utluhhgifniiuailkxvx` no dashboard do Supabase.
+Migration nova: próximo número da sequência (`0010_...sql`), aditiva e idempotente
+(`if not exists`, `drop ... if exists` antes de `create trigger`). Comando que apaga dado
+exige `-- allow-destructive` no arquivo.
 
-**Supabase CLI (conta pessoal):**
-```bash
-supabase login                                  # conta dona do projeto pessoal
-supabase link --project-ref utluhhgifniiuailkxvx
-supabase db push                                # aplica 0002 (0001 é idempotente)
-```
+Pré-requisito único: o segredo `SUPABASE_DB_URL` (Session Pooler, IPv4) no environment
+`Production` do GitHub.
 
 Confira: `npm run check:db` → deve listar `publish_slots` e `scheduled_posts` ✅.
 
