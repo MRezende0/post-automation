@@ -14,10 +14,15 @@ describe('checkGuardrails', () => {
     expect(r.flags.some(f => f.startsWith('buzzword'))).toBe(true);
   });
 
-  it('flagra termo fora do ICP (obra) e fora do recorte (arquitetura)', () => {
-    const r = checkGuardrails({ hook: 'No canteiro de obras', body: 'pra arquitetura também' }, { pillar: 'dica' });
+  it('flagra termo fora do ICP (canteiro) e fora do recorte (construtora)', () => {
+    const r = checkGuardrails({ hook: 'No canteiro de obras', body: 'pra construtora também' }, { pillar: 'dica' });
     expect(r.flags.some(f => f.startsWith('fora-icp'))).toBe(true);
     expect(r.flags.some(f => f.startsWith('fora-recorte'))).toBe(true);
+  });
+
+  it('aceita arquitetura, que faz parte do ICP desde set/2026', () => {
+    const r = checkGuardrails({ hook: 'Seu escritório de arquitetura cobra a revisão 3?', body: 'Projeto de arquitetura também estoura margem.' }, { pillar: 'dor' });
+    expect(r.clean).toBe(true);
   });
 
   it('flagra número em pilar prova (verificar fonte)', () => {
