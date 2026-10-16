@@ -126,6 +126,7 @@ export async function prepareGeneration({ channel, seed, regenNote, tenant = res
   const images = [];
   for (let i = 0; i < generation.variations.length; i += 1) {
     const v = generation.variations[i];
+    if (v.format === 'text') continue; // texto puro (SPEC 005): sem card; a aprovação pode pôr arte de outra variação
     let imagePath = null;
     if (rendersImage && v.format === 'pergunta') {
       imagePath = await renderPerguntaArt({ variation: v, pillar: generation.pillar, angle: generation.angle, tenant });

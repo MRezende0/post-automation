@@ -10,7 +10,7 @@ export type Variation = {
   id: number;
   hook?: string;
   body?: string;
-  format?: 'single' | 'carousel' | 'thread' | 'pergunta';
+  format?: 'single' | 'carousel' | 'thread' | 'pergunta' | 'text';
   // foto-pergunta: a pergunta da arte e o id do croqui da biblioteca
   question?: string;
   sketch?: string;

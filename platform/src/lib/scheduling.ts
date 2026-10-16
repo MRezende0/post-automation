@@ -44,6 +44,7 @@ export type ApproveInput = {
   pendingId: string;
   captionId: number; // variação escolhida pra legenda
   artId: number; // arte escolhida
+  noImage?: boolean; // publica só o texto (SPEC 005); o Instagram não aceita
   captionText?: string; // legenda editada (sobrescreve a sugerida)
   scheduledFor?: string; // ISO; se ausente cai no próximo slot livre
 };
@@ -57,8 +58,9 @@ export async function approvePending(input: ApproveInput): Promise<{ scheduledFo
   if (!variation) throw new Error('Variação de legenda inválida.');
 
   const images: ImageRef[] = p.images || [];
+  if (input.noImage && p.channel === 'instagram') throw new Error('O Instagram não publica sem imagem. Escolha uma arte.');
   const art = images.find((i) => i.id === input.artId);
-  const imageUrl = art?.url ?? images[0]?.url ?? null;
+  const imageUrl = input.noImage ? null : art?.url ?? images[0]?.url ?? null;
 
   const captionFinal = (input.captionText && input.captionText.trim()) || composeCaption(variation);
 
@@ -84,7 +86,7 @@ export async function approvePending(input: ApproveInput): Promise<{ scheduledFo
       chosen_variation_id: variation.id,
       caption_final: captionFinal,
       image_url: imageUrl,
-      chosen_art_id: input.artId,
+      chosen_art_id: input.noImage ? null : input.artId,
       slide_urls: variation.slideUrls?.length ? variation.slideUrls : null,
       document_url: variation.documentUrl ?? null,
       generation: p.generation,

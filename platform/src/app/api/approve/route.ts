@@ -4,7 +4,7 @@ import { approvePending } from '@/lib/scheduling';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { pendingId, captionId, artId, captionText, scheduledFor } = body ?? {};
+    const { pendingId, captionId, artId, captionText, scheduledFor, noImage } = body ?? {};
     if (!pendingId || captionId == null || artId == null) {
       return NextResponse.json({ error: 'pendingId, captionId e artId são obrigatórios' }, { status: 400 });
     }
@@ -14,6 +14,7 @@ export async function POST(req: Request) {
       artId: Number(artId),
       captionText: captionText ? String(captionText) : undefined,
       scheduledFor: scheduledFor ? String(scheduledFor) : undefined,
+      noImage: noImage === true,
     });
     return NextResponse.json({ ok: true, ...result });
   } catch (e) {

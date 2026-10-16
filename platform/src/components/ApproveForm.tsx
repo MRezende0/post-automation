@@ -32,6 +32,11 @@ export default function ApproveForm({
 
   const [captionId, setCaptionId] = useState<number>(defaultCaption);
   const [artId, setArtId] = useState<number>(defaultArt);
+  // Texto puro (SPEC 005): padrão quando a variação é `text` ou não há arte; Instagram exige imagem.
+  const canGoTextOnly = pending.channel !== 'instagram';
+  const wantsTextOnly = (id: number) =>
+    canGoTextOnly && (variations.find((v) => v.id === id)?.format === 'text' || !images.some((i) => i.url));
+  const [noImage, setNoImage] = useState<boolean>(wantsTextOnly(defaultCaption));
   const [captionText, setCaptionText] = useState<string>(suggested[defaultCaption] ?? '');
   const [edited, setEdited] = useState(false);
   const [mode, setMode] = useState<'slot' | 'manual'>(nextSlot ? 'slot' : 'manual');
@@ -45,6 +50,7 @@ export default function ApproveForm({
 
   function selectCaption(id: number) {
     setCaptionId(id);
+    setNoImage(wantsTextOnly(id));
     if (!edited) setCaptionText(suggested[id] ?? ''); // só re-semeia se você não editou ainda
   }
 
@@ -55,7 +61,7 @@ export default function ApproveForm({
     const res = await fetch('/api/approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pendingId: pending.pending_id, captionId, artId, captionText, scheduledFor }),
+      body: JSON.stringify({ pendingId: pending.pending_id, captionId, artId, captionText, scheduledFor, noImage }),
     });
     const j = await res.json().catch(() => ({}));
     setBusy(false);
@@ -144,13 +150,27 @@ export default function ApproveForm({
       <section className="space-y-2">
         <h2 className="label">2 · Arte</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {images.length === 0 && <p className="text-sm text-muted">Sem artes nesta pendência.</p>}
+          {images.length === 0 && !canGoTextOnly && <p className="text-sm text-muted">Sem artes nesta pendência.</p>}
+          {canGoTextOnly && (
+            <button
+              onClick={() => setNoImage(true)}
+              className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border text-sm transition ${
+                noImage ? 'border-accent ring-1 ring-accent' : 'border-edge text-muted hover:border-muted'
+              }`}
+            >
+              Sem imagem
+              <span className="text-xs text-muted">só o texto</span>
+            </button>
+          )}
           {images.map((im) => (
             <button
               key={im.id}
-              onClick={() => setArtId(im.id)}
+              onClick={() => {
+                setArtId(im.id);
+                setNoImage(false);
+              }}
               className={`overflow-hidden rounded-lg border transition ${
-                artId === im.id ? 'border-accent ring-1 ring-accent' : 'border-edge hover:border-muted'
+                !noImage && artId === im.id ? 'border-accent ring-1 ring-accent' : 'border-edge hover:border-muted'
               }`}
             >
               {im.url ? (

@@ -1,0 +1,96 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { chooseNextFormat } from '../src/utils/ranking.js';
+import { resolveTenant } from '../src/tenant.js';
+import { uploadVideoFromUrl } from '../platform/src/lib/channels/linkedin.ts';
+import { parseApproveIdea } from '../platform/src/lib/ideas-model.ts';
+import { canAutoPublish } from '../src/channels/capabilities.js';
+
+const tenant = resolveTenant('pilar');
+const li = (format, extra = {}) => ({ channel: 'linkedin', format, ...extra });
+
+describe('rodízio de formato no LinkedIn', () => {
+  const opts = { channel: 'linkedin', rotate: true, windowSize: 8 };
+
+  it('sem histórico começa pelo primeiro formato do canal', () => {
+    expect(chooseNextFormat([], opts, tenant.taxonomy)).toBe('text');
+  });
+
+  it('escolhe o menos usado; no empate, o que saiu há mais tempo', () => {
+    expect(chooseNextFormat([li('text')], opts, tenant.taxonomy)).toBe('single');
+    expect(chooseNextFormat([li('text'), li('single')], opts, tenant.taxonomy)).toBe('carousel');
+    expect(chooseNextFormat([li('carousel'), li('text'), li('single')], opts, tenant.taxonomy)).toBe('carousel');
+  });
+
+  it('ignora o histórico de outras redes', () => {
+    const hist = [li('text'), { channel: 'instagram', format: 'single' }, { channels: { instagram: {} }, format: 'carousel' }];
+    expect(chooseNextFormat(hist, opts, tenant.taxonomy)).toBe('single');
+  });
+
+  it('Instagram continua como antes (sem rodízio)', () => {
+    expect(chooseNextFormat([], {}, tenant.taxonomy)).toBeNull();
+  });
+});
+
+describe('aprovar sem imagem', () => {
+  it('a tela da ideia manda noImage por rede', () => {
+    const r = parseApproveIdea({ briefId: 'b', items: [{ pendingId: 'p', captionId: 1, artId: 1, noImage: true }] });
+    expect(r.ok && r.value.items[0].noImage).toBe(true);
+  });
+});
+
+describe('matriz de capacidades', () => {
+  it('LinkedIn publica texto, imagem, documento e vídeo pela API', () => {
+    for (const f of ['text', 'single', 'carousel', 'video']) expect(canAutoPublish('linkedin', f)).toBe(true);
+  });
+});
+
+describe('vídeo no LinkedIn', () => {
+  beforeEach(() => {
+    vi.stubEnv('LINKEDIN_ACCESS_TOKEN', 'tok');
+    vi.stubEnv('LINKEDIN_AUTHOR_URN', 'urn:li:person:abc');
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it('sobe as partes na ordem e finaliza com os ETags', async () => {
+    const calls = [];
+    const responses = [
+      () => new Response(new Uint8Array(10), { status: 200 }), // download
+      () => new Response(JSON.stringify({
+        value: {
+          video: 'urn:li:video:V1',
+          uploadToken: 't',
+          uploadInstructions: [
+            { uploadUrl: 'https://up/1', firstByte: 0, lastByte: 5 },
+            { uploadUrl: 'https://up/2', firstByte: 6, lastByte: 9 },
+          ],
+        },
+      }), { status: 200 }),
+      () => new Response(null, { status: 200, headers: { etag: 'e1' } }),
+      () => new Response(null, { status: 200, headers: { etag: 'e2' } }),
+      () => new Response('', { status: 200 }), // finalize sem corpo
+    ];
+    vi.stubGlobal('fetch', vi.fn(async (url, init = {}) => {
+      calls.push({ url: String(url), init });
+      return responses.shift()();
+    }));
+
+    await expect(uploadVideoFromUrl('https://cdn/v.mp4')).resolves.toBe('urn:li:video:V1');
+    expect(JSON.parse(calls[1].init.body).initializeUploadRequest).toMatchObject({ owner: 'urn:li:person:abc', fileSizeBytes: 10 });
+    expect(calls[2].init.body).toHaveLength(6);
+    expect(calls[3].init.body).toHaveLength(4);
+    expect(JSON.parse(calls[4].init.body).finalizeUploadRequest).toEqual({ video: 'urn:li:video:V1', uploadToken: 't', uploadedPartIds: ['e1', 'e2'] });
+  });
+
+  it('parte sem ETag falha com mensagem clara', async () => {
+    const responses = [
+      () => new Response(new Uint8Array(4), { status: 200 }),
+      () => new Response(JSON.stringify({ value: { video: 'urn:li:video:V2', uploadInstructions: [{ uploadUrl: 'https://up/1', firstByte: 0, lastByte: 3 }] } }), { status: 200 }),
+      () => new Response(null, { status: 200 }),
+    ];
+    vi.stubGlobal('fetch', vi.fn(async () => responses.shift()()));
+    await expect(uploadVideoFromUrl('https://cdn/v.mp4')).rejects.toThrow(/ETag/);
+  });
+});

@@ -10,6 +10,7 @@ import 'dotenv/config';
 import { renderPreview, prepareGeneration, prepareReuse, publishToChannel } from './pipeline.js';
 import { chooseTopic, sumUsage } from './generate.js';
 import { pickMotherChannel, motherFormat, buildReusePlan, createBrief, markBrief } from './utils/brief.js';
+import { canAutoPublish } from './channels/capabilities.js';
 import { popNext, markPublished, loadPending, savePending, expirePending } from './utils/queue.js';
 import { uploadImage } from './utils/storage.js';
 import * as instagram from './channels/instagram.js';
@@ -115,7 +116,7 @@ async function main() {
   const motherPrepared = await prepareGeneration({ channel: mother, seed, tenant });
   const top = motherPrepared.generation.variations.find(v => v.id === motherPrepared.topId) || motherPrepared.generation.variations[0];
   const kind = motherFormat(top, { longTextChars: tenant.reuse?.longTextChars });
-  const plan = buildReusePlan({ channels: open, mother, kind, tenant });
+  const plan = buildReusePlan({ channels: open, mother, kind, tenant, isPublishable: canAutoPublish });
   log(`Plano (${kind}): ${Object.entries(plan).map(([c, p]) => `${c}=${p.mode}`).join(', ')}`);
 
   const briefId = await createBrief({

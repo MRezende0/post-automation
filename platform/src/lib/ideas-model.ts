@@ -62,6 +62,7 @@ export type IdeaItem = {
   artId: number;
   captionText?: string;
   scheduledFor?: string;
+  noImage?: boolean;
 };
 
 export function parseApproveIdea(body: unknown): Parsed<{ briefId: string; items: IdeaItem[] }> {
@@ -88,6 +89,7 @@ export function parseApproveIdea(body: unknown): Parsed<{ briefId: string; items
       artId,
       captionText: typeof raw.captionText === 'string' ? raw.captionText : undefined,
       scheduledFor,
+      noImage: raw.noImage === true,
     });
   }
   if (!items.some((i) => i.enabled)) return { ok: false, error: 'Ligue pelo menos uma rede ou rejeite a ideia.' };

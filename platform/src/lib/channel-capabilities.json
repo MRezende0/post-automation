@@ -21,7 +21,7 @@
         "text": { "publish": "auto", "label": "Texto" },
         "single": { "publish": "auto", "label": "Texto com imagem" },
         "carousel": { "publish": "auto", "label": "Documento (PDF)", "note": "O carrossel sai como PDF, uma página por slide." },
-        "video": { "publish": "planned", "label": "Vídeo", "note": "A API aceita (Videos API). Falta construir." },
+        "video": { "publish": "auto", "label": "Vídeo", "note": "MP4 de 3 s a 30 min (Videos API). Sai quando o post tem vídeo pronto." },
         "poll": { "publish": "manual", "label": "Enquete", "note": "Enquete por API não foi validada para perfil pessoal. Publique pelo app." }
       }
     },
