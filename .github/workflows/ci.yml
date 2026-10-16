@@ -1,8 +1,9 @@
 name: CI
 
 # O que este workflow garante (ADR 0003, mesmo desenho do Saint-Jardin):
-#   - toda PR: testes, typecheck da plataforma e as migrations aplicadas (duas vezes)
-#     num Postgres limpo, sem comando destrutivo escondido;
+#   - toda PR: testes, typecheck da plataforma, as migrations aplicadas (duas vezes)
+#     num Postgres limpo sem comando destrutivo escondido, o isolamento por tenant (RLS)
+#     testado e a varredura de segredo e de dependência; o job `CI ok` agrega tudo;
 #   - merge na main: as migrations pendentes são aplicadas no banco de produção.
 #
 # A Vercel publica a plataforma por conta própria quando o merge chega na main, e os
@@ -82,15 +83,10 @@ jobs:
           done
           exit $falhou
 
-      # As migrations dão revoke/grant nos papéis da API do Supabase; num Postgres puro
-      # eles não existem.
-      - name: Papéis do Supabase
-        run: |
-          psql "$PGURL" -v ON_ERROR_STOP=1 -q <<'SQL'
-          create role anon nologin;
-          create role authenticated nologin;
-          create role service_role nologin bypassrls;
-          SQL
+      # As migrations usam o que o Supabase já traz (papéis da API, auth.users, auth.uid()).
+      # Num Postgres puro, o bootstrap cria o equivalente mínimo.
+      - name: Base do Supabase
+        run: psql "$PGURL" -v ON_ERROR_STOP=1 -q -f supabase/ci/bootstrap.sql
 
       # Duas passadas: a segunda prova que reaplicar é seguro (o banco de produção nunca
       # teve histórico de migrations; a primeira execução automática reaplica as antigas).
@@ -126,9 +122,67 @@ jobs:
           insert into engage_targets (tenant_id, name, profile_url) values ('pilar', 'Ana', 'https://www.linkedin.com/in/ana/');
           SQL
 
+      # Isolamento por tenant provado como o app acessa (authenticated com JWT), não como
+      # superuser. Também barra tabela sem RLS, grant para anon e SECURITY DEFINER aberto.
+      - name: RLS por tenant
+        run: psql "$PGURL" -v ON_ERROR_STOP=1 -q -f supabase/ci/rls_test.sql
+
+  security:
+    name: Segredos e dependências
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSION: "8.28.0"
+      GITLEAKS_SHA256: a65b5253807a68ac0cafa4414031fd740aeb55f54fb7e55f386acb52e6a840eb
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+
+      # Catraca: varre só os commits novos. O histórico antigo tem falsos positivos
+      # conhecidos (placeholders de .env.example e o exemplo de assinatura da doc do X).
+      - name: Varredura de segredo nos commits novos
+        run: |
+          set -euo pipefail
+          curl -sSL -o gitleaks.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tgz" | sha256sum -c -
+          tar -xzf gitleaks.tgz gitleaks
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            range="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            range="${{ github.event.before }}..${{ github.sha }}"
+          else
+            range="HEAD~1..HEAD"
+          fi
+          ./gitleaks git . --no-banner --redact --log-opts="$range"
+
+      # A plataforma é o que fica exposto na internet: vulnerabilidade crítica em dependência
+      # de produção bloqueia. (O pacote raiz roda só no GitHub Actions; o crítico dele vem do
+      # node-telegram-bot-api e está no roadmap da SPEC 006.)
+      - name: Dependências da plataforma
+        working-directory: platform
+        run: npm audit --omit=dev --audit-level=critical
+
+  # Único check obrigatório na proteção da main: agrega os outros, então job novo entra
+  # aqui sem mexer na configuração do GitHub.
+  ci-ok:
+    name: CI ok
+    if: always()
+    needs: [test, migrations-check, security]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          if [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" = "true" ]; then
+            echo "::error::algum job do CI não passou"
+            exit 1
+          fi
+
   migrate:
     name: Migrations em produção
-    needs: [test, migrations-check]
+    needs: [ci-ok]
     # Só no push para a main: PR nunca enxerga o segredo do banco.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
