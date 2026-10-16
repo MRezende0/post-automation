@@ -1,0 +1,36 @@
+{
+  "mother": "linkedin",
+  "kind": "texto_curto",
+  "plan": {
+    "instagram": {
+      "mode": "reuse",
+      "format": "single"
+    },
+    "linkedin": {
+      "mode": "mother"
+    },
+    "twitter": {
+      "mode": "locked",
+      "reason": "twitter ainda não publica (sem credencial ou desligado no tenant)"
+    }
+  },
+  "pillar": "dor",
+  "judge": "score 86 (hook 9, espec 9, voz 9, prova 7)",
+  "posts": {
+    "linkedin": {
+      "mode": "mother",
+      "caption": "Você já passou por isso? Cliente pede uma pequena alteração. Você aceita, sem documentar, pois é simples. Mas aparecem mais pedidos. E você se perde. Enviou a versão errada. Não deu tempo de atualizar tudo. O resultado: 3 dias extras de trabalho. Um colaborador alocado. Um prazo apertado. Tudo isso sem custo extra. Essa despesa de retrabalho e revisões consome seu lucro. Quanto custaram os últimos 'ajustes rápidos' do seu projeto?\n\n#escritoriodeengenharia #arquitetura #revisao",
+      "guard": []
+    },
+    "instagram": {
+      "mode": "reuse",
+      "caption": "Você já aceitou um 'ajuste rápido' sem documentar?\n\nÉ o cliente pedindo uma pequena alteração, e você pensa: 'é simples'.\n\nMas o que era simples vira uma bola de neve: mais pedidos, você se perde, envia a versão errada, não dá tempo de atualizar tudo.\n\nResultado: 3 dias extras de trabalho, colaborador alocado e prazo apertado. Tudo isso sem custo extra.\n\nEssa despesa de retrabalho e revisões consome seu lucro.\n\nQual o custo dos últimos 'ajustes rápidos' no seu projeto?\n\n#engenhariacivil #escritoriodeengenharia #gestaodeprojetos #retrabalho #custos",
+      "guard": []
+    },
+    "twitter": {
+      "mode": "locked",
+      "reason": "twitter ainda não publica (sem credencial ou desligado no tenant)"
+    }
+  },
+  "seconds": 35
+}
