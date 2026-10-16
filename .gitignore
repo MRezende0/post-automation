@@ -17,3 +17,6 @@ content/kb-index.json
 
 # previews locais de imagem (testes)
 previews/
+
+# estado local da CLI do Supabase
+supabase/.temp/
