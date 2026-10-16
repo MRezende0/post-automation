@@ -37,6 +37,14 @@ begin
     raise exception 'tabela % tem tenant_id mas não tem policy de leitura', r.relname;
   end loop;
 
+  -- nenhum tenant_id tem default: quem insere informa o tenant (0013)
+  for r in
+    select table_name from information_schema.columns
+    where table_schema = 'public' and column_name = 'tenant_id' and column_default is not null
+  loop
+    raise exception 'tenant_id de % tem default; informe o tenant em todo insert', r.table_name;
+  end loop;
+
   -- anon não toca em tabela nenhuma
   for r in
     select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
@@ -65,6 +73,13 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-00000000000b', 'b@test'),
   ('00000000-0000-0000-0000-00000000000c', 'c@test');
 insert into tenants (id, name) values ('acme', 'Acme') on conflict (id) do nothing;
+-- tenant novo nasce pausado (trigger da 0013)
+do $$
+begin
+  if not exists (select 1 from publishing_controls where tenant_id = 'acme' and paused) then
+    raise exception 'tenant novo deveria nascer pausado';
+  end if;
+end $$;
 insert into tenant_members (tenant_id, user_id, role) values
   ('pilar', '00000000-0000-0000-0000-00000000000a', 'editor'),
   ('acme',  '00000000-0000-0000-0000-00000000000b', 'viewer');
