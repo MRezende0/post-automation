@@ -2,13 +2,15 @@
 
 import type { Utm } from './utm';
 
-export type Channel = 'instagram' | 'linkedin';
+export type Channel = 'instagram' | 'linkedin' | 'twitter';
+
+export const CHANNELS: Channel[] = ['instagram', 'linkedin', 'twitter'];
 
 export type Variation = {
   id: number;
   hook?: string;
   body?: string;
-  format?: 'single' | 'carousel';
+  format?: 'single' | 'carousel' | 'thread';
   slides?: unknown[];
   hashtags?: string[];
 };

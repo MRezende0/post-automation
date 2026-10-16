@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/supabase';
+import { CHANNELS, type Channel } from '@/lib/types';
 
 export async function POST(req: Request) {
   try {
@@ -7,6 +8,9 @@ export async function POST(req: Request) {
     const { channel, weekday, hour, minute } = body ?? {};
     if (!channel || weekday == null || hour == null) {
       return NextResponse.json({ error: 'channel, weekday e hour obrigatórios' }, { status: 400 });
+    }
+    if (!CHANNELS.includes(channel as Channel)) {
+      return NextResponse.json({ error: `channel inválido: use ${CHANNELS.join(', ')}` }, { status: 400 });
     }
     const { error } = await db().from('publish_slots').insert({
       channel: String(channel),

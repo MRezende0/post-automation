@@ -1,8 +1,7 @@
-// twitter.js — canal X/Twitter. PUBLICAÇÃO REAL PENDENTE de acesso à API:
-// o X migrou pra pay-per-use em fev/2026 ($0,015/post, $0,20 com link) e exige
-// app + billing. Por ora o canal é GERÁVEL (entra na geração/preview), mas
-// publishText/publishThread só operam em dryRun; sem dryRun lançam erro
-// explicativo até a API ser plugada. Interface espelha instagram.js/linkedin.js.
+// twitter.js — canal X/Twitter no pipeline Node: GERÁVEL (entra na geração/preview).
+// Quem publica de verdade é o scheduler da plataforma (platform/src/lib/channels/x.ts,
+// SPEC 002). Aqui publishText/publishThread só operam em dryRun; sem dryRun lançam
+// erro explicativo. Interface espelha instagram.js/linkedin.js.
 
 const TWEET_LIMIT = 280;
 
@@ -43,8 +42,8 @@ export function splitThread(text, limit = TWEET_LIMIT) {
   return tweets;
 }
 
-const NOT_ENABLED = 'Publicação no X/Twitter ainda não habilitada (API/app review pendente). '
-  + 'O canal gera e entra no preview; publique manualmente por ora.';
+const NOT_ENABLED = 'O pipeline Node não publica no X. Aprove a pendência na plataforma: '
+  + 'o scheduler publica no horário do slot.';
 
 export async function publishText({ text, imageUrl, dryRun = false }) {
   if (dryRun) {

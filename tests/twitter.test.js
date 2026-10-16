@@ -41,6 +41,6 @@ describe('publish (dry-run e guarda de API)', () => {
   });
 
   it('publishText sem dry-run lança (API/app review pendente)', async () => {
-    await expect(publishText({ text: 'oi' })).rejects.toThrow(/não habilitada/i);
+    await expect(publishText({ text: 'oi' })).rejects.toThrow(/não publica no X/i);
   });
 });
