@@ -12,7 +12,7 @@ ativados e pagantes cada link trouxe, mas nada aqui lê isso.
 
 ## Contrato (lado Pilar, não muda aqui)
 
-`GET {PILAR_FUNCTIONS_URL}/functions/v1/ops-export-funil?desde=AAAA-MM-DD&ate=AAAA-MM-DD`
+`GET {PILAR_FUNNEL_URL}?desde=AAAA-MM-DD&ate=AAAA-MM-DD`
 com `Authorization: Bearer <OPS_EXPORT_TOKEN>`. Janela máxima de 120 dias.
 
 ```json
@@ -42,7 +42,7 @@ com `Authorization: Bearer <OPS_EXPORT_TOKEN>`. Janela máxima de 120 dias.
    com mais ativados.
 5. **Histórico na plataforma:** cada post publicado mostra cadastros, ativados e pagantes quando
    houver.
-6. Sem `PILAR_FUNCTIONS_URL` ou `OPS_EXPORT_TOKEN`, o job avisa e termina sem erro.
+6. Sem `PILAR_FUNNEL_URL` ou `OPS_EXPORT_TOKEN`, o job avisa e termina sem erro.
 
 ## Fora de escopo e limites conhecidos
 
@@ -67,5 +67,9 @@ com `Authorization: Bearer <OPS_EXPORT_TOKEN>`. Janela máxima de 120 dias.
 
 1. Aplicar `0010_funnel.sql`.
 2. Matheus gera o token (`openssl rand -hex 32`), um por ambiente, e coloca no Pilar
-   (secret das Edge Functions) e aqui (GitHub Actions: `OPS_EXPORT_TOKEN` e
-   `PILAR_FUNCTIONS_URL`).
+   (secret das Edge Functions) e aqui: `OPS_EXPORT_TOKEN` como secret do GitHub Actions e
+   `PILAR_FUNNEL_URL` como variável do repo, com a URL completa da função:
+   - produção: `https://vepnsonbnsimqcsfcagm.supabase.co/functions/v1/ops-export-funil`
+     (responde depois do próximo release da Pilar);
+   - staging, para teste: `https://rizaklgstyfrwgmdsldf.supabase.co/functions/v1/ops-export-funil`,
+     com token próprio.

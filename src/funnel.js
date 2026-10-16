@@ -11,8 +11,9 @@ function log(...args) {
   console.log('[funnel]', ...args);
 }
 
-export async function fetchFunnel({ desde, ate, baseUrl = process.env.PILAR_FUNCTIONS_URL, token = process.env.OPS_EXPORT_TOKEN }) {
-  const url = new URL('/functions/v1/ops-export-funil', baseUrl);
+// PILAR_FUNNEL_URL é a URL completa da função (produção ou staging), sem segredo.
+export async function fetchFunnel({ desde, ate, endpoint = process.env.PILAR_FUNNEL_URL, token = process.env.OPS_EXPORT_TOKEN }) {
+  const url = new URL(endpoint);
   url.searchParams.set('desde', desde);
   url.searchParams.set('ate', ate);
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
@@ -64,8 +65,8 @@ async function updatePostTotals({ tenantId, totals, runAt }) {
 }
 
 export async function runFunnel({ now = new Date() } = {}) {
-  if (!process.env.PILAR_FUNCTIONS_URL || !process.env.OPS_EXPORT_TOKEN) {
-    log('PILAR_FUNCTIONS_URL ou OPS_EXPORT_TOKEN ausente: coleta do funil pulada.');
+  if (!process.env.PILAR_FUNNEL_URL || !process.env.OPS_EXPORT_TOKEN) {
+    log('PILAR_FUNNEL_URL ou OPS_EXPORT_TOKEN ausente: coleta do funil pulada.');
     return { skipped: true };
   }
   if (!usingSupabase()) {
