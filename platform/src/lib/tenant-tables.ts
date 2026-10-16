@@ -1,0 +1,24 @@
+// Tabelas com dados do tenant. É a lista que a exportação (LGPD) percorre; um teste a compara
+// com as migrations, então tabela nova com tenant_id que não entrar aqui reprova o CI.
+export const TENANT_TABLES = [
+  'assets',
+  'bandit_snapshots',
+  'briefs',
+  'campaigns',
+  'engage_targets',
+  'engagements',
+  'feedback',
+  'funnel_daily',
+  'metrics_snapshots',
+  'pending_approvals',
+  'post_events',
+  'post_variants',
+  'posts',
+  'prompt_versions',
+  'publish_slots',
+  'publishing_controls',
+  'queue_items',
+  'rejected_posts',
+  'scheduled_posts',
+  'style_rules',
+] as const;

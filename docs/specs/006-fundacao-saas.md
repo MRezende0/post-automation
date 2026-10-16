@@ -1,6 +1,6 @@
 # SPEC 006: fundação do SaaS
 
-- **Status:** F1 em implementação
+- **Status:** F1 entregue (#22); F2 parcial: escopo por tenant, validação de entrada, erros e log, contrato do tenant (0013), exportação. Falta o login por usuário (precisa de protótipo).
 - **Data:** 2026-10-16
 - **Depende de:** [ADR 0002](../adr/0002-plataforma-como-produto-proprio.md), [ADR 0003](../adr/0003-migrations-automaticas-no-merge.md), [ADR 0004](../adr/0004-construir-o-saas-sem-cnpj-validando-com-a-pilar.md) (construir sem CNPJ, gates antes de cobrar), [ADR 0005](../adr/0005-tenancy-e-login-por-usuario.md)
 - **Referência:** esteira de engenharia pessoal (`~/.claude/standards/ESTEIRA.md`) e o que já foi
@@ -52,20 +52,22 @@ Labrynth, titularidade, caso Pilar, demanda dos pilotos, sustentabilidade). Por 
 
 ### F2. Login por usuário e tenant na sessão (antes do 2º tenant)
 
-ADR 0005 detalha. Resumo:
+ADR 0005 detalha. Estado de cada item:
 
-1. Supabase Auth (email + senha e link mágico) substitui a senha única. Sessão por cookie do
-   `@supabase/ssr`; o middleware renova a sessão.
-2. Todo acesso de tela e de API passa a usar o cliente do usuário (RLS decide). A service role
-   fica só no cron, nos jobs e em operações de sistema (criar tenant, convidar).
-3. Tenant ativo vem da sessão (membership), nunca do corpo da requisição.
-4. Contract da 0003: tirar o default `'pilar'` de `tenant_id` (expand/contract: só depois que
-   todo insert passar o tenant explícito).
-5. Validação por parser em todas as rotas de API antigas (approve, scheduled, slots, pause),
-   no mesmo padrão de `learning.ts` e `ideas-model.ts`.
-6. Erro de API: mensagem de domínio para o usuário, detalhe técnico só no log/rastreador.
-7. Rate limit nas rotas de autenticação (o do Supabase Auth cobre login; conferir os limites
-   do projeto) e nas rotas que disparam geração.
+1. [ ] Supabase Auth (email + senha e link mágico) substitui a senha única. Sessão por cookie
+   do `@supabase/ssr`; o middleware renova a sessão. **Espera protótipo das telas.**
+2. [~] Acesso de tela e de API pelo cliente do usuário (RLS decide). Feito o escopo por tenant
+   no servidor (`tenantDb`, com teste que barra `db()` cru); falta trocar o cliente quando o
+   login por usuário entrar. A service role fica só no cron, nos jobs e em operações de sistema.
+3. [x] Tenant ativo vem da sessão (assinado no cookie), nunca do corpo da requisição.
+4. [x] Contract da 0003: sem `default 'pilar'` em `tenant_id` (0013). Tenant novo nasce pausado.
+5. [x] Validação por parser em todas as rotas de API (`route-input.ts`).
+6. [x] Erro de API: mensagem de domínio para o usuário, detalhe técnico só no log estruturado.
+   **Pendente:** rastreador de erro (Sentry), precisa de conta e DSN.
+7. [ ] Rate limit: o login por senha única ainda não tem (o do Supabase Auth cobre depois do
+   item 1). Nas rotas que chamam o modelo (rascunho de engajamento) também falta.
+8. [x] Exportação dos dados do tenant (`/api/export`, `/settings`). **Pendente:** exclusão.
+9. [x] Criar tenant por comando (`npm run tenant:create`) e runbook de operação.
 
 Telas novas (protótipo antes): login, cadastro, esqueci a senha, convite aceito, seletor de
 tenant quando o usuário tem mais de um.

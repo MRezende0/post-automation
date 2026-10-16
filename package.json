@@ -19,7 +19,8 @@
     "backfill": "node scripts/backfill-supabase.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "funnel": "node src/funnel.js"
+    "funnel": "node src/funnel.js",
+    "tenant:create": "node scripts/create-tenant.js"
   },
   "engines": {
     "node": ">=22.12.0"

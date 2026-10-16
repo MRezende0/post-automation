@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { TENANT_TABLES } from '../platform/src/lib/tenant-tables.ts';
 
 // Tabelas com tenant_id (as migrations são a fonte). Toda consulta do Node a elas precisa
 // carimbar ou filtrar o tenant, ou agir por chave primária (uuid).
@@ -57,6 +58,10 @@ describe('Node: toda consulta a tabela de tenant carimba ou filtra o tenant', ()
     for (const t of ['posts', 'queue_items', 'pending_approvals', 'scheduled_posts', 'feedback', 'engagements']) {
       expect(tables.has(t)).toBe(true);
     }
+  });
+
+  it('a exportação do tenant cobre todas as tabelas com tenant_id', () => {
+    expect([...TENANT_TABLES].sort()).toEqual([...tables].sort());
   });
 
   it('nenhuma consulta fica sem escopo de tenant', () => {
