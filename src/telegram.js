@@ -11,7 +11,7 @@
 // callback_data carrega o pendingId pra casar a decisão com o post certo mesmo
 // com múltiplos canais pendentes ao mesmo tempo: "a:<pid>:<varId>" | "r:<pid>" | "x:<pid>".
 
-import TelegramBot from 'node-telegram-bot-api';
+import { createBot } from './utils/telegram-api.js';
 
 const CAPTION_LIMIT = 1024;
 const MESSAGE_LIMIT = 4096;
@@ -29,7 +29,7 @@ function chatId() {
 }
 
 function makeBot() {
-  return new TelegramBot(botToken(), { polling: false });
+  return createBot(botToken());
 }
 
 // HTML é mais robusto que o Markdown legado: hashtags com underscore
