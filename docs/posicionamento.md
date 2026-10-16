@@ -12,18 +12,21 @@ O conteúdo usa **dois níveis** (decisão validada):
 
 > Planilha é a porta de entrada. Lucro/previsibilidade é o destino. Nunca prometa lucro sem antes nomear a dor concreta.
 
-## Frase principal
+## Frase principal (tagline oficial, `brand/messaging.md` da Pilar)
 
-> **Saia da planilha e finalmente saiba se cada projeto dá lucro.**
+> **Saiba se cada projeto está dando lucro antes de terminar.**
+
+Variação de gancho para topo de funil: "Saia da planilha e finalmente saiba se cada projeto dá lucro."
+
 
 ## Frase do produto (1 linha — usar no fundo de funil)
 
-> **O sistema operacional do escritório de engenharia — do lead ao recebimento, com lucro por projeto em tempo real.**
+> **O Pilar conecta proposta, projeto, cobrança e financeiro num fluxo só, e mostra ao dono se cada projeto está dando lucro antes de terminar.**
 
 ## Os 3 vetores que nenhum concorrente BR junta (munição de diferencial)
 
 1. **Operação + financeiro integrados** — não é CRM, não é ERP genérico.
-2. **Feito pra engenharia de projeto** — disciplinas, marcos de faturamento, rentabilidade por projeto.
+2. **Feito pra escritório de projeto** (engenharia e arquitetura): disciplinas, marcos de faturamento, rentabilidade por projeto.
 3. **Fluxo único** — lead → proposta → projeto → financeiro → cliente, encadeado.
 
 ## Vilões (o que o conteúdo ataca)
@@ -36,7 +39,7 @@ O conteúdo usa **dois níveis** (decisão validada):
 
 ## Diferença vs Vobi (concorrente mais citado)
 
-A Vobi é pra **obra/construção civil** (diário de obra, curva ABC, medição, composição de custo). O **Pilar é pra escritório de projeto/consultoria** — estrutural, elétrica, hidráulica, ambiental, laudos, regularização: quem **vende projeto, não obra física**. Não competir no terreno de obra; reforçar o nosso.
+A Vobi é pra **obra/construção civil** (diário de obra, curva ABC, medição, composição de custo). O **Pilar é pra escritório de projeto**: estrutural, elétrica, hidráulica, ambiental, laudos, regularização e arquitetura. Quem **vende projeto, não obra física**. Não competir no terreno de obra; reforçar o nosso.
 
 ## Anti-posicionamento (o que NÃO somos)
 

@@ -9,7 +9,7 @@
 | Building in public | 15% | Conexão pessoal, confiança |
 | Prova social | 15% | Conversão, DM, lead |
 
-> **Estratégia (ver `posicionamento.md`):** gancho de topo = planilha/WhatsApp/feeling; promessa de fundo = **lucro por projeto / controle**. As dores núcleo `[validada]` de `dores.md` (não saber se dá lucro, orçar no feeling, financeiro × operação desconectados) devem permear sobretudo **Dor** e **Dica**. Público: engenharia consultiva de projeto (não obra).
+> **Estratégia (ver `posicionamento.md`):** gancho de topo = planilha/WhatsApp/feeling; promessa de fundo = **lucro por projeto / controle**. As dores núcleo `[validada]` de `dores.md` (não saber se dá lucro, orçar no feeling, financeiro × operação desconectados) devem permear sobretudo **Dor** e **Dica**. Público: escritório de projeto de engenharia (civil, estrutural, MEP) e de arquitetura (não construtora).
 
 ---
 

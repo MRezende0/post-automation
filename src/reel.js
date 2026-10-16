@@ -48,12 +48,12 @@ export function normalizeReelScript(raw) {
 
 function buildPrompt({ pillar, angle, context }) {
   return [
-    'Você é roteirista de Reels faceless pra um SaaS B2B de engenharia de projeto (Pilar).',
+    'Você é roteirista de Reels faceless pra um SaaS B2B de escritório de projeto de engenharia e arquitetura (Pilar).',
     `Crie um roteiro de Reel (15-40s) pro pilar "${pillar}"${angle ? `, ângulo "${angle}"` : ''}.`,
     context ? `Contexto/base:\n${context}` : '',
     '',
     'Regras: hook nos primeiros 3s que para o scroll; voz seca e concreta; zero buzzword;',
-    'dor específica de escritório de engenharia (não obra, não arquitetura); 3 a 6 cenas curtas.',
+    'dor específica de escritório de projeto de engenharia ou arquitetura (não construtora, não canteiro); 3 a 6 cenas curtas.',
     '',
     'Responda só JSON:',
     '{"hook_0_3s":"...","scenes":[{"visual":"descrição do b-roll/tela","voiceover":"fala","caption":"legenda na tela"}],"cta":"...","duration_s":30,"visual_style":"..."}',

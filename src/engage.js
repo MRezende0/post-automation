@@ -38,7 +38,7 @@ export function normalizeComments(raw, n = 3) {
 
 function buildPrompt(targetText, n) {
   return [
-    'Você é o founder de um SaaS B2B de engenharia de projeto (Pilar). Vai comentar no post abaixo.',
+    'Você é o founder de um SaaS B2B de escritório de projeto de engenharia e arquitetura (Pilar). Vai comentar no post abaixo.',
     `Escreva ${n} opções de comentário de VALOR — não promocional, não puxa-saco, não genérico.`,
     'Cada um: acrescenta uma ideia/experiência concreta, tom seco e humano, 1-3 frases, zero buzzword.',
     'Nunca mencione o Pilar diretamente; valor primeiro.',

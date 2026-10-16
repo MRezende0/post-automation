@@ -3,17 +3,18 @@
 > Documento base pra todos os prompts. Lido pelo `prompts/system.md` e injetado no contexto do Claude.
 > Fonte: STRATEGY_V2.md (ICP primário real do Pilar) + entrevistas a refinar.
 
-## Recorte (ICP primário — foco do conteúdo agora)
+## Recorte (ICP primário, foco do conteúdo)
 
-**Escritório de engenharia consultiva multidisciplinar, 5–30 pessoas.**
+**Escritório de projeto técnico, 3 a 30 pessoas: engenharia (civil, estrutural, MEP/HVAC) ou arquitetura.**
 
-- Disciplinas: estruturas, instalações, hidráulica, elétrica, geotecnia, regularização, laudos.
+- Disciplinas: estruturas, instalações, hidráulica, elétrica, geotecnia, regularização, laudos e projeto de arquitetura.
 - **Vende projeto sob encomenda, fatura por marcos** (não toca obra física).
 - Hoje usa planilha + WhatsApp + ERP genérico.
 - **Dor #1: não sabe se está lucrando.**
 
-> Foco é engenharia (não arquitetura — ICP secundário, fora do conteúdo por enquanto).
-> Não é construtora/obra pesada (terreno da Vobi), nem autônomo solo, nem escritório 50+.
+> Desde 01/09/2026 arquitetura faz parte do ICP (fonte: `brand/messaging.md` do repo da Pilar).
+> Não é construtora nem incorporadora (terreno da Vobi), nem autônomo solo, nem escritório 50+.
+> O módulo de Obras existe para o escritório que acompanha a obra do próprio projeto; conteúdo não fala de canteiro.
 
 ## Persona principal
 
@@ -46,7 +47,6 @@
 
 - Não é gerente de TI procurando "solução enterprise"
 - Não é construtora/empreiteiro de obra (é a Vobi que atende isso)
-- Não é arquiteto (ICP secundário, dor diferente — fora por ora)
 - Não é engenheiro CLT nem autônomo solo
 - Não compra por "feature list" — compra por **alívio + controle do lucro**
 

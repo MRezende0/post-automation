@@ -12,12 +12,12 @@
 import { _internal as ranking } from './utils/ranking.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PILAR — tenant nº 1 (dogfooding). SaaS B2B de engenharia de projeto.
+// PILAR — tenant nº 1 (dogfooding). SaaS B2B de escritório de projeto (engenharia e arquitetura).
 // ─────────────────────────────────────────────────────────────────────────────
 const PILAR = {
   id: 'pilar',
   name: 'Pilar',
-  niche: 'SaaS B2B de gestão para escritórios de engenharia de projeto (não obra)',
+  niche: 'SaaS B2B de gestão para escritórios de projeto de engenharia e arquitetura (não construtora)',
   channels: ['instagram', 'linkedin', 'twitter'],
 
   // Características por plataforma — o "adaptador por plataforma". Injetadas na
@@ -38,9 +38,9 @@ const PILAR = {
 
   // Persona injetada nos prompts — substitui o hardcode em generate.js (passo 3).
   persona: {
-    critic: 'crítico cético de conteúdo B2B pra escritórios de engenharia de projeto (não obra)',
-    judge: 'editor de conteúdo de um SaaS B2B pra escritórios de engenharia',
-    editor: 'editor de copy do Pilar (SaaS pra escritório de engenharia de projeto — não obra)',
+    critic: 'crítico cético de conteúdo B2B pra escritórios de projeto de engenharia e arquitetura (não construtora)',
+    judge: 'editor de conteúdo de um SaaS B2B pra escritórios de engenharia e arquitetura',
+    editor: 'editor de copy do Pilar (SaaS pra escritório de projeto de engenharia e arquitetura, não construtora)',
   },
 
   // Checklist de voz aplicado na auto-edição (polishPost).
@@ -48,7 +48,7 @@ const PILAR = {
     'Hook curto que para o scroll.',
     'Dor concreta e específica; zero buzzword (sinergia, otimizar, performance, ecossistema, escalável).',
     'Frases curtas — nenhuma com mais de 25 palavras.',
-    'NÃO falar de obra/canteiro. NÃO citar arquitetura. NÃO inventar número.',
+    'Público: escritório de projeto de engenharia (civil, estrutural, MEP) ou arquitetura. NÃO falar de canteiro nem de construtora. NÃO inventar número.',
     'Tom seco e direto, estilo: "Proposta no feeling. Financeiro descolado da operação."',
   ],
 
@@ -56,7 +56,7 @@ const PILAR = {
   guardrails: {
     buzzwords: ['sinergia', 'otimizar', 'escalável', 'ecossistema', 'disruptivo', 'solução integrada', 'gestão eficiente'],
     foraIcp: ['canteiro', 'diário de obra', 'diario de obra'],
-    foraRecorte: ['arquitet'], // conteúdo é só engenharia por ora
+    foraRecorte: ['construtora', 'incorporadora'], // anti-posicionamento: não é sistema de obra
   },
 
   // Badge por pilar (overlay do template de imagem) — pipeline.js renderHero.

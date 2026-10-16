@@ -38,12 +38,12 @@ function buildPrompt({ source, n, voice, pilares }) {
     .map(([p, a]) => `- ${p}: ${a.join(', ')}`)
     .join('\n');
   return [
-    'Você é estrategista de conteúdo do Pilar (SaaS pra escritório de engenharia de projeto — não obra, não arquitetura).',
+    'Você é estrategista de conteúdo do Pilar (SaaS pra escritório de projeto de engenharia e arquitetura, não construtora).',
     `Abaixo vai um ATIVO (copy/feature/doc). Atomize-o em ${n} ideias de post distintas.`,
     'Cada ideia deve puxar uma dor concreta e mapear pra um pilar+ângulo VÁLIDO:',
     anglesList,
     '',
-    'Regras: nada de obra/canteiro/arquitetura; não invente número; tom seco e direto.',
+    'Regras: nada de canteiro nem construtora; não invente número; tom seco e direto.',
     '',
     '== VOZ ==',
     voice.slice(0, 2500),
