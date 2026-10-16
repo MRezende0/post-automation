@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1630" height="1150" viewBox="0 0 1630 1150"><rect width="100%" height="100%" fill="#FBFBFA"/>
+<defs><marker id="an" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3A4450"/></marker></defs>
+<defs><marker id="aok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2E8B57"/></marker></defs>
+<defs><marker id="ano" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C9372C"/></marker></defs>
+<defs><marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8A929B"/></marker></defs>
+<text x="24" y="46" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#1B1F24" text-anchor="start">Arquitetura SaaS no Google Cloud</text>
+<text x="24" y="74" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5B6570" text-anchor="start">Um projeto por ambiente (prod e staging), região São Paulo. Tudo gerenciado: nenhum servidor para cuidar.</text>
+<rect x="24" y="100" width="200" height="990" rx="14" fill="none" stroke="#B8BEC6" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="38" y="122" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#5B6570" text-anchor="start">Fora do Google Cloud</text>
+<rect x="250" y="100" width="1100" height="990" rx="14" fill="#F5F8FE" stroke="#3B6FD4" stroke-width="1.6"/>
+<text x="264" y="122" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#3B6FD4" text-anchor="start">Projeto prod · southamerica-east1 · staging é uma cópia</text>
+<rect x="1390" y="100" width="220" height="990" rx="14" fill="none" stroke="#B8BEC6" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="1404" y="122" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#5B6570" text-anchor="start">Fora do Google Cloud</text>
+<rect x="540" y="250" width="320" height="460" rx="14" fill="none" stroke="#3B6FD4" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="554" y="272" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#3B6FD4" text-anchor="start">Cloud Run</text>
+<rect x="920" y="250" width="390" height="520" rx="14" fill="none" stroke="#2E8B57" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="934" y="272" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#2E8B57" text-anchor="start">Dados e IA</text>
+<rect x="280" y="880" width="1040" height="180" rx="14" fill="none" stroke="#6B5BB5" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="294" y="902" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#6B5BB5" text-anchor="start">Apoio: todos usam, nada disso fica no código</text>
+<rect x="44" y="150" width="160" height="90" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="124.0" y="180.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Navegador</text>
+<text x="124.0" y="200.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">PF ou equipe</text>
+<text x="124.0" y="220.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">da empresa</text>
+<rect x="44" y="540" width="160" height="90" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="124.0" y="570.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Asaas</text>
+<text x="124.0" y="590.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">cobrança PF e PJ</text>
+<text x="124.0" y="610.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">Pix, boleto, cartão</text>
+<rect x="44" y="775" width="160" height="80" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="124.0" y="810.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">GitHub</text>
+<text x="124.0" y="830.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">código e CI</text>
+<rect x="280" y="150" width="210" height="80" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="385.0" y="185.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Identity Platform</text>
+<text x="385.0" y="205.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">login e MFA</text>
+<rect x="280" y="280" width="210" height="360" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="385.0" y="385.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Borda</text>
+<text x="385.0" y="405.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">Load Balancer</text>
+<text x="385.0" y="425.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">domínio e HTTPS</text>
+<text x="385.0" y="445.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle"></text>
+<text x="385.0" y="465.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">Cloud Armor</text>
+<text x="385.0" y="485.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">WAF e limite por IP</text>
+<text x="385.0" y="505.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle"></text>
+<text x="385.0" y="525.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">Cloud CDN</text>
+<text x="385.0" y="545.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">arquivos estáticos</text>
+<rect x="280" y="670" width="210" height="75" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="385.0" y="702.5" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Cloud Scheduler</text>
+<text x="385.0" y="722.5" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">a cada minuto</text>
+<rect x="280" y="775" width="210" height="80" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="385.0" y="810.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Artifact Registry</text>
+<text x="385.0" y="830.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">containers versionados</text>
+<rect x="560" y="280" width="280" height="120" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="700.0" y="325.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">plataforma</text>
+<text x="700.0" y="345.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">telas e API (Next.js)</text>
+<text x="700.0" y="365.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">1 instância sempre quente</text>
+<rect x="600" y="440" width="200" height="70" rx="10" fill="#E0F4F4" stroke="#138A8A" stroke-width="2"/>
+<text x="700.0" y="470.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Cloud Tasks</text>
+<text x="700.0" y="490.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">filas por rede e tipo</text>
+<rect x="560" y="550" width="280" height="130" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="700.0" y="600.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">workers</text>
+<text x="700.0" y="620.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">publicar, gerar com IA,</text>
+<text x="700.0" y="640.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">renderizar, métricas</text>
+<rect x="940" y="280" width="350" height="100" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="1115.0" y="315.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Cloud SQL (Postgres)</text>
+<text x="1115.0" y="335.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">contas, membros, posts, uso</text>
+<text x="1115.0" y="355.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">isolados por RLS</text>
+<rect x="940" y="400" width="350" height="80" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="1115.0" y="435.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Cloud KMS</text>
+<text x="1115.0" y="455.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">cifra os tokens das redes</text>
+<rect x="940" y="560" width="350" height="70" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="1115.0" y="590.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Vertex AI</text>
+<text x="1115.0" y="610.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">Gemini escreve os textos</text>
+<rect x="940" y="660" width="350" height="90" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="1115.0" y="690.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Cloud Storage</text>
+<text x="1115.0" y="710.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">mídia privada</text>
+<text x="1115.0" y="730.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">URL assinada de curta duração</text>
+<rect x="1410" y="160" width="180" height="90" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="1500.0" y="190.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">E-mail</text>
+<text x="1500.0" y="210.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">convite, alerta,</text>
+<text x="1500.0" y="230.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">relatório</text>
+<rect x="1410" y="290" width="180" height="460" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="1500.0" y="475.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Redes sociais</text>
+<text x="1500.0" y="495.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">Instagram</text>
+<text x="1500.0" y="515.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">LinkedIn</text>
+<text x="1500.0" y="535.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">X</text>
+<text x="1500.0" y="555.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle"></text>
+<text x="1500.0" y="575.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">APIs externas</text>
+<rect x="295" y="920" width="240" height="110" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
+<text x="415.0" y="970.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Secret Manager</text>
+<text x="415.0" y="990.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">segredos da plataforma</text>
+<rect x="550" y="920" width="240" height="110" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
+<text x="670.0" y="960.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Observabilidade</text>
+<text x="670.0" y="980.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">logs, erros e alertas</text>
+<text x="670.0" y="1000.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">sempre com tenant_id</text>
+<rect x="805" y="920" width="240" height="110" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
+<text x="925.0" y="960.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">IAM e IAP</text>
+<text x="925.0" y="980.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">uma conta por função;</text>
+<text x="925.0" y="1000.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">console só da equipe</text>
+<rect x="1060" y="920" width="240" height="110" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
+<text x="1180.0" y="960.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Orçamento</text>
+<text x="1180.0" y="980.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">alerta de gasto</text>
+<text x="1180.0" y="1000.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e custo por conta</text>
+<polyline points="204,195 280,195" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="220.8" y="173" width="42.400000000000006" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="242" y="186" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#3A4450" text-anchor="middle">login</text>
+<polyline points="124,240 124,330 280,330" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="178.8" y="309" width="42.400000000000006" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="200" y="322" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#3A4450" text-anchor="middle">HTTPS</text>
+<polyline points="204,585 280,585" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="214.32" y="563" width="55.36" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="242" y="576" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#3A4450" text-anchor="middle">webhook</text>
+<polyline points="490,340 560,340" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<polyline points="640,280 640,190 490,190" fill="none" stroke="#8A929B" stroke-width="2.2" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#am)"/>
+<rect x="517.88" y="169" width="94.24000000000001" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="565" y="182" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#8A929B" text-anchor="middle">valida sessão</text>
+<polyline points="490,705 515,705 515,375 560,375" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<polyline points="700,400 700,440" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="723.84" y="412" width="68.32000000000001" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="758" y="425" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#3A4450" text-anchor="middle">enfileira</text>
+<polyline points="700,510 700,550" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="724.32" y="522" width="55.36" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="752" y="535" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#3A4450" text-anchor="middle">entrega</text>
+<polyline points="840,320 940,320" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="855.84" y="299" width="68.32000000000001" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="890" y="312" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#3A4450" text-anchor="middle">SQL + RLS</text>
+<polyline points="840,570 895,570 895,360 940,360" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<polyline points="840,595 940,595" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="868.8" y="574" width="42.400000000000006" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="890" y="587" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#3A4450" text-anchor="middle">texto</text>
+<polyline points="840,650 910,650 910,705 940,705" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<polyline points="760,680 760,820 1500,820 1500,750" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="1040.76" y="799" width="178.48000000000002" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="1130" y="812" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#3A4450" text-anchor="middle">publica, comenta, métricas</text>
+<polyline points="1410,705 1290,705" fill="none" stroke="#8A929B" stroke-width="2.2" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#am)"/>
+<rect x="1302.88" y="684" width="94.24000000000001" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="1350" y="697" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#8A929B" text-anchor="middle">busca a mídia</text>
+<polyline points="800,280 800,140 1500,140 1500,160" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="1089.92" y="119" width="120.16000000000001" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="1150" y="132" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#3A4450" text-anchor="middle">avisos por e-mail</text>
+<polyline points="204,815 280,815" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="224.04" y="793" width="35.92" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="242" y="806" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">OIDC</text>
+<polyline points="490,835 600,835 600,710" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="507.36" y="814" width="81.28" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="548" y="827" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#3A4450" text-anchor="middle">nova versão</text>
+<text x="24" y="1122" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#5B6570" text-anchor="start">Só a borda recebe a internet. Banco, KMS, Vertex e storage só respondem a contas de serviço. Sem Telegram: avisos vão para o app e o e-mail.</text>
+</svg>
