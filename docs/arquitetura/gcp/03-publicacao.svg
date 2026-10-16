@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1710" height="570" viewBox="0 0 1710 570"><rect width="100%" height="100%" fill="#FBFBFA"/>
+<defs><marker id="an" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3A4450"/></marker></defs>
+<defs><marker id="aok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2E8B57"/></marker></defs>
+<defs><marker id="ano" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C9372C"/></marker></defs>
+<defs><marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8A929B"/></marker></defs>
+<text x="24" y="46" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#1B1F24" text-anchor="start">Uma publicação, do despertador ao aviso</text>
+<text x="24" y="74" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5B6570" text-anchor="start">Como o post sai e por que não duplica nem trava as outras contas.</text>
+<rect x="40" y="130.0" width="150" height="100" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="115.0" y="165.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">1. Scheduler</text>
+<text x="115.0" y="185.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">a cada minuto,</text>
+<text x="115.0" y="205.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">token OIDC</text>
+<rect x="225" y="130.0" width="150" height="100" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="300.0" y="165.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">2. Enfileira</text>
+<text x="300.0" y="185.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">um task por</text>
+<text x="300.0" y="205.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">post vencido</text>
+<rect x="410" y="130.0" width="150" height="100" rx="10" fill="#E0F4F4" stroke="#138A8A" stroke-width="2"/>
+<text x="485.0" y="155.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">3. Cloud Tasks</text>
+<text x="485.0" y="175.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">fila por rede:</text>
+<text x="485.0" y="195.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">Instagram não</text>
+<text x="485.0" y="215.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">atrasa LinkedIn</text>
+<polygon points="670.0,115.0 745.0,180 670.0,245.0 595.0,180" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="670.0" y="167.5" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">Trava</text>
+<text x="670.0" y="184.5" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">scheduled para</text>
+<text x="670.0" y="201.5" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">publishing?</text>
+<rect x="780" y="130.0" width="150" height="100" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="855.0" y="165.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">4. Token</text>
+<text x="855.0" y="185.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">KMS decifra</text>
+<text x="855.0" y="205.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">só na memória</text>
+<polygon points="1040.0,120.0 1115.0,180 1040.0,240.0 965.0,180" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="1040.0" y="176.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">Token</text>
+<text x="1040.0" y="193.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">válido?</text>
+<rect x="1150" y="130.0" width="150" height="100" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="1225.0" y="155.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">5. Publica</text>
+<text x="1225.0" y="175.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">a Meta busca a</text>
+<text x="1225.0" y="195.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">mídia por URL</text>
+<text x="1225.0" y="215.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">assinada</text>
+<rect x="1335" y="130.0" width="150" height="100" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="1410.0" y="165.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">6. Grava</text>
+<text x="1410.0" y="185.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">published ou failed;</text>
+<text x="1410.0" y="205.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">comenta o link</text>
+<rect x="1520" y="130.0" width="150" height="100" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
+<text x="1595.0" y="165.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">7. Avisa</text>
+<text x="1595.0" y="185.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">no app; e-mail</text>
+<text x="1595.0" y="205.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">se falhar</text>
+<polyline points="190,180 225,180" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="375,180 410,180" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="560,180 595,180" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="745,180 780,180" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="747.78" y="159" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="762.5" y="172" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">sim</text>
+<polyline points="930,180 965,180" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="1115,180 1150,180" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="1117.78" y="159" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="1132.5" y="172" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">sim</text>
+<polyline points="1300,180 1335,180" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="1485,180 1520,180" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="595" y="320" width="150" height="56" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="670.0" y="343.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">Ignora</text>
+<text x="670.0" y="363.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">outro worker pegou</text>
+<polyline points="670.0,245 670.0,320" fill="none" stroke="#8A929B" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#am)"/>
+<rect x="670.28" y="287" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="685.0" y="300" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#8A929B" text-anchor="middle">não</text>
+<rect x="965" y="320" width="150" height="56" rx="10" fill="#FDE8E6" stroke="#C9372C" stroke-width="2"/>
+<text x="1040.0" y="343.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">reauth_required</text>
+<text x="1040.0" y="363.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">pausa só essa rede</text>
+<polyline points="1040.0,240 1040.0,320" fill="none" stroke="#C9372C" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ano)"/>
+<rect x="1040.28" y="287" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="1055.0" y="300" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#C9372C" text-anchor="middle">não</text>
+<polyline points="1115,348 1595.0,348 1595.0,230.0" fill="none" stroke="#C9372C" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ano)"/>
+<rect x="1276.96" y="327" width="146.08" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="1350" y="340" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#C9372C" text-anchor="middle">avisa o administrador</text>
+<rect x="40" y="410" width="1630" height="130" rx="14" fill="#F3FAF5" stroke="#2E8B57" stroke-width="1.6"/>
+<text x="54" y="432" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#2E8B57" text-anchor="start">Por que não duplica nem trava</text>
+<text x="62" y="470" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1B1F24" text-anchor="start">1. A trava no banco acontece antes de chamar a rede.</text>
+<text x="892" y="470" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1B1F24" text-anchor="start">2. O worker responde 200 mesmo se a rede falhar: a falha vai para o banco, não volta para a fila.</text>
+<text x="62" y="504" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1B1F24" text-anchor="start">3. Publicação e comentário nunca são repetidos sozinhos.</text>
+<text x="892" y="504" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1B1F24" text-anchor="start">4. Uma fila por rede: lentidão ou limite de uma não atrasa as outras.</text>
+</svg>

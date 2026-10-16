@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1150" viewBox="0 0 1800 1150"><rect width="100%" height="100%" fill="#FBFBFA"/>
+<defs><marker id="an" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3A4450"/></marker></defs>
+<defs><marker id="aok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2E8B57"/></marker></defs>
+<defs><marker id="ano" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C9372C"/></marker></defs>
+<defs><marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8A929B"/></marker></defs>
+<text x="24" y="46" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#1B1F24" text-anchor="start">Contas e papéis</text>
+<text x="24" y="74" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5B6570" text-anchor="start">Pessoa física e empresa usam o mesmo modelo. O plano define limites; o papel define o que cada pessoa faz.</text>
+<text x="44" y="116" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#1B1F24" text-anchor="start">Dois tipos de conta, um modelo só</text>
+<rect x="44" y="135" width="270" height="130" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="179.0" y="175.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Conta pessoal (PF)</text>
+<text x="179.0" y="195.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">cobrança no CPF</text>
+<text x="179.0" y="215.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">1 assento: você é o dono</text>
+<text x="179.0" y="235.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">plano individual</text>
+<rect x="344" y="135" width="270" height="130" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="479.0" y="175.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Conta empresa (PJ)</text>
+<text x="479.0" y="195.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">cobrança no CNPJ</text>
+<text x="479.0" y="215.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">equipe com assentos</text>
+<text x="479.0" y="235.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">papel por pessoa</text>
+<rect x="44" y="315" width="570" height="90" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="329.0" y="355.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Conta (tenant)</text>
+<text x="329.0" y="375.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">mesmas tabelas, mesmo código, mesmo RLS</text>
+<polyline points="179,265 179,315" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<polyline points="479,265 479,315" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="44" y="455" width="275" height="110" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
+<text x="181.5" y="495.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Plano define limites</text>
+<text x="181.5" y="515.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">assentos, redes, posts</text>
+<text x="181.5" y="535.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e gerações por mês</text>
+<rect x="339" y="455" width="275" height="110" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="476.5" y="495.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Papel define ações</text>
+<text x="476.5" y="515.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">dono, administrador,</text>
+<text x="476.5" y="535.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">criador, usuário</text>
+<polyline points="179,405 179,455" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<polyline points="479,405 479,455" fill="none" stroke="#3A4450" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#an)"/>
+<rect x="44" y="605" width="570" height="90" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="329.0" y="645.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Uma pessoa, várias contas</text>
+<text x="329.0" y="665.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">agência ou freelancer troca de conta no topo da tela</text>
+<rect x="44" y="735" width="570" height="100" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="329.0" y="770.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">PF vira empresa sem migrar</text>
+<text x="329.0" y="790.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">sobe de plano, ganha assentos e convida a equipe;</text>
+<text x="329.0" y="810.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">nenhum dado muda de lugar</text>
+<text x="660" y="116" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#1B1F24" text-anchor="start">Quem pode o quê</text>
+<rect x="660" y="132" width="1112" height="62" rx="8" fill="#EEF1F4" stroke="none"/>
+<text x="1324.0" y="158" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Dono</text>
+<text x="1324.0" y="178" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#5B6570" text-anchor="middle">1 por conta</text>
+<text x="1452.0" y="158" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Administrador</text>
+<text x="1452.0" y="178" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#5B6570" text-anchor="middle">gere a conta</text>
+<text x="1580.0" y="158" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Criador</text>
+<text x="1580.0" y="178" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#5B6570" text-anchor="middle">produz conteúdo</text>
+<text x="1708.0" y="158" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Usuário</text>
+<text x="1708.0" y="178" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#5B6570" text-anchor="middle">lê e comenta</text>
+<text x="674" y="224" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#5B6570" text-anchor="start">Conteúdo</text>
+<rect x="660" y="234" width="1112" height="46" rx="6" fill="#FFFFFF" stroke="#ECEEF1"/>
+<text x="674" y="263" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Ver calendário, posts e métricas</text>
+<circle cx="1324.0" cy="257" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,257 1322.5,261.5 1330.0,252.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="257" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1446.5,257 1450.5,261.5 1458.0,252.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1580.0" cy="257" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1574.5,257 1578.5,261.5 1586.0,252.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1708.0" cy="257" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1702.5,257 1706.5,261.5 1714.0,252.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="674" y="309" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Comentar e dar feedback</text>
+<circle cx="1324.0" cy="303" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,303 1322.5,307.5 1330.0,298.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="303" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1446.5,303 1450.5,307.5 1458.0,298.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1580.0" cy="303" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1574.5,303 1578.5,307.5 1586.0,298.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1708.0" cy="303" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1702.5,303 1706.5,307.5 1714.0,298.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="660" y="326" width="1112" height="46" rx="6" fill="#FFFFFF" stroke="#ECEEF1"/>
+<text x="674" y="355" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Criar brief e campanha, gerar com IA</text>
+<circle cx="1324.0" cy="349" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,349 1322.5,353.5 1330.0,344.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="349" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1446.5,349 1450.5,353.5 1458.0,344.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1580.0" cy="349" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1574.5,349 1578.5,353.5 1586.0,344.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1708.0" cy="349" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<text x="674" y="401" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Editar posts e artes</text>
+<circle cx="1324.0" cy="395" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,395 1322.5,399.5 1330.0,390.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="395" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1446.5,395 1450.5,399.5 1458.0,390.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1580.0" cy="395" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1574.5,395 1578.5,399.5 1586.0,390.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1708.0" cy="395" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<rect x="660" y="418" width="1112" height="46" rx="6" fill="#FFFFFF" stroke="#ECEEF1"/>
+<text x="674" y="447" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Aprovar e agendar</text>
+<circle cx="1324.0" cy="441" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,441 1322.5,445.5 1330.0,436.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="441" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1446.5,441 1450.5,445.5 1458.0,436.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1580.0" cy="441" r="11" fill="#FFF4D6" stroke="#C98A00" stroke-width="2.4"/>
+<text x="1580.0" y="446" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#C98A00" text-anchor="middle">?</text>
+<circle cx="1708.0" cy="441" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<text x="674" y="493" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Pausar a publicação da conta</text>
+<circle cx="1324.0" cy="487" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,487 1322.5,491.5 1330.0,482.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="487" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1446.5,487 1450.5,491.5 1458.0,482.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1580.0" cy="487" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="1708.0" cy="487" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<text x="674" y="534" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#5B6570" text-anchor="start">Conta</text>
+<rect x="660" y="544" width="1112" height="46" rx="6" fill="#FFFFFF" stroke="#ECEEF1"/>
+<text x="674" y="573" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Conectar e desconectar redes</text>
+<circle cx="1324.0" cy="567" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,567 1322.5,571.5 1330.0,562.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="567" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1446.5,567 1450.5,571.5 1458.0,562.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1580.0" cy="567" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="1708.0" cy="567" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<text x="674" y="619" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Marca, voz e regras de estilo</text>
+<circle cx="1324.0" cy="613" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,613 1322.5,617.5 1330.0,608.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="613" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1446.5,613 1450.5,617.5 1458.0,608.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1580.0" cy="613" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="1708.0" cy="613" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<rect x="660" y="636" width="1112" height="46" rx="6" fill="#FFFFFF" stroke="#ECEEF1"/>
+<text x="674" y="665" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Convidar, remover e mudar papel</text>
+<circle cx="1324.0" cy="659" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,659 1322.5,663.5 1330.0,654.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="659" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1446.5,659 1450.5,663.5 1458.0,654.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1580.0" cy="659" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="1708.0" cy="659" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<text x="674" y="711" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Ver o log de auditoria</text>
+<circle cx="1324.0" cy="705" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,705 1322.5,709.5 1330.0,700.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="705" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1446.5,705 1450.5,709.5 1458.0,700.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1580.0" cy="705" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="1708.0" cy="705" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<text x="674" y="752" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#5B6570" text-anchor="start">Titularidade</text>
+<rect x="660" y="762" width="1112" height="46" rx="6" fill="#FFFFFF" stroke="#ECEEF1"/>
+<text x="674" y="791" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Plano, cobrança e notas fiscais</text>
+<circle cx="1324.0" cy="785" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,785 1322.5,789.5 1330.0,780.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="785" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="1580.0" cy="785" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="1708.0" cy="785" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<text x="674" y="837" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Exportar todos os dados (LGPD)</text>
+<circle cx="1324.0" cy="831" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,831 1322.5,835.5 1330.0,826.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="831" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="1580.0" cy="831" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="1708.0" cy="831" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<rect x="660" y="854" width="1112" height="46" rx="6" fill="#FFFFFF" stroke="#ECEEF1"/>
+<text x="674" y="883" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#1B1F24" text-anchor="start">Transferir a conta ou excluir</text>
+<circle cx="1324.0" cy="877" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="1318.5,877 1322.5,881.5 1330.0,872.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1452.0" cy="877" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="1580.0" cy="877" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="1708.0" cy="877" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="680" cy="930" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="674.5,930 678.5,934.5 686,925.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="700" y="935" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B1F24" text-anchor="start">pode</text>
+<circle cx="770" cy="930" r="11" fill="#FFF4D6" stroke="#C98A00" stroke-width="2.4"/>
+<text x="770" y="935" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#C98A00" text-anchor="middle">?</text>
+<text x="790" y="935" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B1F24" text-anchor="start">se o administrador liberar (padrão: criador manda para aprovação)</text>
+<circle cx="1280" cy="930" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<text x="1294" y="935" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B1F24" text-anchor="start">não pode</text>
+<rect x="44" y="960" width="1712" height="160" rx="14" fill="#FFFBF0" stroke="#C98A00" stroke-width="1.6"/>
+<text x="58" y="982" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#C98A00" text-anchor="start">Regras que o banco garante (testadas no CI)</text>
+<text x="66" y="1010" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">1. Toda conta tem exatamente um dono. Para sair, o dono transfere antes.</text>
+<text x="926" y="1010" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">2. Administrador não mexe no dono e não se promove a dono.</text>
+<text x="66" y="1044" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">3. Dono e administrador entram com MFA.</text>
+<text x="926" y="1044" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">4. Ação de conta ou de titularidade vai para o audit log e avisa o dono por e-mail.</text>
+<text x="66" y="1078" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">5. Limite do plano é checado no servidor, nunca só na tela.</text>
+<text x="926" y="1078" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">6. A equipe da plataforma fica fora deste quadro: console interno, auditado.</text>
+</svg>
