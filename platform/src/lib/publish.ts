@@ -9,6 +9,8 @@ import * as instagram from './channels/instagram';
 import * as linkedin from './channels/linkedin';
 import * as x from './channels/x';
 import { LINK_POLICY, linkCommentText } from './utm';
+import { canAutoPublish, notPublishableReason } from './capabilities';
+import { getPauseState } from './pause';
 import type { ScheduledPost, Generation, Variation } from './types';
 
 const MAX_ATTEMPTS = 3;
@@ -92,7 +94,12 @@ async function persistPublishedPost(s: ScheduledPost, result: Record<string, unk
   return postId;
 }
 
+// Formato que a rede não publica por API: falha na hora, sem retry e sem chamar a rede.
+class NotPublishableError extends Error {}
+
 async function publishToChannel(s: ScheduledPost): Promise<Record<string, unknown>> {
+  const format = s.variation?.format ?? null;
+  if (!canAutoPublish(s.channel, format)) throw new NotPublishableError(notPublishableReason(s.channel, format));
   const caption = s.caption_final || '';
   if (s.channel === 'instagram') {
     if (s.variation?.format === 'carousel' && Array.isArray(s.slide_urls) && s.slide_urls.length >= 2) {
@@ -159,19 +166,13 @@ async function postLinkComment(postUrn: string, text: string): Promise<Record<st
 // posts + marca published; em falha incrementa attempts e volta pra scheduled
 // (ou marca failed ao esgotar as tentativas).
 async function processOne(s: ScheduledPost): Promise<{ ok: boolean; error?: string }> {
+  let result: Record<string, unknown>;
   try {
-    const result = await publishToChannel(s);
-    const postId = await persistPublishedPost(s, result);
-    await db()
-      .from('scheduled_posts')
-      .update({ status: 'published', published_at: new Date().toISOString(), post_id: postId, last_error: null })
-      .eq('id', s.id);
-    await notify(`✅ Publicado em <b>${s.channel}</b> — ${escapeHtml((s.variation?.hook || '').slice(0, 80))}`);
-    return { ok: true };
+    result = await publishToChannel(s);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     const attempts = (s.attempts ?? 0) + 1;
-    const failed = attempts >= MAX_ATTEMPTS;
+    const failed = attempts >= MAX_ATTEMPTS || e instanceof NotPublishableError;
     await db()
       .from('scheduled_posts')
       .update({ status: failed ? 'failed' : 'scheduled', attempts, last_error: msg })
@@ -183,6 +184,27 @@ async function processOne(s: ScheduledPost): Promise<{ ok: boolean; error?: stri
     );
     return { ok: false, error: msg };
   }
+
+  // A rede aceitou: o post está no ar. Daqui em diante nada volta para 'scheduled',
+  // senão o próximo ciclo publicaria de novo. Falha ao gravar o histórico fica registrada.
+  let postId: string | null = null;
+  let persistError: string | null = null;
+  try {
+    postId = await persistPublishedPost(s, result);
+  } catch (e) {
+    persistError = `Publicado, mas o histórico não foi gravado: ${e instanceof Error ? e.message : String(e)}`;
+  }
+  await db()
+    .from('scheduled_posts')
+    .update({ status: 'published', published_at: new Date().toISOString(), post_id: postId, last_error: persistError })
+    .eq('id', s.id);
+  const hook = escapeHtml((s.variation?.hook || '').slice(0, 80));
+  await notify(
+    persistError
+      ? `⚠️ Publicado em <b>${s.channel}</b>, mas sem histórico (métricas não vão ligar a este post): ${escapeHtml(persistError)}`
+      : `✅ Publicado em <b>${s.channel}</b>: ${hook}`,
+  );
+  return { ok: true };
 }
 
 // Varre os vencidos, trava cada um (anti-corrida) e publica. Retorna o resumo.
@@ -190,7 +212,11 @@ export async function runPublishDue(nowIso = new Date().toISOString()): Promise<
   picked: number;
   published: number;
   failed: number;
+  paused?: boolean;
 }> {
+  // Pausa global (/settings): não toca em nenhuma rede; os vencidos esperam a retomada.
+  if ((await getPauseState()).paused) return { picked: 0, published: 0, failed: 0, paused: true };
+
   const { data, error } = await db()
     .from('scheduled_posts')
     .select('id')
