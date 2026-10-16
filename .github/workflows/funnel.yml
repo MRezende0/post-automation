@@ -23,7 +23,8 @@ jobs:
 
       - name: Collect Pilar funnel
         env:
-          PILAR_FUNCTIONS_URL: ${{ secrets.PILAR_FUNCTIONS_URL }}
+          # URL completa da função (variável do repo, não secreta); token é secret.
+          PILAR_FUNNEL_URL: ${{ vars.PILAR_FUNNEL_URL }}
           OPS_EXPORT_TOKEN: ${{ secrets.OPS_EXPORT_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
