@@ -49,17 +49,17 @@ export async function verifySessionToken(token: string | undefined | null): Prom
   const [exp, sig] = token.split('.');
   if (!exp || !sig) return false;
   if (Number(exp) < Date.now()) return false;
-  const expected = await hmac(exp);
-  // comparação em tempo constante
-  if (expected.length !== sig.length) return false;
-  let diff = 0;
-  for (let i = 0; i < expected.length; i += 1) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
-  return diff === 0;
+  return safeEqual(await hmac(exp), sig);
 }
 
 export async function checkPassword(input: string): Promise<boolean> {
   const expected = process.env.PLATFORM_PASSWORD;
   if (!expected) throw new Error('PLATFORM_PASSWORD ausente');
+  return safeEqual(input, expected);
+}
+
+// Comparação em tempo constante (não para no primeiro byte diferente).
+export function safeEqual(input: string, expected: string): boolean {
   const a = new TextEncoder().encode(input);
   const b = new TextEncoder().encode(expected);
   if (a.length !== b.length) return false;

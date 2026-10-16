@@ -1,10 +1,10 @@
 // Gate global: toda rota exige sessão válida, exceto login, o endpoint do cron
-// (protegido por CRON_SECRET) e assets estáticos.
+// (protegido por CRON_SECRET), o health check e assets estáticos.
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { SESSION_COOKIE, verifySessionToken } from '@/lib/auth';
 
-const PUBLIC_PREFIXES = ['/login', '/api/login', '/api/cron'];
+const PUBLIC_PREFIXES = ['/login', '/api/login', '/api/cron', '/api/health'];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

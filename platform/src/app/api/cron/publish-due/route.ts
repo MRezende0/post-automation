@@ -1,8 +1,9 @@
-// Endpoint do scheduler. Disparado pelo Vercel Cron (vercel.json, */10min).
-// Protegido por CRON_SECRET: o Vercel manda `Authorization: Bearer <CRON_SECRET>`
-// nos crons; aceito também ?key= e header x-cron-key pra teste manual.
+// Endpoint do scheduler, disparado pelo workflow publish-due (a cada 10min).
+// Exige `Authorization: Bearer <CRON_SECRET>`. Sem CRON_SECRET configurado, recusa tudo:
+// checagem de segredo falha fechada. Segredo na query string não é aceito (vaza em log).
 
 import { NextResponse } from 'next/server';
+import { safeEqual } from '@/lib/auth';
 import { runPublishDue } from '@/lib/publish';
 
 export const dynamic = 'force-dynamic';
@@ -10,13 +11,10 @@ export const maxDuration = 60;
 
 function authorized(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
-  if (!secret) return true; // sem segredo configurado → não bloqueia (dev)
-  const url = new URL(req.url);
-  const fromQuery = url.searchParams.get('key');
-  const fromHeader = req.headers.get('x-cron-key');
+  if (!secret) return false;
   const auth = req.headers.get('authorization');
-  const bearer = auth?.startsWith('Bearer ') ? auth.slice(7) : null;
-  return secret === fromQuery || secret === fromHeader || secret === bearer;
+  if (!auth?.startsWith('Bearer ')) return false;
+  return safeEqual(auth.slice(7), secret);
 }
 
 async function handle(req: Request) {
