@@ -13,6 +13,7 @@ import { retrieve } from './utils/rag.js';
 import { withRetry } from './utils/retry.js';
 import { resolveTenant } from './tenant.js';
 import { getActiveStyleRules, buildReflectionBlock } from './utils/reflections.js';
+import { croquisPromptList } from './utils/croquis.js';
 
 const MODEL_GENERATE = 'gemini-2.5-flash';
 const MODEL_SIMPLE = 'gemini-2.5-flash-lite';
@@ -166,10 +167,15 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
   const platformLine = plat
     ? `Características da plataforma: tom ${plat.tone}; limite ${plat.maxChars} caracteres${plat.thread ? ' por tweet — use THREAD quando a ideia não couber em um' : ''}; formatos ${plat.formats.join(' / ')}.`
     : '';
+  // Foto-pergunta: o modelo escolhe o croqui por id (o SVG sai do repo, nunca do modelo).
+  const sketchLine = plat?.formats?.includes('pergunta')
+    ? `Croquis disponíveis para o formato pergunta (use o id em "sketch"): ${croquisPromptList()}.`
+    : '';
   const system = [
     systemBase,
     `## Canal alvo: ${channel}`,
     platformLine,
+    sketchLine,
     channelPrompt,
     `## Pilar alvo: ${chosenPillar}`,
     pillarPrompt,
@@ -350,6 +356,14 @@ export function checkGuardrails(variation, { pillar, tenant = resolveTenant() } 
   for (const w of foraIcp) if (text.includes(w)) flags.push(`fora-icp:${w}`);
   for (const w of foraRecorte) if (text.includes(w)) flags.push(`fora-recorte:${w}`);
   if (pillar === 'prova' && /\d/.test(text)) flags.push('prova-com-numero:verificar-fonte');
+  if (variation?.format === 'pergunta') {
+    const question = String(variation.question || '').trim();
+    if (!question) flags.push('pergunta-ausente');
+    else {
+      if (question.split(/\s+/).length > 12) flags.push('pergunta-longa:max-12-palavras');
+      if (!question.endsWith('?')) flags.push('pergunta-sem-interrogacao');
+    }
+  }
   return { clean: flags.length === 0, flags };
 }
 
@@ -412,6 +426,7 @@ function parseJsonResponse(text) {
 
 function mockGeneration({ channel, pillar, angle }) {
   const isCarousel = pillar === 'dica' && channel === 'instagram';
+  const isPergunta = pillar === 'dor' && channel === 'instagram';
   return {
     channel,
     pillar,
@@ -424,12 +439,21 @@ function mockGeneration({ channel, pillar, angle }) {
         format: isCarousel ? 'carousel' : 'single',
         slides: isCarousel ? ['Slide 1', 'Slide 2', 'Slide 3', 'Slide 4', 'Slide 5'] : undefined,
       },
-      {
-        id: 2,
-        hook: `[MOCK ${channel}/${pillar} #2] Cena: 23h, escritório vazio, planilha aberta.`,
-        body: `[MOCK] Variação narrativa.\n\nCena.\nVirada.\nFechamento.`,
-        format: 'single',
-      },
+      isPergunta
+        ? {
+          id: 2,
+          hook: `[MOCK ${channel}/${pillar} #2] Você cobra a revisão 3 ou faz de graça?`,
+          body: `[MOCK] Foto-pergunta.\n\nContexto curto.\nResponde aqui embaixo.`,
+          format: 'pergunta',
+          question: 'Você cobra a revisão 3 ou faz de graça?',
+          sketch: 'nuvem-revisao',
+        }
+        : {
+          id: 2,
+          hook: `[MOCK ${channel}/${pillar} #2] Cena: 23h, escritório vazio, planilha aberta.`,
+          body: `[MOCK] Variação narrativa.\n\nCena.\nVirada.\nFechamento.`,
+          format: 'single',
+        },
       {
         id: 3,
         hook: `[MOCK ${channel}/${pillar} #3] 5 sinais que você tá refém da planilha`,

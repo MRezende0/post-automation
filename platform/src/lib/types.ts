@@ -10,7 +10,10 @@ export type Variation = {
   id: number;
   hook?: string;
   body?: string;
-  format?: 'single' | 'carousel' | 'thread';
+  format?: 'single' | 'carousel' | 'thread' | 'pergunta';
+  // foto-pergunta: a pergunta da arte e o id do croqui da biblioteca
+  question?: string;
+  sketch?: string;
   slides?: unknown[];
   hashtags?: string[];
   // carrossel renderizado na geração (o Node tem Puppeteer; a plataforma não)

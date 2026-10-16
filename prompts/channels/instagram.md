@@ -13,6 +13,11 @@
 
 - `single` — 1 imagem 1080×1350 (4:5)
 - `carousel` — 5–8 slides 1080×1350. Slide 1 = hook visual. Último = CTA suave ou frase de fechamento.
+  Slides do meio como objeto `{"title", "description"}`: o título é o item, a descrição é a ação + por quê.
+- `pergunta`: foto-pergunta, um croqui técnico (prancha, cota, carimbo, régua...) e uma pergunta de
+  no máximo 12 palavras que puxa resposta nos comentários ("Você cobra a revisão 3 ou faz de graça?").
+  Campos: `question` (a pergunta, com ?) e `sketch` (id da lista de croquis). A legenda é curta:
+  2 a 4 linhas de contexto e o pedido de resposta. Pilar principal: dor; também dica.
 
 ## Estrutura recomendada por pilar
 

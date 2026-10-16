@@ -24,9 +24,20 @@ const PILAR = {
   // geração (generate.js) pra diferenciar tom/limite/formato. `publish:false` =
   // canal gerável mas ainda não publicável (Twitter aguarda API/app review).
   platforms: {
-    instagram: { tone: 'visual e direto, leve', maxChars: 2200, formats: ['single', 'carousel'], thread: false, rendersImage: true, publish: true },
+    instagram: { tone: 'visual e direto, leve', maxChars: 2200, formats: ['single', 'carousel', 'pergunta'], thread: false, rendersImage: true, publish: true },
     linkedin:  { tone: 'profissional, parágrafos espaçados', maxChars: 3000, formats: ['text', 'carousel'], thread: false, rendersImage: true, publish: true },
     twitter:   { tone: 'informal, cru, conversado', maxChars: 280, formats: ['single', 'thread'], thread: true, rendersImage: false, publish: false },
+  },
+
+  // Marca nas artes (templates novos leem as cores daqui, não do HTML). ADR 0002:
+  // a plataforma é produto próprio, então a marca é dado do tenant.
+  brand: {
+    name: 'Pilar',
+    handle: '@pilar.software',
+    colors: {
+      paper: '#FCFCFC', ink: '#1A1A1A', inkSoft: '#3C3C3C', muted: '#6B6B6B',
+      accent: '#A4EC86', accentInk: '#2C5016', line: '#E7E5E1',
+    },
   },
 
   // Taxonomia de conteúdo — alimenta o bandit de seleção (ranking.js).

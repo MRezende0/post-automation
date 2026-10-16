@@ -24,6 +24,8 @@ const TEMPLATE_MAP = {
     building: 'templates/instagram/building.html',
     prova: 'templates/instagram/prova.html',
     hero: 'templates/instagram/hero.html',
+    pergunta: 'templates/instagram/pergunta.html',
+    slide: 'templates/instagram/slide.html',
   },
   linkedin: {
     dor: 'templates/linkedin/single.html',
@@ -52,6 +54,26 @@ const BADGE_BY_PILLAR = {
   anuncio: 'NOVIDADE',
 };
 
+// Cores da marca do tenant como variáveis CSS (templates novos usam {{{brand_css}}}).
+const DEFAULT_COLORS = {
+  paper: '#FCFCFC', ink: '#1A1A1A', inkSoft: '#3C3C3C', muted: '#6B6B6B',
+  accent: '#A4EC86', accentInk: '#2C5016', line: '#E7E5E1',
+};
+
+export function brandCss(colors = {}) {
+  const c = { ...DEFAULT_COLORS, ...colors };
+  return `:root{--paper:${c.paper};--ink:${c.ink};--ink-soft:${c.inkSoft};--muted:${c.muted};`
+    + `--accent:${c.accent};--accent-ink:${c.accentInk};--line:${c.line};}`;
+}
+
+// {{{chave}}} entra sem escape: só para conteúdo do repo (SVG da biblioteca de croquis,
+// CSS da marca), nunca para texto vindo do modelo.
+function applyRaw(html, raw = {}) {
+  let out = html;
+  for (const [key, value] of Object.entries(raw)) out = out.replaceAll(`{{{${key}}}}`, String(value ?? ''));
+  return out.replace(/\{\{\{[a-z_]+\}\}\}/g, '');
+}
+
 function applyVars(html, vars, pillar) {
   let out = html;
   const merged = {
@@ -72,7 +94,7 @@ function applyVars(html, vars, pillar) {
     subtitle: vars.subtitle || vars.body || '',
     cta: vars.cta || 'Saiba mais',
     // undefined não pode apagar o padrão (o carrossel repassa brand/handle opcionais)
-    ...Object.fromEntries(Object.entries(vars).filter(([, v]) => v !== undefined)),
+    ...Object.fromEntries(Object.entries(vars).filter(([, v]) => v !== undefined && typeof v !== 'object')),
   };
   for (const [key, value] of Object.entries(merged)) {
     out = out.replaceAll(`{{${key}}}`, escapeHtml(String(value)));
@@ -106,7 +128,7 @@ async function renderWithBrowser(browser, { channel, pillar, vars, outPath }) {
   }
 
   const template = await readFile(templateFile, 'utf8');
-  const html = applyVars(template, vars || {}, pillar);
+  const html = applyVars(applyRaw(template, { brand_css: brandCss(vars?.colors), ...(vars?.raw || {}) }), vars || {}, pillar);
 
   if (!existsSync(TMP_DIR)) await mkdir(TMP_DIR, { recursive: true });
   const finalOut = outPath || path.join(TMP_DIR, `${channel}-${pillar}-${Date.now()}.png`);
@@ -132,24 +154,30 @@ export async function renderImage({ channel, pillar, vars, outPath }) {
   }
 }
 
-export function slideVars(slide, i, total, { brand, handle } = {}) {
+// Capa no 1º slide, fechamento no último, itens numerados no meio.
+export function slideVars(slide, i, total, { brand, handle, badge, colors } = {}) {
   const isText = typeof slide === 'string';
   const title = isText ? slide : (slide?.title || '');
   const description = isText ? '' : (slide?.description || '');
-  return { step: `${i + 1}/${total}`, title, description, hook: title, body: description, brand, handle };
+  const kind = i === 0 ? 'capa' : (i === total - 1 && total > 2 ? 'fim' : 'item');
+  const hint = kind === 'capa' ? 'Arrasta para o lado →' : kind === 'fim' ? 'Salva para usar no próximo projeto' : '';
+  return {
+    kind, step: `${i + 1}/${total}`, number: String(i), title, description, hint,
+    hook: title, body: description, brand, handle, badge, colors,
+  };
 }
 
 // Slides do carrossel sempre no desenho vertical do Instagram (1080x1350): o mesmo
 // PNG serve o carrossel do IG e as páginas do PDF do LinkedIn.
-export async function renderCarousel({ pillar, slides, brand, handle, slideChannel = 'instagram' }) {
+export async function renderCarousel({ pillar, slides, brand, handle, badge, colors, slideChannel = 'instagram' }) {
   const out = [];
   const stamp = Date.now();
   const browser = await launchBrowser();
   try {
     for (let i = 0; i < slides.length; i += 1) {
-      const vars = slideVars(slides[i], i, slides.length, { brand, handle });
+      const vars = slideVars(slides[i], i, slides.length, { brand, handle, badge: badge ?? BADGE_BY_PILLAR[pillar], colors });
       const outPath = path.join(TMP_DIR, `${slideChannel}-${pillar}-carousel-${stamp}-${i}.png`);
-      out.push(await renderWithBrowser(browser, { channel: slideChannel, pillar, vars, outPath }));
+      out.push(await renderWithBrowser(browser, { channel: slideChannel, pillar: 'slide', vars, outPath }));
     }
   } finally {
     await browser.close();
@@ -192,4 +220,14 @@ export async function renderPdf({ imagePaths, outPath, slideChannel = 'instagram
   }
 }
 
-export const _internal = { applyVars, resolveTemplate, DIMENSIONS, buildPdfHtml, slideVars };
+// Foto-pergunta: croqui da biblioteca (SVG do repo) + pergunta curta.
+export async function renderPergunta({ question, sketchSvg, brand, handle, colors, eyebrow = 'Pergunta', cta = 'Responde nos comentários', outPath }) {
+  return renderImage({
+    channel: 'instagram',
+    pillar: 'pergunta',
+    vars: { question, eyebrow, cta, brand, handle, colors, raw: { sketch: sketchSvg } },
+    outPath,
+  });
+}
+
+export const _internal = { applyVars, applyRaw, resolveTemplate, DIMENSIONS, buildPdfHtml, slideVars };

@@ -25,7 +25,7 @@ const ANGLES = {
   prova: ['citacao_direta', 'antes_depois', 'lista_uso', 'case_curto', 'cliente_dificil'],
 };
 
-const FORMATS = ['single', 'carousel'];
+const FORMATS = ['single', 'carousel', 'pergunta'];
 
 // Normaliza a taxonomia recebida: aceita parcial (cai nos defaults Pilar campo a
 // campo) ou ausente. Único ponto que conhece os defaults — o resto é genérico.
@@ -146,8 +146,11 @@ export function chooseNextFormat(publishedHistory, { windowSize = 12 } = {}, tax
 
   const recent = hist.slice(-windowSize).map(p => p.format).filter(Boolean);
   const lastThree = recent.slice(-3);
-  // 3 do formato primário seguidos → varia pro próximo formato (se houver)
-  if (lastThree.length === 3 && lastThree.every(f => f === formats[0])) return formats[1] ?? null;
+  // 3 seguidos do mesmo formato → o formato menos usado na janela (empate: ordem da lista)
+  if (lastThree.length === 3 && lastThree.every(f => f === lastThree[0])) {
+    const count = f => recent.filter(r => r === f).length;
+    return formats.filter(f => f !== lastThree[0]).sort((a, b) => count(a) - count(b))[0] ?? null;
+  }
   return null;
 }
 
