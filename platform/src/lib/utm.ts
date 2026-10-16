@@ -24,11 +24,13 @@ export const ALWAYS_ON_CAMPAIGN = 'sempre-on';
 export const LINK_POLICY: Record<Channel, LinkPolicy> = {
   instagram: 'bio',
   linkedin: 'first_comment',
+  twitter: 'reply',
 };
 
 const SOURCE_BY_CHANNEL: Record<Channel, string> = {
   instagram: 'instagram',
   linkedin: 'linkedin',
+  twitter: 'x',
 };
 
 export function shortId(uuid: string): string {

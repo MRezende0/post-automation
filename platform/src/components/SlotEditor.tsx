@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { weekdayName } from '@/lib/format';
-import type { PublishSlot, Channel } from '@/lib/types';
+import { CHANNELS, type PublishSlot, type Channel } from '@/lib/types';
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0]; // seg..sáb, dom
 
@@ -47,8 +47,11 @@ export default function SlotEditor({ initial }: { initial: PublishSlot[] }) {
             onChange={(e) => setChannel(e.target.value as Channel)}
             className="rounded-md border border-edge bg-ink px-2 py-1.5 text-sm"
           >
-            <option value="instagram">instagram</option>
-            <option value="linkedin">linkedin</option>
+            {CHANNELS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
           <select
             value={weekday}
@@ -84,7 +87,7 @@ export default function SlotEditor({ initial }: { initial: PublishSlot[] }) {
         </div>
       </div>
 
-      {(['instagram', 'linkedin'] as Channel[]).map((c) => (
+      {CHANNELS.map((c) => (
         <div key={c} className="card space-y-2">
           <h2 className="label uppercase">{c}</h2>
           {byChannel(c).length === 0 && <p className="text-sm text-muted">Sem slots.</p>}

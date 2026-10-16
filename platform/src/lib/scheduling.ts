@@ -7,6 +7,7 @@ import { notify, escapeHtml } from './telegram';
 import { composeCaption } from './caption';
 import { nextFreeSlot } from './slots';
 import { distributionUtm } from './utm';
+import { splitThread } from './thread';
 import type { PendingApproval, Variation, ImageRef, MediaKind } from './types';
 
 function fmtLocal(iso: string): string {
@@ -23,7 +24,8 @@ async function loadPending(pendingId: string): Promise<PendingApproval | null> {
   return (data?.[0] as PendingApproval) ?? null;
 }
 
-function mediaKindOf(channel: string, variation: Variation, imageUrl: string | null): MediaKind {
+function mediaKindOf(channel: string, variation: Variation, imageUrl: string | null, caption = ''): MediaKind {
+  if (channel === 'twitter') return splitThread(caption).length > 1 ? 'thread' : imageUrl ? 'image' : 'text';
   if (variation.format === 'carousel') return 'carousel';
   if (channel === 'linkedin' && !imageUrl) return 'text';
   return 'image';
@@ -88,7 +90,7 @@ export async function approvePending(input: ApproveInput): Promise<{ scheduledFo
       scheduled_for: scheduledFor,
       source_pending_id: p.pending_id,
       campaign_id: campaignId,
-      media_kind: mediaKindOf(p.channel, variation, imageUrl),
+      media_kind: mediaKindOf(p.channel, variation, imageUrl, captionFinal),
       utm,
     })
     .select('id')

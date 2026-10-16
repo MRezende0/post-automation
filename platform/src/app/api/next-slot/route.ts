@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { nextFreeSlot } from '@/lib/slots';
-import type { Channel } from '@/lib/types';
+import { CHANNELS, type Channel } from '@/lib/types';
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const channel = searchParams.get('channel') as Channel | null;
-    if (channel !== 'instagram' && channel !== 'linkedin') {
+    if (!channel || !CHANNELS.includes(channel)) {
       return NextResponse.json({ error: 'channel inválido' }, { status: 400 });
     }
     const slot = await nextFreeSlot(channel);

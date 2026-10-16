@@ -7,6 +7,7 @@ import { db } from './supabase';
 import { notify, escapeHtml } from './telegram';
 import * as instagram from './channels/instagram';
 import * as linkedin from './channels/linkedin';
+import * as x from './channels/x';
 import { LINK_POLICY, linkCommentText } from './utm';
 import type { ScheduledPost, Generation, Variation } from './types';
 
@@ -107,7 +108,37 @@ async function publishToChannel(s: ScheduledPost): Promise<Record<string, unknow
     }
     return result;
   }
+  if (s.channel === 'twitter') return publishX(s, caption);
   throw new Error(`Canal desconhecido: ${s.channel}`);
+}
+
+// X (SPEC 002): thread pela legenda, link UTM na resposta ao último tweet. Depois que o
+// 1º tweet saiu, nada aqui pode lançar: retry duplicaria o post. Erros vão no resultado.
+async function publishX(s: ScheduledPost, caption: string): Promise<Record<string, unknown>> {
+  const result: Record<string, unknown> = await x.publishThread({
+    tweets: x.splitThread(caption),
+    imageUrl: s.image_url,
+    videoUrl: s.video_url,
+  });
+  if (result.partial_error) {
+    await notify(`⚠️ Thread no X saiu incompleta: ${escapeHtml(String(result.partial_error))}`);
+    return result;
+  }
+  if (LINK_POLICY.twitter === 'reply' && s.utm?.url) {
+    const ids = result.ids as string[];
+    result.link_reply = await postLinkReply(ids[ids.length - 1], linkCommentText(s.utm));
+  }
+  return result;
+}
+
+async function postLinkReply(tweetId: string, text: string): Promise<Record<string, unknown>> {
+  try {
+    return { ok: true, ...(await x.replyWithLink(tweetId, text)) };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    await notify(`⚠️ Post no X saiu, mas a resposta com o link falhou: ${escapeHtml(msg)}`);
+    return { ok: false, error: msg, text };
+  }
 }
 
 // O post já está no ar: falha no comentário NÃO pode virar retry (duplicaria o post).

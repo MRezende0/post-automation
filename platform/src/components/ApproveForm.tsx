@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fmtDateTime, isoToLocalInput, localInputToIso } from '@/lib/format';
+import { splitThread } from '@/lib/thread';
 import type { PendingApproval } from '@/lib/types';
 
 export default function ApproveForm({
@@ -31,6 +32,7 @@ export default function ApproveForm({
   const [error, setError] = useState('');
 
   const chosenVariation = useMemo(() => variations.find((v) => v.id === captionId), [variations, captionId]);
+  const tweets = useMemo(() => (pending.channel === 'twitter' ? splitThread(captionText) : []), [pending.channel, captionText]);
 
   function selectCaption(id: number) {
     setCaptionId(id);
@@ -129,6 +131,22 @@ export default function ApproveForm({
             restaurar sugestão
           </button>
         </p>
+        {tweets.length > 0 && (
+          <div className="space-y-1">
+            <p className="text-xs text-muted">
+              {tweets.length === 1 ? 'Sai como 1 tweet.' : `Sai como thread de ${tweets.length} tweets.`} Linha em branco
+              separa os tweets.
+            </p>
+            <ol className="space-y-1">
+              {tweets.map((t, i) => (
+                <li key={i} className="rounded-md border border-edge px-3 py-2 text-sm">
+                  <p className="whitespace-pre-line">{t}</p>
+                  <p className="mt-1 text-right text-xs text-muted">{t.length}/280</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
       </section>
 
       {/* 2. Arte */}
