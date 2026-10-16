@@ -12,7 +12,7 @@
 ## Formatos suportados
 
 - `text` — post de texto, opcional 1 imagem 1200×627
-- `carousel` — PDF com 5–10 slides 1080×1080. Funciona muito bem em B2B.
+- `carousel` — PDF com 5–10 slides 1080×1350 (os mesmos slides do carrossel do Instagram). Funciona muito bem em B2B.
 
 ## Estrutura recomendada por pilar
 

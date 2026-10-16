@@ -4,7 +4,7 @@
 import { readFile } from 'node:fs/promises';
 import { generatePost, judgeVariations, critiqueVariations, polishPost, checkGuardrails, composeCaption } from './generate.js';
 import { resolveTenant } from './tenant.js';
-import { renderImage, renderCarousel } from './render-image.js';
+import { renderImage, renderCarousel, renderPdf } from './render-image.js';
 import { rankVariations } from './utils/ranking.js';
 import { uploadImage } from './utils/storage.js';
 import { generateBackground, SCENE_BY_PILLAR, pickScenes } from './utils/image-gen.js';
@@ -136,12 +136,42 @@ export async function prepareGeneration({ channel, seed, regenNote, tenant = res
     }
   }
 
+  // Carrossel: slides (e o PDF, no LinkedIn) saem prontos da geração. A plataforma
+  // não tem Puppeteer; sem isso o carrossel aprovado lá saía como imagem única.
+  if (rendersImage && !DRY_RUN) {
+    for (const v of generation.variations) {
+      if (!isRenderableCarousel(v)) continue;
+      try {
+        Object.assign(v, await buildCarouselMedia({ channel, pillar: generation.pillar, variation: v }));
+        log(`Carrossel variação #${v.id}: ${v.slideUrls.length} slides${v.documentUrl ? ' + PDF' : ''}`);
+      } catch (e) {
+        log(`Falha ao renderizar carrossel #${v.id}: ${e.message}`); // segue como imagem única
+      }
+    }
+  }
+
   return { generation, topId, images };
+}
+
+const MAX_SLIDES = 10; // limite do carrossel do Instagram
+
+export function isRenderableCarousel(variation) {
+  return variation?.format === 'carousel' && Array.isArray(variation.slides) && variation.slides.length >= 2;
+}
+
+// Renderiza os slides, sobe cada PNG e, no LinkedIn, monta e sobe o PDF (post de documento).
+export async function buildCarouselMedia({ channel, pillar, variation }) {
+  const files = await renderCarousel({ pillar, slides: variation.slides.slice(0, MAX_SLIDES) });
+  const slideUrls = [];
+  for (const file of files) slideUrls.push((await uploadImage(file)).url);
+  if (channel !== 'linkedin') return { slideUrls };
+  const pdf = await renderPdf({ imagePaths: files });
+  return { slideUrls, documentUrl: (await uploadImage(pdf)).url };
 }
 
 // Renderiza cada slide do carrossel e sobe pro storage, retornando as URLs.
 async function buildCarouselUrls({ channel, pillar, variation }) {
-  const files = await renderCarousel({ channel, pillar, slides: variation.slides || [] });
+  const files = await renderCarousel({ pillar, slides: variation.slides || [] });
   const urls = [];
   for (const file of files) {
     const uploaded = await uploadImage(file);
@@ -168,6 +198,9 @@ export async function publishToChannel({ channel, variation, imageUrl, pillar })
     return { ...r, imageUrl: used };
   }
   if (channel === 'linkedin') {
+    if (variation.documentUrl) {
+      return linkedin.publishDocument({ text: caption, documentUrl: variation.documentUrl, title: variation.hook, dryRun: DRY_RUN });
+    }
     const r = await linkedin.publishText({ text: caption, imageUrl, dryRun: DRY_RUN });
     return { ...r, imageUrl: imageUrl || null };
   }

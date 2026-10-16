@@ -102,7 +102,9 @@ async function publishToChannel(s: ScheduledPost): Promise<Record<string, unknow
     return instagram.publishSingle(s.image_url, caption);
   }
   if (s.channel === 'linkedin') {
-    const result: Record<string, unknown> = await linkedin.publishText(caption, s.image_url);
+    const result: Record<string, unknown> = s.document_url
+      ? await linkedin.publishDocument(caption, s.document_url, s.variation?.hook)
+      : await linkedin.publishText(caption, s.image_url);
     if (LINK_POLICY.linkedin === 'first_comment' && s.utm?.url && result.id) {
       result.link_comment = await postLinkComment(String(result.id), linkCommentText(s.utm));
     }

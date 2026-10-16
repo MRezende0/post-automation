@@ -107,13 +107,61 @@ export async function publishText({ text, imagePath, dryRun = false }) {
   return apiJson('POST', '/posts', body, { retry: false });
 }
 
-export async function publishCarousel({ text, imagePaths, dryRun = false }) {
-  if (dryRun) {
-    return { id: 'mock_li_carousel_id', dryRun: true, channel: 'linkedin', slides: imagePaths?.length || 0 };
+// Título que aparece em cima do documento no feed: o gancho do post, curto.
+export function documentTitle(hook) {
+  const clean = String(hook || '').replace(/\s+/g, ' ').trim();
+  if (!clean) return 'Pilar';
+  return clean.length > 80 ? `${clean.slice(0, 79).trimEnd()}…` : clean;
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// O LinkedIn processa o PDF depois do upload; espera AVAILABLE (até ~20s) antes de postar.
+async function waitDocumentAvailable(documentUrn, tries = 10, intervalMs = 2000) {
+  let status = 'UNKNOWN';
+  for (let i = 0; i < tries; i += 1) {
+    const doc = await apiJson('GET', `/documents/${encodeURIComponent(documentUrn)}`);
+    status = doc?.status ?? 'UNKNOWN';
+    if (status === 'AVAILABLE') return status;
+    if (status === 'PROCESSING_FAILED') throw new Error('LinkedIn não conseguiu processar o PDF (PROCESSING_FAILED)');
+    await sleep(intervalMs);
   }
-  // LinkedIn Posts API aceita até 1 imagem inline; pra carrossel usa-se PDF como document.
-  // Implementação real exige montar PDF dos slides PNG (TODO).
-  throw new Error('LinkedIn carousel requer PDF — TODO: gerar PDF dos slides e usar /documents endpoint');
+  return status;
+}
+
+// Carrossel do LinkedIn = post de documento (PDF já renderizado e público, uma página por slide).
+// Docs: learn.microsoft.com/linkedin/marketing/community-management/shares/documents-api
+export async function publishDocument({ text, documentUrl, title, dryRun = false }) {
+  if (dryRun) {
+    return { id: 'mock_li_document_id', dryRun: true, channel: 'linkedin', documentUrl };
+  }
+  const init = await apiJson('POST', '/documents?action=initializeUpload', {
+    initializeUploadRequest: { owner: authorUrn() },
+  });
+  const uploadUrl = init.value?.uploadUrl;
+  const documentUrn = init.value?.document;
+  if (!uploadUrl || !documentUrn) throw new Error('Resposta inesperada de documents initializeUpload');
+
+  const pdfRes = await fetch(documentUrl);
+  if (!pdfRes.ok) throw new Error(`Falha ao baixar PDF ${documentUrl}: ${pdfRes.status}`);
+  const upRes = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token()}` },
+    body: Buffer.from(await pdfRes.arrayBuffer()),
+  });
+  if (!upRes.ok) throw new Error(`Falha upload PDF LinkedIn: ${upRes.status} ${await upRes.text()}`);
+
+  const documentStatus = await waitDocumentAvailable(documentUrn);
+  const r = await apiJson('POST', '/posts', {
+    author: authorUrn(),
+    commentary: text,
+    visibility: 'PUBLIC',
+    distribution: { feedDistribution: 'MAIN_FEED', targetEntities: [], thirdPartyDistributionChannels: [] },
+    content: { media: { title: documentTitle(title), id: documentUrn } },
+    lifecycleState: 'PUBLISHED',
+    isReshareDisabledByAuthor: false,
+  }, { retry: false });
+  return { id: r.id, channel: 'linkedin', document: documentUrn, documentStatus, documentUrl };
 }
 
 // Coleta likes/comentários de um post via socialActions. Impressões exigem

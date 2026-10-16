@@ -13,6 +13,9 @@ export type Variation = {
   format?: 'single' | 'carousel' | 'thread';
   slides?: unknown[];
   hashtags?: string[];
+  // carrossel renderizado na geração (o Node tem Puppeteer; a plataforma não)
+  slideUrls?: string[];
+  documentUrl?: string;
 };
 
 export type ImageRef = { id: number; url: string | null; path?: string };
