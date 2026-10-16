@@ -159,9 +159,11 @@ jobs:
           fi
           ./gitleaks git . --no-banner --redact --log-opts="$range"
 
-      # A plataforma é o que fica exposto na internet: vulnerabilidade crítica em dependência
-      # de produção bloqueia. (O pacote raiz roda só no GitHub Actions; o crítico dele vem do
-      # node-telegram-bot-api e está no roadmap da SPEC 006.)
+      # A raiz (jobs do GitHub Actions) bloqueia a partir de "alta". A plataforma, que fica
+      # exposta na internet, bloqueia "crítica": o que sobra nela é o PostCSS embutido no
+      # Next 15 (só em build, corrige no Next 16, mudança maior que entra à parte).
+      - name: Dependências da raiz
+        run: npm audit --omit=dev --audit-level=high
       - name: Dependências da plataforma
         working-directory: platform
         run: npm audit --omit=dev --audit-level=critical
