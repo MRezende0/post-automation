@@ -1,7 +1,7 @@
 // linkedin.js — publica post (texto + imagem ou PDF carrossel) via LinkedIn API v2.
 // Chamado por: src/index.js. Docs: learn.microsoft.com/linkedin/marketing/integrations/community-management/shares/posts-api
 //
-// Fluxo /rest/posts (versão 202405+):
+// Fluxo /rest/posts (versionado, header LinkedIn-Version):
 //   1. POST /rest/images?action=initializeUpload (registra slot)
 //   2. PUT upload binário no URL retornado
 //   3. POST /rest/posts com content.media referenciando image URN
@@ -11,7 +11,8 @@ import { existsSync } from 'node:fs';
 import { withRetry } from '../utils/retry.js';
 
 const API_BASE = 'https://api.linkedin.com/rest';
-const VERSION = '202405';
+// LinkedIn desativa cada versão ~1 ano depois; versão vencida devolve erro em toda chamada.
+const VERSION = process.env.LINKEDIN_VERSION || '202610';
 
 function token() {
   const t = process.env.LINKEDIN_ACCESS_TOKEN;

@@ -4,7 +4,8 @@
 // Docs: learn.microsoft.com/linkedin/marketing/community-management/shares/posts-api
 
 const API_BASE = 'https://api.linkedin.com/rest';
-const VERSION = '202405';
+// LinkedIn desativa cada versão ~1 ano depois; versão vencida devolve erro em toda chamada.
+const VERSION = process.env.LINKEDIN_VERSION || '202610';
 
 function token(): string {
   const t = process.env.LINKEDIN_ACCESS_TOKEN;
