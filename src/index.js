@@ -16,6 +16,8 @@ import { sendApprovalRequest, notify } from './telegram.js';
 import { getUpcomingHoliday, holidayContext } from './utils/holidays.js';
 import { getActiveCampaign, campaignContext } from './utils/calendar.js';
 import { resolveTenant } from './tenant.js';
+import { usingSupabase } from './utils/db.js';
+import { syncCampaigns, campaignSlug } from './utils/campaign-sync.js';
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const PUBLISH_TEST = process.env.PUBLISH_TEST === 'true';
@@ -44,6 +46,17 @@ async function main() {
     await notify(`🗑️ Pending ${e.channel} expirou (>7d) e foi descartado`, { dryRun: DRY_RUN }).catch(() => {});
   }
 
+  // Espelha campaigns.yaml na tabela: a plataforma usa o slug no UTM da distribuição.
+  // Best-effort: falha no sync não impede a geração.
+  if (usingSupabase() && !DRY_RUN) {
+    try {
+      const n = await syncCampaigns({ tenantId: tenant.id });
+      log(`Campanhas sincronizadas: ${n}`);
+    } catch (e) {
+      log(`Falha no sync de campanhas: ${e.message}`);
+    }
+  }
+
   const queueItem = await popNext();
   const seed = queueItem || {};
   log(`Item da fila: ${queueItem ? JSON.stringify(queueItem) : 'vazio, gera automático'}`);
@@ -54,6 +67,7 @@ async function main() {
     const campaign = await getActiveCampaign(new Date());
     if (campaign) {
       campaignActive = true;
+      seed.campaign = campaignSlug(campaign); // vira utm_campaign na aprovação
       if (campaign.pillar) seed.pillar = campaign.pillar;
       if (campaign.angle) seed.angle = campaign.angle;
       seed.context = [seed.context, campaignContext(campaign)].filter(Boolean).join('\n\n');
