@@ -83,8 +83,9 @@ jobs:
           done
           exit $falhou
 
-      # As migrations usam o que o Supabase já traz (papéis da API, auth.users, auth.uid()).
-      # Num Postgres puro, o bootstrap cria o equivalente mínimo.
+      # As migrations antigas usam o que o Supabase já traz (papéis da API, auth.users, auth.uid()).
+      # Num Postgres puro, o bootstrap cria o equivalente mínimo. Desde a 0015 nada ativo depende
+      # do schema auth, e o teste de RLS reprova se voltar a depender (SPEC 008).
       - name: Base do Supabase
         run: psql "$PGURL" -v ON_ERROR_STOP=1 -q -f supabase/ci/bootstrap.sql
 
