@@ -5,6 +5,9 @@
 // das APIs (IG/LinkedIn não expõem timeline de terceiros; scraping = risco). Então
 // o fluxo é: VOCÊ passa o texto do post-alvo → o agente rascunha → você aprova/cola.
 //
+// Caminho principal desde a SPEC 005: área Engajamento da plataforma (/engage), que usa a voz
+// aprendida, publica pela API com seu clique e registra tudo. Este script fica pro terminal.
+//
 // Rodar: ENGAGE_TARGET="texto do post alvo" npm run engage
 //    ou: npm run engage "texto do post alvo"
 

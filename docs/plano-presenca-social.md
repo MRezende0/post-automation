@@ -266,7 +266,9 @@ plataforma; a Pilar só abre o link para cá.
 **Por mês:** relatório da fase e proposta da próxima campanha.
 
 **Limites:** nunca publica sem aprovação (N1); nunca comenta nem manda mensagem direta
-sozinho (termos das redes); comentário de valor continua pelo `engage.js`, com você colando.
+sozinho (termos das redes). Comentário de valor no LinkedIn sai pela área Engajamento da
+plataforma (SPEC 005): o agente sugere, você escolhe, edita e clica; a API publica com no máximo
+20 por dia e 60 s entre um e outro. Mensagem direta segue fora.
 
 ## 10. Backlog para este repo
 

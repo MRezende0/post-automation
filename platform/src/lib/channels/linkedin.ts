@@ -62,15 +62,19 @@ async function uploadImageFromUrl(imageUrl: string): Promise<string> {
   return imageUrn;
 }
 
-// Comentário do autor no próprio post (link no 1º comentário: LinkedIn derruba alcance
-// de post com link no corpo). O URN do post vai codificado no path (Rest.li 2.0).
+// Comentário como o perfil: no próprio post (link no 1º comentário: LinkedIn derruba alcance
+// de post com link no corpo) ou no post de outra pessoa (SPEC 005). Com `parentComment`, é
+// resposta a um comentário: o alvo do path vira o comentário. URNs vão codificadas no path.
 // Docs: learn.microsoft.com/linkedin/marketing/community-management/shares/comments-api
-export async function commentOnPost(postUrn: string, text: string): Promise<{ id: string | null }> {
-  const r = await apiJson('POST', `/socialActions/${encodeURIComponent(postUrn)}/comments`, {
-    actor: authorUrn(),
-    object: postUrn,
-    message: { text },
-  });
+export async function commentOnPost(
+  postUrn: string,
+  text: string,
+  { parentComment }: { parentComment?: string | null } = {},
+): Promise<{ id: string | null }> {
+  const target = parentComment || postUrn;
+  const body: Record<string, unknown> = { actor: authorUrn(), object: postUrn, message: { text } };
+  if (parentComment) body.parentComment = parentComment;
+  const r = await apiJson('POST', `/socialActions/${encodeURIComponent(target)}/comments`, body);
   return { id: r?.id ?? null };
 }
 
