@@ -1,6 +1,8 @@
 // gemini.ts: chamada direta ao Gemini (REST, sem SDK) pra rascunhos interativos da
 // plataforma, que não podem esperar o cron. Server-only: a chave nunca vai pro browser.
 
+import { UserError } from './errors';
+
 const MODEL = process.env.GEMINI_MODEL_ENGAGE || 'gemini-2.5-flash';
 
 export async function generateJson(prompt: string, { maxOutputTokens = 800 } = {}): Promise<unknown> {
@@ -23,6 +25,6 @@ export async function generateJson(prompt: string, { maxOutputTokens = 800 } = {
   } catch {
     const match = cleaned.match(/\{[\s\S]*\}/);
     if (match) return JSON.parse(match[0]);
-    throw new Error('O Gemini devolveu algo que não é JSON. Tente gerar de novo.');
+    throw new UserError('O Gemini devolveu algo que não é JSON. Tente gerar de novo.');
   }
 }

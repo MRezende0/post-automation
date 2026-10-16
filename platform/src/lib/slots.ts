@@ -3,7 +3,8 @@
 // Os slots são definidos em horário local (PUBLISH_TZ_OFFSET, default BRT -3);
 // tudo é resolvido pra UTC, que é como o scheduled_for é gravado.
 
-import { db } from './supabase';
+import type { TenantDb } from './tenant-db';
+import { UserError } from './errors';
 import type { Channel, PublishSlot } from './types';
 
 const HORIZON_DAYS = 90;
@@ -13,18 +14,17 @@ export function tzOffsetHours(): number {
   return Number.isFinite(v) ? v : -3;
 }
 
-export async function getActiveSlots(channel?: Channel): Promise<PublishSlot[]> {
-  let q = db().from('publish_slots').select('*').eq('active', true);
+export async function getActiveSlots(t: TenantDb, channel?: Channel): Promise<PublishSlot[]> {
+  let q = t.select('publish_slots').eq('active', true);
   if (channel) q = q.eq('channel', channel);
   const { data, error } = await q.order('weekday').order('hour');
   if (error) throw new Error(`Falha ao ler publish_slots: ${error.message}`);
   return (data || []) as PublishSlot[];
 }
 
-async function occupiedEpochs(channel: Channel): Promise<Set<number>> {
-  const { data, error } = await db()
-    .from('scheduled_posts')
-    .select('scheduled_for')
+async function occupiedEpochs(t: TenantDb, channel: Channel): Promise<Set<number>> {
+  const { data, error } = await t
+    .select('scheduled_posts', 'scheduled_for')
     .eq('channel', channel)
     .in('status', ['scheduled', 'publishing']);
   if (error) throw new Error(`Falha ao ler scheduled_posts: ${error.message}`);
@@ -54,12 +54,23 @@ export function upcomingSlotEpochs(slots: PublishSlot[], fromMs: number, horizon
 }
 
 // Próximo slot livre do canal (ISO) ou null se a grade está vazia/saturada.
-export async function nextFreeSlot(channel: Channel, fromMs = Date.now()): Promise<string | null> {
-  const slots = await getActiveSlots(channel);
+export async function nextFreeSlot(t: TenantDb, channel: Channel, fromMs = Date.now()): Promise<string | null> {
+  const slots = await getActiveSlots(t, channel);
   if (!slots.length) return null;
-  const occupied = await occupiedEpochs(channel);
+  const occupied = await occupiedEpochs(t, channel);
   for (const epoch of upcomingSlotEpochs(slots, fromMs)) {
     if (!occupied.has(epoch)) return new Date(epoch).toISOString();
   }
   return null;
+}
+
+export async function addSlot(t: TenantDb, slot: { channel: Channel; weekday: number; hour: number; minute: number }): Promise<void> {
+  const { error } = await t.insert('publish_slots', { ...slot, active: true });
+  if (error) throw new Error(`Falha ao criar slot: ${error.message}`);
+}
+
+export async function removeSlot(t: TenantDb, id: string): Promise<void> {
+  const { data, error } = await t.delete('publish_slots').eq('id', id).select('id');
+  if (error) throw new Error(`Falha ao remover slot: ${error.message}`);
+  if (!data?.length) throw new UserError('Slot não encontrado. Recarregue a página.');
 }

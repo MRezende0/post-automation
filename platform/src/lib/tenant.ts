@@ -1,2 +1,7 @@
-// Tenant desta instalação (ADR 0002). Um por enquanto; toda tela nova já filtra por ele.
-export const TENANT_ID = process.env.TENANT_ID || 'pilar';
+// Id de tenant (ADR 0005): o mesmo formato que a tabela `tenants` aceita. Sem dependência,
+// pra caber no middleware (edge).
+const TENANT_RE = /^[a-z0-9][a-z0-9-]{1,39}$/;
+
+export function isTenantId(value: unknown): value is string {
+  return typeof value === 'string' && TENANT_RE.test(value);
+}

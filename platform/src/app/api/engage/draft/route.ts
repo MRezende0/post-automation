@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
 import { parseDraftInput } from '@/lib/engage-model';
 import { draftEngagement } from '@/lib/engage';
+import { requireTenant } from '@/lib/session';
+import { apiError, badRequest } from '@/lib/api';
 
 export async function POST(req: Request) {
   try {
+    const t = await requireTenant();
     const parsed = parseDraftInput(await req.json().catch(() => null));
-    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
-    return NextResponse.json({ ok: true, ...(await draftEngagement(parsed.value)) });
+    if (!parsed.ok) return badRequest(parsed.error);
+    return NextResponse.json({ ok: true, ...(await draftEngagement(t, parsed.value)) });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'erro' }, { status: 500 });
+    return apiError(e, 'api/engage/draft');
   }
 }

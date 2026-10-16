@@ -1,9 +1,10 @@
-// publish.ts — coração do scheduler. Publica os scheduled_posts vencidos e grava
+// publish.ts: coração do scheduler. Publica os scheduled_posts vencidos e grava
 // o post durável em `posts` (porta de queue.js:markPublishedToDb, preservando a
 // mesma observabilidade que o backend Node gravava). Idempotente via lock de
 // status (scheduled → publishing) com update condicional anti-corrida.
 
 import { db } from './supabase';
+import { tenantDb, type TenantDb } from './tenant-db';
 import { notify, escapeHtml } from './telegram';
 import * as instagram from './channels/instagram';
 import * as linkedin from './channels/linkedin';
@@ -17,14 +18,13 @@ const MAX_ATTEMPTS = 3;
 
 // Insere o post durável + todas as variações + eventos. Espelha o backend pra
 // que bandit/métricas/calibração continuem funcionando igual.
-async function persistPublishedPost(s: ScheduledPost, result: Record<string, unknown>): Promise<string> {
+async function persistPublishedPost(t: TenantDb, s: ScheduledPost, result: Record<string, unknown>): Promise<string> {
   const gen: Generation = (s.generation || { variations: [] }) as Generation;
   const chosenId = s.chosen_variation_id ?? null;
   const v = s.variation || ({} as Variation);
 
-  const { data: post, error } = await db()
-    .from('posts')
-    .insert({
+  const { data: post, error } = await t
+    .insert('posts', {
       pillar: s.pillar,
       angle: s.angle ?? null,
       channel: s.channel,
@@ -60,11 +60,11 @@ async function persistPublishedPost(s: ScheduledPost, result: Record<string, unk
       heuristic_score: gen.heuristic_scores?.[String(vv.id)] ?? null,
       was_chosen: vv.id === chosenId,
     }));
-    const { error: ve } = await db().from('post_variants').insert(rows);
+    const { error: ve } = await t.insert('post_variants', rows);
     if (ve) console.error(`[publish] falha ao gravar variações: ${ve.message}`);
   }
 
-  await db().from('post_events').insert({
+  await t.insert('post_events', {
     post_id: postId,
     type: 'published',
     payload: {
@@ -80,7 +80,7 @@ async function persistPublishedPost(s: ScheduledPost, result: Record<string, unk
 
   if ((gen as any).judge_scores || gen.critic) {
     const chosenScore = (gen as any).judge_scores?.find?.((x: any) => x.id === chosenId);
-    await db().from('post_events').insert({
+    await t.insert('post_events', {
       post_id: postId,
       type: 'judge_decision',
       payload: {
@@ -167,7 +167,7 @@ async function postLinkComment(postUrn: string, text: string): Promise<Record<st
 // Tenta publicar UM scheduled_post já travado em 'publishing'. Em sucesso grava
 // posts + marca published; em falha incrementa attempts e volta pra scheduled
 // (ou marca failed ao esgotar as tentativas).
-async function processOne(s: ScheduledPost): Promise<{ ok: boolean; error?: string }> {
+async function processOne(t: TenantDb, s: ScheduledPost): Promise<{ ok: boolean; error?: string }> {
   let result: Record<string, unknown>;
   try {
     result = await publishToChannel(s);
@@ -175,9 +175,8 @@ async function processOne(s: ScheduledPost): Promise<{ ok: boolean; error?: stri
     const msg = e instanceof Error ? e.message : String(e);
     const attempts = (s.attempts ?? 0) + 1;
     const failed = attempts >= MAX_ATTEMPTS || e instanceof NotPublishableError;
-    await db()
-      .from('scheduled_posts')
-      .update({ status: failed ? 'failed' : 'scheduled', attempts, last_error: msg })
+    await t
+      .update('scheduled_posts', { status: failed ? 'failed' : 'scheduled', attempts, last_error: msg })
       .eq('id', s.id);
     await notify(
       failed
@@ -192,13 +191,12 @@ async function processOne(s: ScheduledPost): Promise<{ ok: boolean; error?: stri
   let postId: string | null = null;
   let persistError: string | null = null;
   try {
-    postId = await persistPublishedPost(s, result);
+    postId = await persistPublishedPost(t, s, result);
   } catch (e) {
     persistError = `Publicado, mas o histórico não foi gravado: ${e instanceof Error ? e.message : String(e)}`;
   }
-  await db()
-    .from('scheduled_posts')
-    .update({ status: 'published', published_at: new Date().toISOString(), post_id: postId, last_error: persistError })
+  await t
+    .update('scheduled_posts', { status: 'published', published_at: new Date().toISOString(), post_id: postId, last_error: persistError })
     .eq('id', s.id);
   const hook = escapeHtml((s.variation?.hook || '').slice(0, 80));
   await notify(
@@ -209,43 +207,53 @@ async function processOne(s: ScheduledPost): Promise<{ ok: boolean; error?: stri
   return { ok: true };
 }
 
-// Varre os vencidos, trava cada um (anti-corrida) e publica. Retorna o resumo.
+// Varre os vencidos de TODOS os tenants (job de sistema), trava cada um (anti-corrida) e
+// publica no escopo do tenant dono da linha. Tenant pausado em /settings fica de fora: os
+// vencidos dele esperam a retomada.
 export async function runPublishDue(nowIso = new Date().toISOString()): Promise<{
   picked: number;
   published: number;
   failed: number;
-  paused?: boolean;
+  paused: string[];
 }> {
-  // Pausa global (/settings): não toca em nenhuma rede; os vencidos esperam a retomada.
-  if ((await getPauseState()).paused) return { picked: 0, published: 0, failed: 0, paused: true };
-
+  // sistema: leitura entre tenants, só id e dono
   const { data, error } = await db()
     .from('scheduled_posts')
-    .select('id')
+    .select('id,tenant_id')
     .eq('status', 'scheduled')
     .lte('scheduled_for', nowIso)
     .order('scheduled_for', { ascending: true })
     .limit(20);
   if (error) throw new Error(`Falha ao buscar vencidos: ${error.message}`);
 
+  const pausedByTenant = new Map<string, boolean>();
+  const isPaused = async (tenantId: string) => {
+    if (!pausedByTenant.has(tenantId)) pausedByTenant.set(tenantId, (await getPauseState(tenantDb(tenantId))).paused);
+    return pausedByTenant.get(tenantId)!;
+  };
+
+  let picked = 0;
   let published = 0;
   let failed = 0;
-  const ids = (data || []).map((r) => r.id as string);
 
-  for (const id of ids) {
+  for (const row of data || []) {
+    const tenantId = row.tenant_id as string;
+    if (await isPaused(tenantId)) continue;
+    const t = tenantDb(tenantId);
     // lock: só pega se ainda está 'scheduled' (outro cron não levou)
-    const { data: locked, error: le } = await db()
-      .from('scheduled_posts')
-      .update({ status: 'publishing' })
-      .eq('id', id)
+    const { data: locked, error: le } = await t
+      .update('scheduled_posts', { status: 'publishing' })
+      .eq('id', row.id as string)
       .eq('status', 'scheduled')
       .select('*')
       .single();
     if (le || !locked) continue; // outro processo levou ou sumiu
-    const res = await processOne(locked as ScheduledPost);
+    picked += 1;
+    const res = await processOne(t, locked as ScheduledPost);
     if (res.ok) published += 1;
     else failed += 1;
   }
 
-  return { picked: ids.length, published, failed };
+  const paused = [...pausedByTenant].filter(([, p]) => p).map(([id]) => id);
+  return { picked, published, failed, paused };
 }

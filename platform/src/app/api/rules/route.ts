@@ -1,25 +1,29 @@
 import { NextResponse } from 'next/server';
 import { parseRuleInput, parseRulePatch } from '@/lib/learning';
 import { createRule, updateRule } from '@/lib/feedback';
+import { requireTenant } from '@/lib/session';
+import { apiError, badRequest } from '@/lib/api';
 
 export async function POST(req: Request) {
   try {
+    const t = await requireTenant();
     const parsed = parseRuleInput(await req.json().catch(() => null));
-    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
-    const id = await createRule(parsed.value);
+    if (!parsed.ok) return badRequest(parsed.error);
+    const id = await createRule(t, parsed.value);
     return NextResponse.json({ ok: true, id });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'erro' }, { status: 500 });
+    return apiError(e, 'api/rules');
   }
 }
 
 export async function PATCH(req: Request) {
   try {
+    const t = await requireTenant();
     const parsed = parseRulePatch(await req.json().catch(() => null));
-    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
-    await updateRule(parsed.value.id, parsed.value);
+    if (!parsed.ok) return badRequest(parsed.error);
+    await updateRule(t, parsed.value.id, parsed.value);
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'erro' }, { status: 500 });
+    return apiError(e, 'api/rules');
   }
 }

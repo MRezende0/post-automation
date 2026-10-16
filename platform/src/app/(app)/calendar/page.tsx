@@ -2,16 +2,19 @@ import { getScheduled } from '@/lib/queries';
 import { fmtDate, fmtTime } from '@/lib/format';
 import ScheduledCard from '@/components/ScheduledCard';
 import type { ScheduledPost } from '@/lib/types';
+import { pageTenant } from '@/lib/session';
+import { pageError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
 export default async function CalendarPage() {
+  const t = await pageTenant();
   let posts: ScheduledPost[] = [];
   let err = '';
   try {
-    posts = await getScheduled(['scheduled', 'publishing', 'failed']);
+    posts = await getScheduled(t, ['scheduled', 'publishing', 'failed']);
   } catch (e) {
-    err = e instanceof Error ? e.message : 'erro';
+    err = pageError(e, 'page/calendar');
   }
 
   // agrupa por dia (no fuso editorial)

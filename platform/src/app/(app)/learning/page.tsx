@@ -2,17 +2,20 @@ import { getRules, getRecentFeedback } from '@/lib/feedback';
 import RulesEditor from '@/components/RulesEditor';
 import FeedbackList from '@/components/FeedbackList';
 import type { Feedback, StyleRule } from '@/lib/learning';
+import { pageTenant } from '@/lib/session';
+import { pageError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
 export default async function LearningPage() {
+  const t = await pageTenant();
   let rules: StyleRule[] = [];
   let feedback: Feedback[] = [];
   let err = '';
   try {
-    [rules, feedback] = await Promise.all([getRules(), getRecentFeedback(30)]);
+    [rules, feedback] = await Promise.all([getRules(t), getRecentFeedback(t, 30)]);
   } catch (e) {
-    err = e instanceof Error ? e.message : 'erro';
+    err = pageError(e, 'page/learning');
   }
 
   return (

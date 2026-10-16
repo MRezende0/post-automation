@@ -3,6 +3,8 @@ import { getPendings } from '@/lib/queries';
 import { fmtDateTime } from '@/lib/format';
 import { groupIdeas, roleOf } from '@/lib/ideas-model';
 import type { PendingApproval } from '@/lib/types';
+import { pageTenant } from '@/lib/session';
+import { pageError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,12 +22,13 @@ function DbHint({ message }: { message: string }) {
 }
 
 export default async function InboxPage() {
+  const t = await pageTenant();
   let pendings: PendingApproval[] = [];
   let err = '';
   try {
-    pendings = await getPendings();
+    pendings = await getPendings(t);
   } catch (e) {
-    err = e instanceof Error ? e.message : 'erro';
+    err = pageError(e, 'page/inbox');
   }
 
   // Redes da mesma rodada viram um cartão só (SPEC 003 R3); pendência avulsa abre a tela antiga.
