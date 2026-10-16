@@ -80,7 +80,8 @@ métricas do perfil pessoal (só por CSV).
 5. Tela `/engage`: formulário (link, texto, autor), opções editáveis, "Comentar no LinkedIn" e
    "Copiar e abrir o post"; contador da semana contra a meta (`tenant.engage.weeklyGoal`, padrão
    15); histórico; contas-alvo com atalho para a atividade.
-6. `engage.js` (terminal) passa a usar o mesmo prompt.
+6. `engage.js` (terminal) continua para quem estiver sem a plataforma; o caminho principal é `/engage`.
+   O prompt da plataforma vive em `platform/src/lib/engage-model.ts`.
 
 ## Critérios de aceite
 

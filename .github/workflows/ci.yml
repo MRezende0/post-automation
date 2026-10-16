@@ -120,6 +120,10 @@ jobs:
           insert into style_rules (tenant_id, rule, aspect, source) values ('pilar', 'sem emoji', 'tom', 'manual');
           insert into publishing_controls (tenant_id, paused) values ('pilar', false);
           insert into post_events (tenant_id, post_id, type, payload) values ('pilar', null, 'idea_decision', '{}');
+          insert into engagements (tenant_id, kind, target_url, target_urn, parent_comment_urn, target_text, options, status)
+            values ('pilar', 'resposta', 'https://www.linkedin.com/feed/update/urn:li:activity:1/', 'urn:li:activity:1',
+                    'urn:li:comment:(urn:li:activity:1,2)', 'texto', '["a"]', 'publicado');
+          insert into engage_targets (tenant_id, name, profile_url) values ('pilar', 'Ana', 'https://www.linkedin.com/in/ana/');
           SQL
 
   migrate:
