@@ -41,6 +41,7 @@ export type PendingApproval = {
   id: string;
   pending_id: string;
   channel: Channel;
+  brief_id?: string | null; // ideia da rodada (SPEC 003): redes da mesma ideia compartilham
   generation: Generation;
   top_id?: number;
   images?: ImageRef[];

@@ -92,6 +92,7 @@ export async function approvePending(input: ApproveInput): Promise<{ scheduledFo
       status: 'scheduled',
       scheduled_for: scheduledFor,
       source_pending_id: p.pending_id,
+      brief_id: p.brief_id ?? null,
       campaign_id: campaignId,
       media_kind: mediaKindOf(p.channel, variation, imageUrl, captionFinal),
       utm,
