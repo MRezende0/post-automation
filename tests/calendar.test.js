@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import yaml from 'js-yaml';
 import { campaignContext, _internal } from '../src/utils/calendar.js';
 
 const { pickActiveCampaign } = _internal;
@@ -35,6 +36,21 @@ describe('calendar.js', () => {
         { name: 'B', start: '2026-06-05', end: '2026-06-10' },
       ];
       expect(pickActiveCampaign(two, utc(2026, 6, 6))?.name).toBe('A');
+    });
+  });
+
+  describe('datas vindas do YAML', () => {
+    it('respeita start/end sem aspas (js-yaml devolve Date)', () => {
+      const camps = yaml.load(`
+- name: Futura
+  start: 2026-11-16
+  end: 2026-12-20
+`);
+      expect(camps[0].start).toBeInstanceOf(Date);
+      expect(pickActiveCampaign(camps, utc(2026, 10, 20))).toBeNull();
+      expect(pickActiveCampaign(camps, utc(2026, 11, 16))?.name).toBe('Futura');
+      expect(pickActiveCampaign(camps, utc(2026, 12, 20))?.name).toBe('Futura');
+      expect(pickActiveCampaign(camps, utc(2026, 12, 21))).toBeNull();
     });
   });
 
