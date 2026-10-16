@@ -1,14 +1,16 @@
-// reflect.js — REFLECTION (npm run reflect). Aprende ESTILO com as edições
-// humanas: compara a legenda sugerida (composeCaption da variação gerada) com a
-// caption_final editada no cockpit, e via Gemini deriva REGRAS duráveis, salvas
-// por tenant em style_rules. As regras entram nas próximas gerações (generate.js).
-// Roda por tenant (env TENANT_ID). Best-effort: sem API / sem edições → no-op.
+// reflect.js: REFLECTION (npm run reflect). Aprende com o editor: compara a legenda
+// sugerida (composeCaption da variação gerada) com a caption_final editada no cockpit,
+// lê o feedback "o que não gostei" (SPEC 003 R4) e via Gemini deriva REGRAS duráveis,
+// com aspecto e canal, salvas por tenant em style_rules. Regras de visual vão pro
+// prompt de imagem; as outras, pro de texto (generate.js). Regras manuais (criadas ou
+// editadas na plataforma) nunca são desligadas aqui.
+// Roda por tenant (env TENANT_ID). Best-effort: sem API / sem sinal → no-op.
 
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { usingSupabase, supabase } from './utils/db.js';
 import { composeCaption } from './generate.js';
-import { hasMeaningfulEdit } from './utils/reflections.js';
+import { hasMeaningfulEdit, buildReflectPrompt, normalizeDerivedRules } from './utils/reflections.js';
 import { resolveTenant } from './tenant.js';
 
 const MODEL = 'gemini-2.5-flash';
@@ -39,48 +41,52 @@ async function collectEdits(tenantId, { limit = 40 } = {}) {
   return pairs;
 }
 
-// Gemini extrai regras GENERALIZÁVEIS dos pares. Best-effort → [].
-async function deriveStyleRules(pairs, tenant) {
+// Feedback do editor dos últimos `days` dias (positivo e negativo, todos os aspectos).
+async function collectFeedback(tenantId, { days = 90, limit = 60 } = {}) {
+  const since = new Date(Date.now() - days * 86400 * 1000).toISOString();
+  const { data, error } = await supabase()
+    .from('feedback')
+    .select('channel,aspect,sentiment,note,excerpt,created_at')
+    .eq('tenant_id', tenantId)
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(`Falha ao ler feedback: ${error.message}`);
+  return data || [];
+}
+
+// Gemini extrai regras GENERALIZÁVEIS das edições e feedbacks. Best-effort → [].
+async function deriveStyleRules({ pairs, feedback }, tenant) {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || !pairs.length) return [];
+  if (!apiKey || (!pairs.length && !feedback.length)) return [];
   const client = new GoogleGenAI({ apiKey });
-
-  const sample = pairs.slice(0, 12)
-    .map((p, i) => `Edição ${i + 1} (${p.channel}):\nSUGERIDO: ${p.suggested}\nEDITADO: ${p.edited}`)
-    .join('\n\n');
-
-  const prompt = [
-    `Você analisa como o editor de ${tenant.name} corrige os posts gerados antes de aprovar.`,
-    'Compare SUGERIDO vs EDITADO e extraia REGRAS DE ESTILO que GENERALIZAM — padrões que',
-    'se repetem ou refletem claramente a preferência de voz. NÃO inclua correção pontual de',
-    'um único post. Seja conservador: no máximo 5 regras, cada uma uma frase imperativa curta.',
-    '',
-    sample,
-    '',
-    'Responda só JSON: {"rules":["regra curta 1","regra curta 2"]}',
-  ].join('\n');
+  const prompt = buildReflectPrompt({ tenantName: tenant.name, pairs, feedback });
 
   try {
     const res = await client.models.generateContent({
       model: MODEL,
       contents: prompt,
-      config: { maxOutputTokens: 600, responseMimeType: 'application/json' },
+      config: { maxOutputTokens: 1200, responseMimeType: 'application/json' },
     });
     const cleaned = (res.text || '{}').replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    const parsed = JSON.parse(cleaned);
-    return Array.isArray(parsed.rules) ? parsed.rules.filter(Boolean).slice(0, 5) : [];
+    return normalizeDerivedRules(JSON.parse(cleaned), { channels: tenant.channels });
   } catch (e) {
     log(`falha ao derivar regras: ${e.message}`);
     return [];
   }
 }
 
-// Snapshot do aprendizado atual: desativa as regras antigas do tenant e grava as
-// novas. Mantém histórico (active=false) em vez de apagar.
-async function persistRules(tenantId, rules, sampleCount) {
+// Snapshot do aprendizado atual: desativa as regras DERIVADAS antigas do tenant e grava
+// as novas. Manual fica como está. Mantém histórico (active=false) em vez de apagar.
+async function persistRules(tenantId, rules, evidence) {
   if (!rules.length) return;
-  await supabase().from('style_rules').update({ active: false }).eq('tenant_id', tenantId).eq('active', true);
-  const rows = rules.map(rule => ({ tenant_id: tenantId, rule, evidence: { samples: sampleCount } }));
+  await supabase()
+    .from('style_rules')
+    .update({ active: false })
+    .eq('tenant_id', tenantId)
+    .eq('active', true)
+    .in('source', ['edicao', 'feedback']);
+  const rows = rules.map(r => ({ tenant_id: tenantId, ...r, evidence }));
   const { error } = await supabase().from('style_rules').insert(rows);
   if (error) throw new Error(`Falha ao gravar style_rules: ${error.message}`);
 }
@@ -93,18 +99,18 @@ async function main() {
   }
   log(`reflection | tenant=${tenant.id}`);
 
-  const pairs = await collectEdits(tenant.id);
-  log(`${pairs.length} edição(ões) significativa(s) encontrada(s)`);
-  if (!pairs.length) {
-    log('Nada a aprender por ora (aprove editando a legenda no cockpit pra gerar sinal).');
+  const [pairs, feedback] = await Promise.all([collectEdits(tenant.id), collectFeedback(tenant.id)]);
+  log(`${pairs.length} edição(ões) significativa(s), ${feedback.length} feedback(s)`);
+  if (!pairs.length && !feedback.length) {
+    log('Nada a aprender por ora (edite a legenda ou registre feedback na plataforma pra gerar sinal).');
     return;
   }
 
-  const rules = await deriveStyleRules(pairs, tenant);
+  const rules = await deriveStyleRules({ pairs, feedback }, tenant);
   log(`${rules.length} regra(s) derivada(s): ${JSON.stringify(rules)}`);
   if (!rules.length) return;
 
-  await persistRules(tenant.id, rules, pairs.length);
+  await persistRules(tenant.id, rules, { samples: pairs.length, edits: pairs.length, feedback: feedback.length });
   log('Regras atualizadas — entram nas próximas gerações.');
 }
 

@@ -9,6 +9,7 @@ import { pickSketch, sketchSvg } from './utils/croquis.js';
 import { rankVariations } from './utils/ranking.js';
 import { uploadImage } from './utils/storage.js';
 import { generateBackground, SCENE_BY_PILLAR, pickScenes } from './utils/image-gen.js';
+import { getVisualGuidance } from './utils/feedback.js';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
 import * as twitter from './channels/twitter.js';
@@ -22,7 +23,8 @@ async function renderHero({ channel, pillar, variation, scene, tenant }) {
   if (channel !== 'instagram') return null;
   try {
     const chosenScene = scene || SCENE_BY_PILLAR[pillar] || SCENE_BY_PILLAR.default;
-    const bgPath = await generateBackground({ scene: chosenScene });
+    const guidance = await getVisualGuidance(tenant.id, channel);
+    const bgPath = await generateBackground({ scene: chosenScene, guidance });
     if (!bgPath) return null;
     const bg = `data:image/png;base64,${(await readFile(bgPath)).toString('base64')}`;
     return await renderImage({
