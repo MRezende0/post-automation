@@ -14,6 +14,7 @@ import { withRetry } from './utils/retry.js';
 import { resolveTenant } from './tenant.js';
 import { getActiveStyleRules, buildReflectionBlock } from './utils/reflections.js';
 import { croquisPromptList } from './utils/croquis.js';
+import { getRecentFeedback, buildFeedbackBlock } from './utils/feedback.js';
 
 const MODEL_GENERATE = 'gemini-2.5-flash';
 const MODEL_SIMPLE = 'gemini-2.5-flash-lite';
@@ -160,8 +161,14 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
   ]);
 
   const ragBlock = await retrieveKnowledge({ pillar: chosenPillar, angle: chosenAngle, context });
-  // Regras de estilo aprendidas com edições anteriores (reflection). Best-effort.
-  const reflectionBlock = buildReflectionBlock(await getActiveStyleRules(tenant.id, { channel }));
+  // Regras de estilo aprendidas (reflection) + feedback recente do editor. Best-effort.
+  // O de visual não entra aqui: vai pro prompt de imagem (getVisualGuidance).
+  const [styleRules, recentFeedback] = await Promise.all([
+    getActiveStyleRules(tenant.id, { channel }),
+    getRecentFeedback(tenant.id, { channel }),
+  ]);
+  const reflectionBlock = buildReflectionBlock(styleRules);
+  const feedbackBlock = buildFeedbackBlock(recentFeedback);
 
   const plat = tenant.platforms?.[channel];
   const platformLine = plat
@@ -181,6 +188,7 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     pillarPrompt,
     ragBlock,
     reflectionBlock,
+    feedbackBlock,
     buildFewShot(examples),
   ].filter(Boolean).join('\n\n---\n\n');
 

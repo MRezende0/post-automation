@@ -74,12 +74,13 @@ export function pickScenes(pillar, n) {
 }
 
 // Monta um prompt de cena a partir do post. `scene` é uma descrição visual curta
-// (metáfora da dor/tema); evita citar texto a ser escrito.
-export function buildImagePrompt(scene) {
-  return `${STYLE}\nSubject: ${scene}`;
+// (metáfora da dor/tema); evita citar texto a ser escrito. `guidance` = regras e
+// feedback de visual do editor (feedback.js:getVisualGuidance).
+export function buildImagePrompt(scene, guidance = '') {
+  return [`${STYLE}\nSubject: ${scene}`, guidance].filter(Boolean).join('\n\n');
 }
 
-export async function generateBackground({ scene, outPath } = {}) {
+export async function generateBackground({ scene, outPath, guidance } = {}) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || !scene) return null;
   const client = new GoogleGenAI({ apiKey });
@@ -87,7 +88,7 @@ export async function generateBackground({ scene, outPath } = {}) {
   try {
     const res = await client.models.generateContent({
       model: MODEL,
-      contents: buildImagePrompt(scene),
+      contents: buildImagePrompt(scene, guidance),
     });
     const parts = res.candidates?.[0]?.content?.parts || [];
     const img = parts.find(p => p.inlineData);

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fmtDateTime, isoToLocalInput, localInputToIso } from '@/lib/format';
 import { splitThread } from '@/lib/thread';
+import FeedbackForm from './FeedbackForm';
 import type { PendingApproval, Variation } from '@/lib/types';
 
 function carouselNote(v?: Variation): string {
@@ -37,6 +38,7 @@ export default function ApproveForm({
   const [manual, setManual] = useState<string>(nextSlot ? isoToLocalInput(nextSlot) : '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [rejecting, setRejecting] = useState(false);
 
   const chosenVariation = useMemo(() => variations.find((v) => v.id === captionId), [variations, captionId]);
   const tweets = useMemo(() => (pending.channel === 'twitter' ? splitThread(captionText) : []), [pending.channel, captionText]);
@@ -62,24 +64,6 @@ export default function ApproveForm({
       router.refresh();
     } else {
       setError(j.error || 'Falha ao agendar');
-    }
-  }
-
-  async function reject() {
-    const reason = window.prompt('Motivo da rejeição (opcional, vira anti-exemplo):') ?? undefined;
-    setBusy(true);
-    const res = await fetch('/api/reject', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pendingId: pending.pending_id, reason }),
-    });
-    setBusy(false);
-    if (res.ok) {
-      router.push('/inbox');
-      router.refresh();
-    } else {
-      const j = await res.json().catch(() => ({}));
-      setError(j.error || 'Falha ao rejeitar');
     }
   }
 
@@ -210,13 +194,38 @@ export default function ApproveForm({
         )}
       </section>
 
+      {/* 4. Feedback: entra no prompt das próximas gerações (SPEC 003 R4) */}
+      <details className="card space-y-3">
+        <summary className="cursor-pointer text-sm">
+          <span className="label">4 · O que achou deste post</span>
+          <span className="ml-2 text-xs text-muted">opcional, ensina as próximas gerações</span>
+        </summary>
+        <div className="pt-3">
+          <FeedbackForm channel={pending.channel} pendingId={pending.pending_id} excerpt={chosenVariation?.hook} />
+        </div>
+      </details>
+
       {error && <p className="text-sm text-red-400">{error}</p>}
+
+      {rejecting && (
+        <section className="card space-y-2 border-red-900/60">
+          <h2 className="label">Por que rejeitar?</h2>
+          <p className="text-xs text-muted">O motivo vira anti-exemplo e entra no prompt das próximas gerações.</p>
+          <FeedbackForm
+            mode="reject"
+            channel={pending.channel}
+            pendingId={pending.pending_id}
+            excerpt={chosenVariation?.hook}
+            onCancel={() => setRejecting(false)}
+          />
+        </section>
+      )}
 
       <div className="flex gap-2 border-t border-edge pt-4">
         <button onClick={approve} disabled={busy || (mode === 'slot' && !nextSlot)} className="btn-primary">
           {busy ? 'Agendando…' : 'Aprovar e agendar'}
         </button>
-        <button onClick={reject} disabled={busy} className="btn-danger">
+        <button onClick={() => setRejecting(true)} disabled={busy || rejecting} className="btn-danger">
           Rejeitar
         </button>
         <span className="ml-auto self-center text-xs text-muted">
