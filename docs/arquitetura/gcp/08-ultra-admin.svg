@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1120" viewBox="0 0 1800 1120"><rect width="100%" height="100%" fill="#FBFBFA"/>
+<defs><marker id="an" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3A4450"/></marker></defs>
+<defs><marker id="aok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2E8B57"/></marker></defs>
+<defs><marker id="ano" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C9372C"/></marker></defs>
+<defs><marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8A929B"/></marker></defs>
+<text x="24" y="46" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#1B1F24" text-anchor="start">Ultra admin: só você</text>
+<text x="24" y="74" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5B6570" text-anchor="start">O papel de plataforma com todos os acessos, igual ao da Pilar, com portões que garantem um único dono.</text>
+<polyline points="1560,92 1605,92" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<text x="1613" y="97" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#2E8B57" text-anchor="start">permitido</text>
+<polyline points="1680,92 1725,92" fill="none" stroke="#C9372C" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ano)"/>
+<text x="1733" y="97" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#C9372C" text-anchor="start">negado</text>
+<rect x="24" y="110" width="520" height="860" rx="14" fill="#FFFBF0" stroke="#C98A00" stroke-width="1.6"/>
+<text x="38" y="132" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#C98A00" text-anchor="start">Como só você entra</text>
+<rect x="104" y="150" width="360" height="80" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="284.0" y="185.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Login com o seu e-mail pessoal</text>
+<text x="284.0" y="205.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">Identity Platform (ou emulador local)</text>
+<rect x="104" y="270" width="360" height="80" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="284.0" y="305.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">MFA obrigatório</text>
+<text x="284.0" y="325.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">app autenticador; sem SMS</text>
+<polygon points="284.0,370.0 434.0,425 284.0,480.0 134.0,425" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="284.0" y="421.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">E-mail confere com</text>
+<text x="284.0" y="438.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">PLATFORM_ADMIN_EMAIL?</text>
+<polygon points="284.0,530.0 434.0,585 284.0,640.0 134.0,585" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="284.0" y="581.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">Seu id está em</text>
+<text x="284.0" y="598.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">platform_admins?</text>
+<rect x="104" y="690" width="360" height="80" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
+<text x="284.0" y="725.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">IAP na frente do console</text>
+<text x="284.0" y="745.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">quando o Google Cloud entrar</text>
+<rect x="104" y="820" width="360" height="80" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="284.0" y="855.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Console do ultra admin</text>
+<text x="284.0" y="875.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">outro endereço, sem indexação</text>
+<polyline points="284.0,230 284.0,270" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="284.0,350 284.0,370" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="284.0,480 284.0,530" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="291.28" y="497" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="306.0" y="510" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">sim</text>
+<polyline points="284.0,640 284.0,690" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="291.28" y="657" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="306.0" y="670" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">sim</text>
+<polyline points="284.0,770 284.0,820" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="44" y="915" width="440" height="40" rx="10" fill="#FDE8E6" stroke="#C9372C" stroke-width="2"/>
+<text x="264.0" y="940.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#1B1F24" text-anchor="middle">Qualquer não: 404, alerta no seu e-mail e no audit log</text>
+<polyline points="134.0,425 60,425 60,915" fill="none" stroke="#C9372C" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ano)"/>
+<rect x="67.28" y="404" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="82" y="417" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#C9372C" text-anchor="middle">não</text>
+<polyline points="134.0,585 60,585" fill="none" stroke="#C9372C" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ano)"/>
+<text x="590" y="136" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#1B1F24" text-anchor="start">O que o console faz (a partir da Pilar)</text>
+<rect x="590" y="155" width="375" height="120" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="777.5" y="200.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Visão geral</text>
+<text x="777.5" y="220.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">contas, teste grátis, receita,</text>
+<text x="777.5" y="240.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">posts do dia, falhas, custo</text>
+<rect x="985" y="155" width="375" height="120" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="1172.5" y="200.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Contas</text>
+<text x="1172.5" y="220.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">criar, editar plano e limites,</text>
+<text x="1172.5" y="240.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">estender teste, suspender, excluir</text>
+<rect x="1380" y="155" width="375" height="120" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="1567.5" y="200.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Pessoas</text>
+<text x="1567.5" y="220.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">buscar por e-mail, contas e papéis,</text>
+<text x="1567.5" y="240.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">reenviar convite, sair de tudo, zerar MFA</text>
+<rect x="590" y="295" width="375" height="120" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="777.5" y="340.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Funcionalidades</text>
+<text x="777.5" y="360.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">liga e desliga por conta</text>
+<text x="777.5" y="380.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">ou em massa</text>
+<rect x="985" y="295" width="375" height="120" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
+<text x="1172.5" y="340.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Suporte</text>
+<text x="1172.5" y="360.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">ver como a conta: motivo, 30 min,</text>
+<text x="1172.5" y="380.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">banner; editar pede MFA de novo</text>
+<rect x="1380" y="295" width="375" height="120" rx="10" fill="#E0F4F4" stroke="#138A8A" stroke-width="2"/>
+<text x="1567.5" y="340.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Operação</text>
+<text x="1567.5" y="360.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">filas e jobs, saúde por rede,</text>
+<text x="1567.5" y="380.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">pausa global, desligar uma rede</text>
+<rect x="590" y="435" width="375" height="120" rx="10" fill="#E0F4F4" stroke="#138A8A" stroke-width="2"/>
+<text x="777.5" y="480.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Custos de IA e mídia</text>
+<text x="777.5" y="500.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">por conta, por rede e por dia;</text>
+<text x="777.5" y="520.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">limite que dispara alerta</text>
+<rect x="985" y="435" width="375" height="120" rx="10" fill="#E0F4F4" stroke="#138A8A" stroke-width="2"/>
+<text x="1172.5" y="480.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Cobrança</text>
+<text x="1172.5" y="500.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">assinaturas, inadimplência,</text>
+<text x="1172.5" y="520.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">eventos do webhook</text>
+<rect x="1380" y="435" width="375" height="120" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="1567.5" y="480.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Feedback e incidentes</text>
+<text x="1567.5" y="500.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">o que os clientes mandaram</text>
+<text x="1567.5" y="520.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e o que quebrou</text>
+<rect x="590" y="575" width="375" height="120" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="777.5" y="620.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Atividade</text>
+<text x="777.5" y="640.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">audit log: suas ações e as</text>
+<text x="777.5" y="660.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">ações sensíveis das contas</text>
+<rect x="985" y="575" width="375" height="120" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="1172.5" y="620.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Pedidos LGPD</text>
+<text x="1172.5" y="640.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">exportação e exclusão</text>
+<text x="1172.5" y="660.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">com prazo</text>
+<rect x="1380" y="575" width="375" height="120" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="1567.5" y="620.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Teste grátis</text>
+<text x="1567.5" y="640.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">quem está no teste; estender</text>
+<text x="1567.5" y="660.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">com motivo; retenção depois</text>
+<rect x="570" y="730" width="1206" height="240" rx="14" fill="#F3FAF5" stroke="#2E8B57" stroke-width="1.6"/>
+<text x="584" y="752" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#2E8B57" text-anchor="start">Garantias de exclusividade (testadas no CI)</text>
+<text x="592" y="780" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">1. platform_admins aceita no máximo uma linha (constraint de linha única).</text>
+<text x="592" y="811" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">2. Nenhum grant para a API: só migration revisada em PR grava ali; nenhuma tela promove ninguém.</text>
+<text x="592" y="842" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">3. Separado dos papéis de conta: nenhum administrador de cliente vira ultra admin por engano.</text>
+<text x="592" y="873" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">4. O console não abre bypass no RLS: lê por funções do servidor, e cada ação vai para o audit log.</text>
+<text x="592" y="904" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">5. Impersonação com sessão no servidor, motivo, 30 min e banner; nunca mostra token de rede.</text>
+<text x="592" y="935" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">6. Tentativa negada vira e-mail para você na hora.</text>
+<text x="24" y="1010" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#5B6570" text-anchor="start">Diferença para a Pilar: lá o ultra_admin é um valor da mesma coluna de papel das empresas, protegido por trigger.</text>
+<text x="24" y="1036" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#5B6570" text-anchor="start">Aqui ele mora numa tabela própria, de uma linha só, com dois portões a mais (e-mail fixo e IAP).</text>
+</svg>

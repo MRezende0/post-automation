@@ -30,7 +30,7 @@
 <text x="1040.0" y="207" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">válido, expirado, já aceito</text>
 <rect x="1200" y="155" width="260" height="105" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
 <text x="1330.0" y="185" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Verificar MFA</text>
-<text x="1330.0" y="207" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">dono e administrador</text>
+<text x="1330.0" y="207" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">administrador e ultra admin</text>
 <rect x="1490" y="155" width="260" height="105" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
 <text x="1620.0" y="185" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Escolher conta</text>
 <text x="1620.0" y="207" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">quem está em mais de uma</text>
@@ -43,113 +43,95 @@
 <text x="170.0" y="440" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Início</text>
 <text x="170.0" y="462" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">o que precisa de você hoje:</text>
 <text x="170.0" y="480" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">aprovar, falhas, avisos</text>
-<rect x="46.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="75.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="109.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="138.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
-<rect x="172.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="201.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
-<rect x="235.5" y="514" width="58" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
-<text x="264.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Usuário</text>
+<rect x="53.0" y="514" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="90.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="133.0" y="514" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="170.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
+<rect x="213.0" y="514" width="74" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
+<text x="250.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Leitor</text>
 <rect x="330" y="410" width="260" height="140" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
 <text x="460.0" y="440" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Aprovar</text>
 <text x="460.0" y="462" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">inbox de posts e ideias;</text>
-<text x="460.0" y="480" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">usuário só comenta</text>
-<rect x="336.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="365.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="399.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="428.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
-<rect x="462.5" y="514" width="58" height="24" rx="12" fill="#FFF4D6" stroke="#C98A00"/>
-<text x="491.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Criador?</text>
-<rect x="525.5" y="514" width="58" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
-<text x="554.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Usuário</text>
+<text x="460.0" y="480" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">leitor dá parecer</text>
+<rect x="343.0" y="514" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="380.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="423.0" y="514" width="74" height="24" rx="12" fill="#FFF4D6" stroke="#C98A00"/>
+<text x="460.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Criador?</text>
+<rect x="503.0" y="514" width="74" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
+<text x="540.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Leitor</text>
 <rect x="620" y="410" width="260" height="140" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
 <text x="750.0" y="440" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Criar</text>
 <text x="750.0" y="462" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">brief, campanha</text>
 <text x="750.0" y="480" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e gerar com IA</text>
-<rect x="626.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="655.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="689.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="718.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
-<rect x="752.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="781.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
-<rect x="815.5" y="514" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="844.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Usuário</text>
+<rect x="633.0" y="514" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="670.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="713.0" y="514" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="750.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
+<rect x="793.0" y="514" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="830.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Leitor</text>
 <rect x="910" y="410" width="260" height="140" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
 <text x="1040.0" y="440" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Agenda</text>
 <text x="1040.0" y="462" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">agendados: reagendar,</text>
 <text x="1040.0" y="480" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">cancelar, pausar</text>
-<rect x="916.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="945.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="979.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="1008.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
-<rect x="1042.5" y="514" width="58" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
-<text x="1071.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Criador</text>
-<rect x="1105.5" y="514" width="58" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
-<text x="1134.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Usuário</text>
+<rect x="923.0" y="514" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="960.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="1003.0" y="514" width="74" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
+<text x="1040.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Criador</text>
+<rect x="1083.0" y="514" width="74" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
+<text x="1120.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Leitor</text>
 <rect x="1200" y="410" width="260" height="140" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
 <text x="1330.0" y="440" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Publicados</text>
 <text x="1330.0" y="462" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">histórico e métricas</text>
 <text x="1330.0" y="480" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">por post e rede</text>
-<rect x="1206.5" y="514" width="58" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
-<text x="1235.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Dono</text>
-<rect x="1269.5" y="514" width="58" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
-<text x="1298.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Admin</text>
-<rect x="1332.5" y="514" width="58" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
-<text x="1361.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Criador</text>
-<rect x="1395.5" y="514" width="58" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
-<text x="1424.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Usuário</text>
+<rect x="1213.0" y="514" width="74" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
+<text x="1250.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Admin</text>
+<rect x="1293.0" y="514" width="74" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
+<text x="1330.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Criador</text>
+<rect x="1373.0" y="514" width="74" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
+<text x="1410.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Leitor</text>
 <rect x="1490" y="410" width="260" height="140" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
 <text x="1620.0" y="440" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Aprendizado</text>
 <text x="1620.0" y="462" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">feedback e o que</text>
 <text x="1620.0" y="480" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">a IA aprendeu</text>
-<rect x="1496.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="1525.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="1559.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="1588.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
-<rect x="1622.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="1651.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
-<rect x="1685.5" y="514" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="1714.5" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Usuário</text>
+<rect x="1503.0" y="514" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="1540.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="1583.0" y="514" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="1620.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
+<rect x="1663.0" y="514" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="1700.0" y="530" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Leitor</text>
 <rect x="40" y="570" width="260" height="140" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
 <text x="170.0" y="600" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Engajamento</text>
 <text x="170.0" y="622" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">comentar e responder</text>
 <text x="170.0" y="640" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">pela API da rede</text>
-<rect x="46.5" y="674" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="75.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="109.5" y="674" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="138.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
-<rect x="172.5" y="674" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="201.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
-<rect x="235.5" y="674" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="264.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Usuário</text>
+<rect x="53.0" y="674" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="90.0" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="133.0" y="674" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="170.0" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
+<rect x="213.0" y="674" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="250.0" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Leitor</text>
 <rect x="330" y="570" width="260" height="140" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
 <text x="460.0" y="600" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Avisos</text>
 <text x="460.0" y="622" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">lista completa;</text>
 <text x="460.0" y="640" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">cada papel vê os seus</text>
-<rect x="336.5" y="674" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="365.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="399.5" y="674" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="428.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
-<rect x="462.5" y="674" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="491.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
-<rect x="525.5" y="674" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="554.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Usuário</text>
+<rect x="343.0" y="674" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="380.0" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="423.0" y="674" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="460.0" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
+<rect x="503.0" y="674" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="540.0" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Leitor</text>
 <rect x="620" y="570" width="260" height="140" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
 <text x="750.0" y="600" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Perfil</text>
 <text x="750.0" y="622" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">nome, senha, MFA,</text>
 <text x="750.0" y="640" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">aviso por e-mail</text>
-<rect x="626.5" y="674" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="655.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="689.5" y="674" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="718.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
-<rect x="752.5" y="674" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="781.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
-<rect x="815.5" y="674" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="844.5" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Usuário</text>
+<rect x="633.0" y="674" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="670.0" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="713.0" y="674" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="750.0" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Criador</text>
+<rect x="793.0" y="674" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="830.0" y="690" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Leitor</text>
 <rect x="910" y="570" width="840" height="140" rx="10" fill="#EEEAF8" stroke="#6B5BB5"/>
 <text x="1330" y="604" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Conta pessoal (PF): as mesmas telas</text>
-<text x="1330" y="632" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="middle">Uma pessoa só, que é a dona: vê tudo, sem seletor de conta.</text>
+<text x="1330" y="632" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="middle">Uma pessoa só, que é a administradora: vê tudo, sem seletor de conta.</text>
 <text x="1330" y="654" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="middle">Em Equipe aparece o convite para subir de plano em vez da lista de pessoas.</text>
 <text x="1330" y="676" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="middle">Subir de plano não muda nenhuma tela: só libera assentos e limites.</text>
 <rect x="24" y="770" width="1742" height="205" rx="14" fill="#FFFBF0" stroke="#C98A00" stroke-width="1.6"/>
@@ -158,86 +140,74 @@
 <text x="170.0" y="840" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Marca e voz</text>
 <text x="170.0" y="862" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">cores, tom, regras</text>
 <text x="170.0" y="880" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">de estilo, público</text>
-<rect x="46.5" y="914" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="75.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="109.5" y="914" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="138.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
-<rect x="172.5" y="914" width="58" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
-<text x="201.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Criador</text>
-<rect x="235.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="264.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Usuário</text>
+<rect x="53.0" y="914" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="90.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="133.0" y="914" width="74" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
+<text x="170.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Criador</text>
+<rect x="213.0" y="914" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="250.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Leitor</text>
 <rect x="330" y="810" width="260" height="140" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
 <text x="460.0" y="840" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Redes conectadas</text>
 <text x="460.0" y="862" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">conectar, reconectar,</text>
 <text x="460.0" y="880" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">desconectar</text>
-<rect x="336.5" y="914" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="365.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="399.5" y="914" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="428.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
-<rect x="462.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="491.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Criador</text>
-<rect x="525.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="554.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Usuário</text>
+<rect x="343.0" y="914" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="380.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="423.0" y="914" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="460.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Criador</text>
+<rect x="503.0" y="914" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="540.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Leitor</text>
 <rect x="620" y="810" width="260" height="140" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
 <text x="750.0" y="840" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Equipe</text>
 <text x="750.0" y="862" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">convidar, remover,</text>
 <text x="750.0" y="880" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">mudar papel</text>
-<rect x="626.5" y="914" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="655.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="689.5" y="914" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="718.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
-<rect x="752.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="781.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Criador</text>
-<rect x="815.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="844.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Usuário</text>
+<rect x="633.0" y="914" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="670.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="713.0" y="914" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="750.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Criador</text>
+<rect x="793.0" y="914" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="830.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Leitor</text>
 <rect x="910" y="810" width="260" height="140" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
 <text x="1040.0" y="840" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Plano e cobrança</text>
 <text x="1040.0" y="862" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">plano, assentos, uso,</text>
 <text x="1040.0" y="880" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">notas fiscais</text>
-<rect x="916.5" y="914" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="945.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="979.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="1008.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Admin</text>
-<rect x="1042.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="1071.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Criador</text>
-<rect x="1105.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="1134.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Usuário</text>
+<rect x="923.0" y="914" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="960.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="1003.0" y="914" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="1040.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Criador</text>
+<rect x="1083.0" y="914" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="1120.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Leitor</text>
 <rect x="1200" y="810" width="260" height="140" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
 <text x="1330.0" y="840" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Auditoria</text>
 <text x="1330.0" y="862" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">quem fez o quê</text>
 <text x="1330.0" y="880" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e quando</text>
-<rect x="1206.5" y="914" width="58" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
-<text x="1235.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Dono</text>
-<rect x="1269.5" y="914" width="58" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
-<text x="1298.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Admin</text>
-<rect x="1332.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="1361.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Criador</text>
-<rect x="1395.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="1424.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Usuário</text>
+<rect x="1213.0" y="914" width="74" height="24" rx="12" fill="#FFFFFF" stroke="#C98A00"/>
+<text x="1250.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#8A5F00" text-anchor="middle">Admin</text>
+<rect x="1293.0" y="914" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="1330.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Criador</text>
+<rect x="1373.0" y="914" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="1410.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Leitor</text>
 <rect x="1490" y="810" width="260" height="140" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
 <text x="1620.0" y="840" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Dados e privacidade</text>
-<text x="1620.0" y="862" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">exportar, transferir,</text>
+<text x="1620.0" y="862" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">exportar ou</text>
 <text x="1620.0" y="880" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">excluir a conta</text>
-<rect x="1496.5" y="914" width="58" height="24" rx="12" fill="#2E8B57" stroke="none"/>
-<text x="1525.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Dono</text>
-<rect x="1559.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="1588.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Admin</text>
-<rect x="1622.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="1651.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Criador</text>
-<rect x="1685.5" y="914" width="58" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
-<text x="1714.5" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Usuário</text>
+<rect x="1503.0" y="914" width="74" height="24" rx="12" fill="#2E8B57" stroke="none"/>
+<text x="1540.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Admin</text>
+<rect x="1583.0" y="914" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="1620.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Criador</text>
+<rect x="1663.0" y="914" width="74" height="24" rx="12" fill="#EEF0F2" stroke="none"/>
+<text x="1700.0" y="930" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#A3AAB2" text-anchor="middle">Leitor</text>
 <rect x="24" y="1000" width="1742" height="140" rx="14" fill="none" stroke="#6B5BB5" stroke-width="1.6" stroke-dasharray="7 5"/>
-<text x="38" y="1022" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#6B5BB5" text-anchor="start">Fora da plataforma do cliente: console interno da equipe (outro endereço, atrás do IAP)</text>
+<text x="38" y="1022" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#6B5BB5" text-anchor="start">Fora da plataforma do cliente: console do ultra admin (só você, outro endereço)</text>
 <rect x="40" y="1035" width="410" height="85" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
-<text x="245.0" y="1065" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Contas e planos</text>
-<text x="245.0" y="1087" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">todas as contas, status e plano</text>
+<text x="245.0" y="1065" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Contas e pessoas</text>
+<text x="245.0" y="1087" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">todas as contas, planos e membros</text>
 <rect x="472" y="1035" width="410" height="85" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
 <text x="677.0" y="1065" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Suporte</text>
-<text x="677.0" y="1087" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">impersonar só leitura, com motivo</text>
+<text x="677.0" y="1087" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">impersonar com motivo, 30 min</text>
 <rect x="904" y="1035" width="410" height="85" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
-<text x="1109.0" y="1065" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Saúde</text>
-<text x="1109.0" y="1087" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">jobs, filas, falhas por rede</text>
+<text x="1109.0" y="1065" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Operação</text>
+<text x="1109.0" y="1087" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">filas, redes, pausas, incidentes</text>
 <rect x="1336" y="1035" width="410" height="85" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
-<text x="1541.0" y="1065" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Custos</text>
-<text x="1541.0" y="1087" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">IA, X e mídia por conta</text>
+<text x="1541.0" y="1065" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Custos e cobrança</text>
+<text x="1541.0" y="1087" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">IA, X e mídia; assinaturas</text>
 </svg>

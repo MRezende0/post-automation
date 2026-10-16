@@ -22,8 +22,8 @@
 <text x="44" y="1026.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#1B1F24" text-anchor="start">Deploy</text>
 <text x="44" y="1048.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="start">GitHub para o Cloud Run</text>
 <rect x="24" y="1170" width="1752" height="240" rx="14" fill="#FFFFFF" stroke="#D5D9DE" stroke-width="1.6"/>
-<text x="44" y="1286.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#1B1F24" text-anchor="start">Equipe</text>
-<text x="44" y="1308.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="start">suporte da plataforma</text>
+<text x="44" y="1286.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#1B1F24" text-anchor="start">Ultra admin</text>
+<text x="44" y="1308.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="start">só você</text>
 <rect x="24" y="1430" width="1752" height="190" rx="14" fill="#F7F8F9" stroke="#D5D9DE" stroke-width="1.6"/>
 <text x="44" y="1521.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#1B1F24" text-anchor="start">Regras fixas</text>
 <text x="44" y="1543.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="start">valem sempre</text>
@@ -194,22 +194,21 @@
 <rect x="800.28" y="1082" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
 <text x="815" y="1095" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#C9372C" text-anchor="middle">não</text>
 <rect x="224" y="1238" width="170" height="84" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
-<text x="309.0" y="1275.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Conta Google</text>
-<text x="309.0" y="1295.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">da equipe (BEZ)</text>
+<text x="309.0" y="1275.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Login + MFA</text>
+<text x="309.0" y="1295.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e-mail pessoal fixo</text>
 <rect x="444" y="1238" width="180" height="84" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
-<text x="534.0" y="1265.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">IAP</text>
-<text x="534.0" y="1285.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">Identity-Aware</text>
-<text x="534.0" y="1305.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">Proxy</text>
+<text x="534.0" y="1275.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">IAP</text>
+<text x="534.0" y="1295.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">com o Google Cloud</text>
 <polygon points="800,1225.0 900.0,1280 800,1335.0 700.0,1280" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
-<text x="800" y="1276.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">No grupo staff</text>
-<text x="800" y="1293.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">e com MFA?</text>
+<text x="800" y="1276.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">Está em</text>
+<text x="800" y="1293.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">platform_admins?</text>
 <rect x="960" y="1238" width="200" height="84" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
-<text x="1060.0" y="1275.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Console interno</text>
-<text x="1060.0" y="1295.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">suporte e operação</text>
+<text x="1060.0" y="1275.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Console</text>
+<text x="1060.0" y="1295.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">todos os acessos</text>
 <rect x="1210" y="1238" width="220" height="84" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
 <text x="1320.0" y="1265.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Impersonar</text>
-<text x="1320.0" y="1285.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">só leitura, com motivo,</text>
-<text x="1320.0" y="1305.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">tempo limitado</text>
+<text x="1320.0" y="1285.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">com motivo, 30 min,</text>
+<text x="1320.0" y="1305.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">banner na tela</text>
 <rect x="1480" y="1238" width="200" height="84" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
 <text x="1580.0" y="1265.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B1F24" text-anchor="middle">Audit log</text>
 <text x="1580.0" y="1285.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">tudo registrado;</text>
