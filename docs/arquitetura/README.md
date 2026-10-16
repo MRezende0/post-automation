@@ -14,34 +14,39 @@
 | [05 mapa de telas](gcp/05-mapa-de-telas.png) | cada tela por papel ([arquitetura de usuário](usuario.md)) |
 | [06 jornadas](gcp/06-jornadas.png) | cadastro, convite e login |
 | [07 ciclo por papel](gcp/07-ciclo-por-papel.png) | etapas do conteúdo e quem recebe cada aviso |
+| [08 ultra admin](gcp/08-ultra-admin.png) | como só o Matheus entra e o que o console faz ([ultra-admin.md](ultra-admin.md)) |
 
 ## Contas: PF e PJ no mesmo modelo
 
 - Uma conta (`tenants`) com `kind` = `pessoa` ou `empresa`. Mesmas tabelas, mesmo RLS, mesmo código.
 - O **plano** define limites (assentos, redes, posts e gerações por mês). O **papel** define ações.
   Nunca um `if pessoa` no código: a diferença mora no plano.
-- PF tem 1 assento e a pessoa é a dona. Subir para um plano com equipe só muda limites.
+- PF tem 1 assento e a pessoa é a administradora. Subir para um plano com equipe só muda limites.
 - Uma pessoa pode estar em várias contas (agência, freelancer), como já diz o ADR 0005.
 - Cobrança no Asaas com CPF ou CNPJ validado na entrada.
 
-## Papéis
+## Papéis (decidido em 16/10: três níveis, sem dono)
 
-| Hoje (0012) | Proposta | Resumo |
-| --- | --- | --- |
-| owner | **Dono** | um por conta: plano, cobrança, exportar, transferir, excluir |
-| admin | **Administrador** | equipe, redes, marca, aprovação, pausa, audit log |
-| editor | **Criador** | cria, edita e gera com IA; aprova só se o administrador liberar |
-| viewer | **Usuário** | lê e comenta |
+| Hoje (0012) | Proposta | Quem é | Resumo |
+| --- | --- | --- | --- |
+| owner + admin | **Administrador** | sócio ou coordenador | tudo da conta: equipe, redes, marca, aprovação, pausa, plano, cobrança, exportar, excluir, audit log |
+| editor | **Criador** | marketing ou quem produz | cria, edita e gera com IA; pede revisão; aprova só se o administrador liberar |
+| viewer | **Leitor** | revisor, cliente, sócio que opina | lê, dá parecer (aprovo ou ajustar, com comentário) e feedback; o parecer não publica |
+
+Exemplo: num escritório de engenharia, o sócio ou o coordenador é administrador, a equipe de
+marketing é criadora, e quem só opina sobre o post é leitor.
 
 A matriz completa está no desenho 04. Regras que o banco garante e o CI testa:
 
-1. Toda conta tem exatamente um dono; o dono transfere antes de sair.
-2. Administrador não mexe no dono e não se promove a dono.
-3. Dono e administrador entram com MFA.
-4. Ação de conta ou de titularidade vai para o audit log e avisa o dono por e-mail.
+1. Toda conta tem pelo menos um administrador: o último não sai nem é rebaixado.
+2. Excluir a conta pede MFA e o nome da conta, e avisa todos os administradores.
+3. Administrador entra com MFA.
+4. Mudança de papel, rede ou cobrança vai para o audit log e avisa os administradores por e-mail.
 5. Limite do plano é checado no servidor, nunca só na tela.
-6. A equipe da plataforma não é papel de conta: console interno atrás do IAP, impersonação
-   só leitura, com motivo, auditada.
+6. O ultra admin não é papel de conta: console próprio, só do Matheus ([ultra-admin.md](ultra-admin.md)).
+
+O "responsável pela cobrança" é um campo da conta (qual administrador recebe a nota e o aviso de
+pagamento), não um papel.
 
 Implementação: permissões numa tabela fixa (`role_permissions`, semeada por migration) e um
 helper `app.can(tenant, 'post.approve')` usado pelo RLS e pela API. Mudar a matriz é uma
@@ -85,7 +90,6 @@ Fora do código: revogar o bot no BotFather depois do merge.
 
 ## Em aberto
 
-- Nome do papel "Usuário": todo mundo é usuário. "Leitor" deixa claro que só lê.
-- Criador aprova sozinho por padrão ou sempre manda para aprovação? A proposta é mandar.
 - Para a advogada: direito de arrependimento de 7 dias (CDC) na assinatura de PF, e termos
   diferentes para PF e PJ.
+- O que decidir e construir antes do Google Cloud: [sem-google.md](sem-google.md).
