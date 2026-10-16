@@ -12,6 +12,7 @@ import { getPublished, isRealPost } from './utils/queue.js';
 import { usingSupabase, supabase } from './utils/db.js';
 import { resolveTenant } from './tenant.js';
 import { engagementScore } from './utils/score.js';
+import { buildFunnelReport, funnelWindow } from './utils/funnel.js';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
 
@@ -163,6 +164,23 @@ async function judgeCalibration() {
   }
 }
 
+// Funil da Pilar (SPEC 004): cadastros da semana por canal e campanha + posts que mais ativaram.
+// Best-effort: sem a 0010 ou sem coleta ainda, o bloco não aparece.
+async function funnelReport() {
+  if (!usingSupabase()) return '';
+  try {
+    const db = supabase();
+    const tenantId = resolveTenant().id;
+    const { desde, ate } = funnelWindow(new Date(), REPORT_WINDOW_DAYS);
+    const { data: rows } = await db.from('funnel_daily').select('*').eq('tenant_id', tenantId).gte('day', desde).lte('day', ate);
+    const { data: top } = await db.from('posts').select('channel,hook,funnel').eq('tenant_id', tenantId)
+      .not('funnel', 'is', null).order('funnel->ativados', { ascending: false }).limit(3);
+    return buildFunnelReport({ rows: rows || [], topPosts: (top || []).filter(p => p.funnel?.ativados > 0) });
+  } catch (e) {
+    return '';
+  }
+}
+
 const WEEKDAYS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
 // Melhor dia da semana por engajamento médio — insight de scheduling. Só sugere
@@ -263,7 +281,8 @@ async function main() {
   const report = buildReport(scored)
     + `\n\n_${collected} posts coletados · few-shot: ${synced.high}↑ / ${synced.low}↓ atualizados._`
     + bestSlots(scored)
-    + await judgeCalibration();
+    + await judgeCalibration()
+    + await funnelReport();
 
   await notify(report, { dryRun: DRY_RUN });
   console.log('[metrics] Relatório enviado.', { collected, synced });

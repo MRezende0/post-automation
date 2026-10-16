@@ -7,6 +7,10 @@
 //
 // Cold start: com pouco engajamento coletado, thompsonChoose devolve null e o
 // chamador cai pra rotação determinística (ranking.js).
+//
+// Recompensa = engajamento + pontos do funil da Pilar (rewardScore, SPEC 004).
+
+import { rewardScore } from './score.js';
 
 function gaussian() {
   let u = 0;
@@ -52,7 +56,7 @@ export function computePosteriors(arms, posts, {
   now = Date.now(),
 } = {}) {
   const scored = (posts || [])
-    .map(p => ({ key: p[keyField], score: p.engagement_score, at: p.published_at }))
+    .map(p => ({ key: p[keyField], score: rewardScore(p), at: p.published_at }))
     .filter(p => arms.includes(p.key) && typeof p.score === 'number' && Number.isFinite(p.score));
 
   const values = scored.map(p => p.score);

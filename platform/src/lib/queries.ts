@@ -28,15 +28,20 @@ export async function getScheduled(statuses: string[] = ['scheduled', 'publishin
   return (data || []) as ScheduledPost[];
 }
 
+const HISTORY_COLUMNS = 'id,pillar,angle,channel,hook,body,format,channels,engagement_score,published_at';
+
 export async function getPublishedHistory(limit = 50): Promise<PublishedPost[]> {
-  const { data, error } = await db()
+  const query = (columns: string) => db()
     .from('posts')
-    .select('id,pillar,angle,channel,hook,body,format,channels,engagement_score,published_at')
+    .select(columns)
     .eq('is_dry_run', false)
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(limit);
+  let { data, error } = await query(`${HISTORY_COLUMNS},funnel`);
+  // Sem a 0010, posts.funnel não existe (42703): mostra o histórico sem o funil.
+  if (error?.code === '42703') ({ data, error } = await query(HISTORY_COLUMNS));
   if (error) throw new Error(`Falha ao ler histórico: ${error.message}`);
-  return (data || []) as PublishedPost[];
+  return (data || []) as unknown as PublishedPost[]; // select dinâmico: o supabase-js não infere o shape
 }
 
 export async function getRecentlyPublishedScheduled(limit = 30): Promise<ScheduledPost[]> {

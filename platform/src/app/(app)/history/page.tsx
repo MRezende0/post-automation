@@ -33,6 +33,13 @@ export default async function HistoryPage() {
                 </div>
                 <p className="mt-1 line-clamp-2 text-sm">{p.hook || p.body?.slice(0, 100) || '(sem hook)'}</p>
                 <p className="mt-1 text-xs text-muted">{p.published_at ? fmtDateTime(p.published_at) : 'sem data'}</p>
+                {p.funnel && p.funnel.cadastros > 0 && (
+                  <p className="mt-1 text-xs text-emerald-300">
+                    {p.funnel.cadastros} {p.funnel.cadastros === 1 ? 'cadastro' : 'cadastros'} · {p.funnel.ativados}{' '}
+                    {p.funnel.ativados === 1 ? 'ativado' : 'ativados'} · {p.funnel.pagantes}{' '}
+                    {p.funnel.pagantes === 1 ? 'pagante' : 'pagantes'} na Pilar
+                  </p>
+                )}
               </div>
               {p.engagement_score != null && (
                 <div className="shrink-0 text-right">

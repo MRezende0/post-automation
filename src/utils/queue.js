@@ -71,6 +71,7 @@ export function dbRowToPublished(row) {
     chosen_variation: row.chosen_variation ?? undefined,
     channels: row.channels ?? {},
     engagement_score: row.engagement_score != null ? Number(row.engagement_score) : undefined,
+    funnel: row.funnel ?? undefined, // cadastros/ativados/pagantes da Pilar (SPEC 004)
     generated_at: row.generated_at ?? undefined,
     published_at: row.published_at ?? undefined,
   };
@@ -78,13 +79,18 @@ export function dbRowToPublished(row) {
 
 // Ordem cronológica (published_at asc) pra casar com a ordem de append do YAML —
 // extractRecentHooks e a janela do bandit dependem disso (slice(-N) = mais recentes).
+const PUBLISHED_COLUMNS = 'id,pillar,angle,context,hook,body,format,chosen_variation,channels,engagement_score,generated_at,published_at';
+
 async function getPublishedFromDb() {
-  const { data, error } = await supabase()
+  const query = columns => supabase()
     .from('posts')
-    .select('id,pillar,angle,context,hook,body,format,chosen_variation,channels,engagement_score,generated_at,published_at')
+    .select(columns)
     .eq('tenant_id', currentTenantId())
     .order('published_at', { ascending: true, nullsFirst: true })
     .order('created_at', { ascending: true });
+  let { data, error } = await query(`${PUBLISHED_COLUMNS},funnel`);
+  // Sem a 0010 aplicada, posts.funnel não existe (42703): lê sem o funil em vez de parar a geração.
+  if (error?.code === '42703') ({ data, error } = await query(PUBLISHED_COLUMNS));
   if (error) throw new Error(`Falha ao ler posts do Supabase: ${error.message}`);
   return (data || []).map(dbRowToPublished);
 }
