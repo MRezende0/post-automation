@@ -38,8 +38,10 @@ Retorne JSON puro, sem markdown fence, sem comentário:
       "hook": "primeira linha, a mais importante",
       "body": "texto completo do post, inclui o hook — SEM hashtags no final",
       "hashtags": ["#engenhariadeprojetos", "#gestaodeengenharia"],  // 4-7, mix nicho+médio; campo separado, NUNCA dentro do body
-      "format": "single" | "carousel" | "text",
-      "slides": ["slide 1", "slide 2", ...]  // só se format=carousel
+      "format": "single" | "carousel" | "text" | "pergunta",
+      "slides": ["capa: o gancho", {"title": "item curto", "description": "ação + por quê, 1-2 frases"}, ..., "frase de fechamento"],  // só se format=carousel
+      "question": "pergunta de até 12 palavras, termina com ?",  // só se format=pergunta
+      "sketch": "id de um croqui da lista do canal"  // só se format=pergunta
     },
     { "id": 2, ... },
     { "id": 3, ... }

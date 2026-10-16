@@ -4,7 +4,8 @@
 import { readFile } from 'node:fs/promises';
 import { generatePost, judgeVariations, critiqueVariations, polishPost, checkGuardrails, composeCaption } from './generate.js';
 import { resolveTenant } from './tenant.js';
-import { renderImage, renderCarousel, renderPdf } from './render-image.js';
+import { renderImage, renderCarousel, renderPdf, renderPergunta } from './render-image.js';
+import { pickSketch, sketchSvg } from './utils/croquis.js';
 import { rankVariations } from './utils/ranking.js';
 import { uploadImage } from './utils/storage.js';
 import { generateBackground, SCENE_BY_PILLAR, pickScenes } from './utils/image-gen.js';
@@ -123,7 +124,10 @@ export async function prepareGeneration({ channel, seed, regenNote, tenant = res
   for (let i = 0; i < generation.variations.length; i += 1) {
     const v = generation.variations[i];
     let imagePath = null;
-    if (rendersImage && IMAGE_BG && !DRY_RUN) {
+    if (rendersImage && v.format === 'pergunta') {
+      imagePath = await renderPerguntaArt({ variation: v, pillar: generation.pillar, angle: generation.angle, tenant });
+    }
+    if (!imagePath && rendersImage && IMAGE_BG && !DRY_RUN) {
       imagePath = await renderHero({ channel, pillar: generation.pillar, variation: v, scene: scenes[i], tenant });
     }
     if (!imagePath && rendersImage) imagePath = await renderPreview({ channel, pillar: generation.pillar, variation: v });
@@ -142,7 +146,7 @@ export async function prepareGeneration({ channel, seed, regenNote, tenant = res
     for (const v of generation.variations) {
       if (!isRenderableCarousel(v)) continue;
       try {
-        Object.assign(v, await buildCarouselMedia({ channel, pillar: generation.pillar, variation: v }));
+        Object.assign(v, await buildCarouselMedia({ channel, pillar: generation.pillar, variation: v, tenant }));
         log(`Carrossel variação #${v.id}: ${v.slideUrls.length} slides${v.documentUrl ? ' + PDF' : ''}`);
       } catch (e) {
         log(`Falha ao renderizar carrossel #${v.id}: ${e.message}`); // segue como imagem única
@@ -155,13 +159,41 @@ export async function prepareGeneration({ channel, seed, regenNote, tenant = res
 
 const MAX_SLIDES = 10; // limite do carrossel do Instagram
 
+// Foto-pergunta: croqui da biblioteca (id inválido cai pelas tags) + a pergunta.
+// Grava o id efetivo na variação pra aprovação e métrica saberem qual croqui saiu.
+async function renderPerguntaArt({ variation, pillar, angle, tenant }) {
+  try {
+    const sketch = pickSketch({ id: variation.sketch, pillar, angle });
+    variation.sketch = sketch.id;
+    const { brand = {} } = tenant;
+    return await renderPergunta({
+      question: variation.question || variation.hook,
+      sketchSvg: sketchSvg(sketch),
+      brand: brand.name,
+      handle: brand.handle,
+      colors: brand.colors,
+    });
+  } catch (e) {
+    log(`Falha render pergunta #${variation.id}: ${e.message}`);
+    return null;
+  }
+}
+
 export function isRenderableCarousel(variation) {
   return variation?.format === 'carousel' && Array.isArray(variation.slides) && variation.slides.length >= 2;
 }
 
 // Renderiza os slides, sobe cada PNG e, no LinkedIn, monta e sobe o PDF (post de documento).
-export async function buildCarouselMedia({ channel, pillar, variation }) {
-  const files = await renderCarousel({ pillar, slides: variation.slides.slice(0, MAX_SLIDES) });
+export async function buildCarouselMedia({ channel, pillar, variation, tenant = resolveTenant() }) {
+  const { brand = {} } = tenant;
+  const files = await renderCarousel({
+    pillar,
+    slides: variation.slides.slice(0, MAX_SLIDES),
+    brand: brand.name,
+    handle: brand.handle,
+    badge: tenant.badges?.[pillar],
+    colors: brand.colors,
+  });
   const slideUrls = [];
   for (const file of files) slideUrls.push((await uploadImage(file)).url);
   if (channel !== 'linkedin') return { slideUrls };
