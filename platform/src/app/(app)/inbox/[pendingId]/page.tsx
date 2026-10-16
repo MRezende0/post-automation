@@ -4,16 +4,18 @@ import { getPending } from '@/lib/queries';
 import { nextFreeSlot } from '@/lib/slots';
 import { composeCaption } from '@/lib/caption';
 import ApproveForm from '@/components/ApproveForm';
+import { pageTenant } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ApprovePage({ params }: { params: Promise<{ pendingId: string }> }) {
   const { pendingId } = await params;
+  const t = await pageTenant();
   const decoded = decodeURIComponent(pendingId);
-  const p = await getPending(decoded);
+  const p = await getPending(t, decoded);
   if (!p) notFound();
 
-  const nextSlot = await nextFreeSlot(p.channel).catch(() => null);
+  const nextSlot = await nextFreeSlot(t, p.channel).catch(() => null);
 
   // legenda sugerida por variação (corpo + hashtags)
   const suggested: Record<number, string> = {};

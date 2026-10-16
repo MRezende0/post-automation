@@ -3,6 +3,8 @@ import { ENGAGE_LIMITS } from '@/lib/engage-model';
 import { fmtDateTime } from '@/lib/format';
 import EngageForm from '@/components/EngageForm';
 import EngageTargets from '@/components/EngageTargets';
+import { pageTenant } from '@/lib/session';
+import { pageError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,14 +16,15 @@ const STATUS_LABEL: Record<Engagement['status'], string> = {
 };
 
 export default async function EngagePage() {
+  const t = await pageTenant();
   let items: Engagement[] = [];
   let targets: EngageTarget[] = [];
   let summary = { postedToday: 0, postedThisWeek: 0 };
   let err = '';
   try {
-    [items, targets, summary] = await Promise.all([listEngagements(30), listTargets(), getEngageSummary()]);
+    [items, targets, summary] = await Promise.all([listEngagements(t, 30), listTargets(t), getEngageSummary(t)]);
   } catch (e) {
-    err = e instanceof Error ? e.message : 'erro';
+    err = pageError(e, 'page/engage');
   }
   const done = items.filter((i) => i.status === 'publicado' || i.status === 'copiado');
 

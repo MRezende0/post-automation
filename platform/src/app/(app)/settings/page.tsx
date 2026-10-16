@@ -5,19 +5,27 @@ import PauseControl from '@/components/PauseControl';
 import CapabilityTable from '@/components/CapabilityTable';
 import { getPauseState, countOverdue, type PauseState } from '@/lib/pause';
 import type { PublishSlot, Campaign } from '@/lib/types';
+import { pageTenant } from '@/lib/session';
+import { pageError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage() {
+  const t = await pageTenant();
   let slots: PublishSlot[] = [];
   let campaign: Campaign | null = null;
   let pause: PauseState = { paused: false, reason: null, pausedAt: null };
   let overdue = 0;
   let err = '';
   try {
-    [slots, campaign, pause, overdue] = await Promise.all([getSlots(), getActiveCampaign(), getPauseState(), countOverdue()]);
+    [slots, campaign, pause, overdue] = await Promise.all([
+      getSlots(t),
+      getActiveCampaign(t),
+      getPauseState(t),
+      countOverdue(t),
+    ]);
   } catch (e) {
-    err = e instanceof Error ? e.message : 'erro';
+    err = pageError(e, 'page/settings');
   }
   const bio = bioLink({ campaignSlug: campaign?.slug, baseUrl: process.env.SITE_URL });
 

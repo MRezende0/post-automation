@@ -5,6 +5,7 @@
 import { NextResponse } from 'next/server';
 import { safeEqual } from '@/lib/auth';
 import { runPublishDue } from '@/lib/publish';
+import { logError } from '@/lib/log';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -23,6 +24,7 @@ async function handle(req: Request) {
     const summary = await runPublishDue();
     return NextResponse.json({ ok: true, ...summary });
   } catch (e) {
+    logError('cron/publish-due', e);
     return NextResponse.json({ error: e instanceof Error ? e.message : 'erro' }, { status: 500 });
   }
 }

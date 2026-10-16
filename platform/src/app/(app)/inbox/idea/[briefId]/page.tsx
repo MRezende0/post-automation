@@ -5,17 +5,19 @@ import { groupIdeas } from '@/lib/ideas-model';
 import { nextFreeSlot } from '@/lib/slots';
 import { composeCaption } from '@/lib/caption';
 import IdeaForm from '@/components/IdeaForm';
+import { pageTenant } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
 export default async function IdeaPage({ params }: { params: Promise<{ briefId: string }> }) {
   const { briefId } = await params;
-  const pendings = await getIdeaPendings(decodeURIComponent(briefId));
+  const t = await pageTenant();
+  const pendings = await getIdeaPendings(t, decodeURIComponent(briefId));
   const idea = groupIdeas(pendings)[0];
   if (!idea) notFound();
 
   const channels = idea.pendings.map((p) => p.channel);
-  const slots = await Promise.all(channels.map((c) => nextFreeSlot(c).catch(() => null)));
+  const slots = await Promise.all(channels.map((c) => nextFreeSlot(t, c).catch(() => null)));
   const nextSlots = Object.fromEntries(channels.map((c, i) => [c, slots[i]]));
 
   // legenda sugerida por variação de cada rede (corpo + hashtags)

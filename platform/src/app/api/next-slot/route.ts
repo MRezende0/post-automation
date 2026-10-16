@@ -1,17 +1,16 @@
 import { NextResponse } from 'next/server';
 import { nextFreeSlot } from '@/lib/slots';
-import { CHANNELS, type Channel } from '@/lib/types';
+import { requireTenant } from '@/lib/session';
+import { parseChannel } from '@/lib/route-input';
+import { apiError, badRequest } from '@/lib/api';
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const channel = searchParams.get('channel') as Channel | null;
-    if (!channel || !CHANNELS.includes(channel)) {
-      return NextResponse.json({ error: 'channel inválido' }, { status: 400 });
-    }
-    const slot = await nextFreeSlot(channel);
-    return NextResponse.json({ scheduledFor: slot });
+    const t = await requireTenant();
+    const channel = parseChannel(new URL(req.url).searchParams.get('channel'));
+    if (!channel.ok) return badRequest(channel.error);
+    return NextResponse.json({ scheduledFor: await nextFreeSlot(t, channel.value) });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'erro' }, { status: 400 });
+    return apiError(e, 'api/next-slot');
   }
 }

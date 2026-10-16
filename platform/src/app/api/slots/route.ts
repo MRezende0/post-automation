@@ -1,40 +1,29 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/supabase';
-import { CHANNELS, type Channel } from '@/lib/types';
+import { addSlot, removeSlot } from '@/lib/slots';
+import { requireTenant } from '@/lib/session';
+import { isUuid, parseSlot } from '@/lib/route-input';
+import { apiError, badRequest } from '@/lib/api';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { channel, weekday, hour, minute } = body ?? {};
-    if (!channel || weekday == null || hour == null) {
-      return NextResponse.json({ error: 'channel, weekday e hour obrigatórios' }, { status: 400 });
-    }
-    if (!CHANNELS.includes(channel as Channel)) {
-      return NextResponse.json({ error: `channel inválido: use ${CHANNELS.join(', ')}` }, { status: 400 });
-    }
-    const { error } = await db().from('publish_slots').insert({
-      channel: String(channel),
-      weekday: Number(weekday),
-      hour: Number(hour),
-      minute: Number(minute ?? 0),
-      active: true,
-    });
-    if (error) throw new Error(error.message);
+    const t = await requireTenant();
+    const parsed = parseSlot(await req.json().catch(() => null));
+    if (!parsed.ok) return badRequest(parsed.error);
+    await addSlot(t, parsed.value);
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'erro' }, { status: 400 });
+    return apiError(e, 'api/slots');
   }
 }
 
 export async function DELETE(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
-    if (!id) return NextResponse.json({ error: 'id obrigatório' }, { status: 400 });
-    const { error } = await db().from('publish_slots').delete().eq('id', id);
-    if (error) throw new Error(error.message);
+    const t = await requireTenant();
+    const id = new URL(req.url).searchParams.get('id');
+    if (!isUuid(id)) return badRequest('Slot não encontrado. Recarregue a página.');
+    await removeSlot(t, id);
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'erro' }, { status: 400 });
+    return apiError(e, 'api/slots');
   }
 }

@@ -1,14 +1,17 @@
-// scheduling.ts — ações de aprovação/agendamento (lado escrita). Substitui o que
+// scheduling.ts: ações de aprovação/agendamento (lado escrita). Substitui o que
 // o resolve.js fazia a partir dos cliques do Telegram: aprovar uma pendência vira
 // um scheduled_post (não publica na hora); cancelar/reagendar mexem na fila.
 
-import { db } from './supabase';
+import type { TenantDb } from './tenant-db';
 import { notify, escapeHtml } from './telegram';
 import { composeCaption } from './caption';
 import { nextFreeSlot } from './slots';
 import { distributionUtm } from './utm';
 import { splitThread } from './thread';
 import type { PendingApproval, Variation, ImageRef, MediaKind } from './types';
+import { UserError } from './errors';
+
+const NOT_FOUND = 'Post agendado não encontrado, ou já mudou de estado. Recarregue a página.';
 
 function fmtLocal(iso: string): string {
   const offset = Number(process.env.PUBLISH_TZ_OFFSET ?? -3);
@@ -18,8 +21,8 @@ function fmtLocal(iso: string): string {
   return `${dias[d.getUTCDay()]} ${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }
 
-async function loadPending(pendingId: string): Promise<PendingApproval | null> {
-  const { data, error } = await db().from('pending_approvals').select('*').eq('pending_id', pendingId).limit(1);
+async function loadPending(t: TenantDb, pendingId: string): Promise<PendingApproval | null> {
+  const { data, error } = await t.select('pending_approvals').eq('pending_id', pendingId).limit(1);
   if (error) throw new Error(`Falha ao ler pending: ${error.message}`);
   return (data?.[0] as PendingApproval) ?? null;
 }
@@ -34,8 +37,8 @@ export function mediaKindOf(channel: string, variation: Variation, imageUrl: str
 }
 
 // Campanha da tabela (sincronizada do campaigns.yaml). Ausente não bloqueia a aprovação.
-async function findCampaignId(slug: string): Promise<string | null> {
-  const { data, error } = await db().from('campaigns').select('id').eq('slug', slug).limit(1);
+async function findCampaignId(t: TenantDb, slug: string): Promise<string | null> {
+  const { data, error } = await t.select('campaigns', 'id').eq('slug', slug).limit(1);
   if (error) return null;
   return (data?.[0]?.id as string) ?? null;
 }
@@ -49,35 +52,34 @@ export type ApproveInput = {
   scheduledFor?: string; // ISO; se ausente cai no próximo slot livre
 };
 
-export async function approvePending(input: ApproveInput): Promise<{ scheduledFor: string; id: string }> {
-  const p = await loadPending(input.pendingId);
-  if (!p) throw new Error('Pendência não encontrada (já resolvida?).');
+export async function approvePending(t: TenantDb, input: ApproveInput): Promise<{ scheduledFor: string; id: string }> {
+  const p = await loadPending(t, input.pendingId);
+  if (!p) throw new UserError('Pendência não encontrada (já resolvida?).');
 
   const variations: Variation[] = p.generation?.variations || [];
   const variation = variations.find((v) => v.id === input.captionId) || variations[0];
-  if (!variation) throw new Error('Variação de legenda inválida.');
+  if (!variation) throw new UserError('Variação de legenda inválida.');
 
   const images: ImageRef[] = p.images || [];
-  if (input.noImage && p.channel === 'instagram') throw new Error('O Instagram não publica sem imagem. Escolha uma arte.');
+  if (input.noImage && p.channel === 'instagram') throw new UserError('O Instagram não publica sem imagem. Escolha uma arte.');
   const art = images.find((i) => i.id === input.artId);
   const imageUrl = input.noImage ? null : art?.url ?? images[0]?.url ?? null;
 
   const captionFinal = (input.captionText && input.captionText.trim()) || composeCaption(variation);
 
-  const scheduledFor = input.scheduledFor || (await nextFreeSlot(p.channel));
+  const scheduledFor = input.scheduledFor || (await nextFreeSlot(t, p.channel));
   if (!scheduledFor) {
-    throw new Error('Sem slot livre na grade. Defina um horário manual ou adicione slots.');
+    throw new UserError('Sem slot livre na grade. Defina um horário manual ou adicione slots.');
   }
 
   // O id nasce aqui pra entrar no utm_content antes do insert.
   const id = crypto.randomUUID();
   const campaignSlug = typeof p.seed?.campaign === 'string' ? p.seed.campaign : null;
-  const campaignId = campaignSlug ? await findCampaignId(campaignSlug) : null;
+  const campaignId = campaignSlug ? await findCampaignId(t, campaignSlug) : null;
   const utm = distributionUtm({ channel: p.channel, distributionId: id, campaignSlug, baseUrl: process.env.SITE_URL });
 
-  const { data, error } = await db()
-    .from('scheduled_posts')
-    .insert({
+  const { data, error } = await t
+    .insert('scheduled_posts', {
       id,
       channel: p.channel,
       pillar: p.generation?.pillar ?? null,
@@ -103,18 +105,18 @@ export async function approvePending(input: ApproveInput): Promise<{ scheduledFo
     .single();
   if (error) throw new Error(`Falha ao agendar: ${error.message}`);
 
-  // consome a pendência (espelha clearPending por canal)
-  await db().from('pending_approvals').delete().eq('channel', p.channel);
+  // consome a pendência
+  await t.delete('pending_approvals').eq('pending_id', p.pending_id);
 
   await notify(`🗓️ Agendado em <b>${p.channel}</b> pra <b>${fmtLocal(scheduledFor)}</b> — ${escapeHtml((variation.hook || '').slice(0, 80))}`);
   return { scheduledFor, id: data!.id as string };
 }
 
-export async function rejectPending(pendingId: string, reason?: string): Promise<void> {
-  const p = await loadPending(pendingId);
-  if (!p) return;
+export async function rejectPending(t: TenantDb, pendingId: string, reason?: string): Promise<void> {
+  const p = await loadPending(t, pendingId);
+  if (!p) throw new UserError('Pendência não encontrada (já resolvida?).');
   const top = (p.generation?.variations || []).find((v) => v.id === p.top_id) || p.generation?.variations?.[0];
-  await db().from('rejected_posts').insert({
+  await t.insert('rejected_posts', {
     pillar: p.generation?.pillar ?? null,
     angle: p.generation?.angle ?? null,
     channel: p.channel,
@@ -123,31 +125,34 @@ export async function rejectPending(pendingId: string, reason?: string): Promise
     format: top?.format ?? null,
     reason: reason || 'rejeitado via plataforma',
   });
-  await db().from('pending_approvals').delete().eq('channel', p.channel);
+  await t.delete('pending_approvals').eq('pending_id', p.pending_id);
   await notify(`❌ Pendência ${p.channel} rejeitada${reason ? `: ${escapeHtml(reason)}` : ''}`);
 }
 
-export async function reschedulePost(id: string, scheduledFor: string): Promise<void> {
-  const { error } = await db()
-    .from('scheduled_posts')
-    .update({ scheduled_for: scheduledFor, status: 'scheduled', last_error: null })
+export async function reschedulePost(t: TenantDb, id: string, scheduledFor: string): Promise<void> {
+  const { data, error } = await t
+    .update('scheduled_posts', { scheduled_for: scheduledFor, status: 'scheduled', last_error: null })
     .eq('id', id)
-    .in('status', ['scheduled', 'failed']);
+    .in('status', ['scheduled', 'failed'])
+    .select('id');
   if (error) throw new Error(`Falha ao reagendar: ${error.message}`);
+  if (!data?.length) throw new UserError(NOT_FOUND);
 }
 
-export async function cancelScheduled(id: string): Promise<void> {
-  const { error } = await db().from('scheduled_posts').delete().eq('id', id).in('status', ['scheduled', 'failed']);
+export async function cancelScheduled(t: TenantDb, id: string): Promise<void> {
+  const { data, error } = await t.delete('scheduled_posts').eq('id', id).in('status', ['scheduled', 'failed']).select('id');
   if (error) throw new Error(`Falha ao cancelar: ${error.message}`);
+  if (!data?.length) throw new UserError(NOT_FOUND);
 }
 
-export async function retryScheduled(id: string): Promise<void> {
-  const { error } = await db()
-    .from('scheduled_posts')
-    .update({ status: 'scheduled', last_error: null })
+export async function retryScheduled(t: TenantDb, id: string): Promise<void> {
+  const { data, error } = await t
+    .update('scheduled_posts', { status: 'scheduled', last_error: null })
     .eq('id', id)
-    .eq('status', 'failed');
+    .eq('status', 'failed')
+    .select('id');
   if (error) throw new Error(`Falha ao re-tentar: ${error.message}`);
+  if (!data?.length) throw new UserError(NOT_FOUND);
 }
 
 export { fmtLocal };

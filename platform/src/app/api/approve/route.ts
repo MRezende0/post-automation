@@ -1,24 +1,17 @@
 import { NextResponse } from 'next/server';
 import { approvePending } from '@/lib/scheduling';
+import { requireTenant } from '@/lib/session';
+import { parseApprove } from '@/lib/route-input';
+import { apiError, badRequest } from '@/lib/api';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { pendingId, captionId, artId, captionText, scheduledFor, noImage } = body ?? {};
-    if (!pendingId || captionId == null || artId == null) {
-      return NextResponse.json({ error: 'pendingId, captionId e artId são obrigatórios' }, { status: 400 });
-    }
-    const result = await approvePending({
-      pendingId: String(pendingId),
-      captionId: Number(captionId),
-      artId: Number(artId),
-      captionText: captionText ? String(captionText) : undefined,
-      scheduledFor: scheduledFor ? String(scheduledFor) : undefined,
-      noImage: noImage === true,
-    });
+    const t = await requireTenant();
+    const parsed = parseApprove(await req.json().catch(() => null));
+    if (!parsed.ok) return badRequest(parsed.error);
+    const result = await approvePending(t, parsed.value);
     return NextResponse.json({ ok: true, ...result });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : 'erro';
-    return NextResponse.json({ error: msg }, { status: 400 });
+    return apiError(e, 'api/approve');
   }
 }

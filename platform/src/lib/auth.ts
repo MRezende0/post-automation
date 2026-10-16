@@ -2,6 +2,8 @@
 // Usa Web Crypto (disponível no edge middleware e nos route handlers) — sem
 // node:crypto, pra rodar igual nos dois runtimes.
 
+import { isTenantId } from './tenant';
+
 export const SESSION_COOKIE = 'pa_session';
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias
 
@@ -37,19 +39,30 @@ async function hmac(payload: string): Promise<string> {
   return b64url(new Uint8Array(sig));
 }
 
-// token = <expiraEm>.<assinatura>
-export async function createSessionToken(): Promise<string> {
-  const exp = String(Date.now() + SESSION_TTL_MS);
-  const sig = await hmac(exp);
-  return `${exp}.${sig}`;
+// Tenant da instalação de senha única. Com o login por usuário, vem da membership.
+export function installTenantId(): string {
+  return process.env.TENANT_ID || 'pilar';
 }
 
-export async function verifySessionToken(token: string | undefined | null): Promise<boolean> {
-  if (!token) return false;
-  const [exp, sig] = token.split('.');
-  if (!exp || !sig) return false;
-  if (Number(exp) < Date.now()) return false;
-  return safeEqual(await hmac(exp), sig);
+export type Session = { tenantId: string };
+
+// token = <tenant>.<expiraEm>.<assinatura>. O tenant entra na assinatura: trocar o tenant no
+// cookie invalida a sessão. Token antigo (sem tenant) não valida e leva de volta ao login.
+export async function createSessionToken(tenantId: string): Promise<string> {
+  const exp = String(Date.now() + SESSION_TTL_MS);
+  const sig = await hmac(`${tenantId}.${exp}`);
+  return `${tenantId}.${exp}.${sig}`;
+}
+
+export async function verifySessionToken(token: string | undefined | null): Promise<Session | null> {
+  if (!token) return null;
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  const [tenantId, exp, sig] = parts;
+  if (!isTenantId(tenantId) || !exp || !sig) return null;
+  if (!(Number(exp) > Date.now())) return null;
+  if (!safeEqual(await hmac(`${tenantId}.${exp}`), sig)) return null;
+  return { tenantId };
 }
 
 export async function checkPassword(input: string): Promise<boolean> {

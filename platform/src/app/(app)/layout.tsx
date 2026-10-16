@@ -3,14 +3,16 @@ import Link from 'next/link';
 import { countByStatus } from '@/lib/queries';
 import { getPauseState, type PauseState } from '@/lib/pause';
 import { fmtDateTime } from '@/lib/format';
+import { pageTenant } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const t = await pageTenant();
   let badges = { pendings: 0, failed: 0 };
   let pause: PauseState | null = null;
   try {
-    const [c, p] = await Promise.all([countByStatus(), getPauseState()]);
+    const [c, p] = await Promise.all([countByStatus(t), getPauseState(t)]);
     badges = { pendings: c.pendings, failed: c.failed };
     pause = p;
   } catch {

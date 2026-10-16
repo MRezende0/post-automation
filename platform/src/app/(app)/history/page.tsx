@@ -2,16 +2,19 @@ import { getPublishedHistory } from '@/lib/queries';
 import { fmtDateTime } from '@/lib/format';
 import FeedbackForm from '@/components/FeedbackForm';
 import type { PublishedPost } from '@/lib/types';
+import { pageTenant } from '@/lib/session';
+import { pageError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HistoryPage() {
+  const t = await pageTenant();
   let posts: PublishedPost[] = [];
   let err = '';
   try {
-    posts = await getPublishedHistory(60);
+    posts = await getPublishedHistory(t, 60);
   } catch (e) {
-    err = e instanceof Error ? e.message : 'erro';
+    err = pageError(e, 'page/history');
   }
 
   return (

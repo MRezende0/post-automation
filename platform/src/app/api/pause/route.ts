@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
 import { setPause } from '@/lib/pause';
 import { notify, escapeHtml } from '@/lib/telegram';
+import { requireTenant } from '@/lib/session';
+import { parsePause } from '@/lib/route-input';
+import { apiError, badRequest } from '@/lib/api';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    if (typeof body?.paused !== 'boolean') {
-      return NextResponse.json({ error: 'Campo "paused" (true ou false) é obrigatório' }, { status: 400 });
-    }
-    const state = await setPause(body.paused, typeof body.reason === 'string' ? body.reason : null);
+    const t = await requireTenant();
+    const parsed = parsePause(await req.json().catch(() => null));
+    if (!parsed.ok) return badRequest(parsed.error);
+    const state = await setPause(t, parsed.value.paused, parsed.value.reason);
     await notify(
       state.paused
         ? `⏸️ Publicação pausada${state.reason ? `: ${escapeHtml(state.reason)}` : ''}. Nada sai até retomar.`
@@ -16,6 +18,6 @@ export async function POST(req: Request) {
     );
     return NextResponse.json({ ok: true, ...state });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'erro' }, { status: 500 });
+    return apiError(e, 'api/pause');
   }
 }
