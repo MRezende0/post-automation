@@ -7,7 +7,7 @@
   - R6 depende do piloto da fábrica de vídeo.
 - **Data:** 2026-10-15
 - **Prazo:** fase A do plano, 20/10 a 15/11/2026
-- **Depende de:** [ADR 0001](../adr/0001-campanha-brief-ativo-distribuicao.md), ADR 0060 e
+- **Depende de:** [ADR 0001](../adr/0001-campanha-brief-ativo-distribuicao.md), ADR 0061 (substitui a parte de marketing da 0060) e
   SPEC 126 do repo da Pilar, `docs/plano-presenca-social.md`
 
 ## Problema
@@ -24,7 +24,7 @@ em lote peças de 4 formatos (texto, foto-pergunta, carrossel, Reels) para Insta
 LinkedIn, e cada link publicado carrega um UTM que a Pilar consegue devolver no funil.
 
 **Fora de escopo (onda 2):** o Planner semanal automático, coletores de anúncios, Search
-Console e PageSpeed, o envio para `ops-ingest`, o prêmio do bandit por cadastro ativado e
+Console e PageSpeed, o prêmio do bandit por cadastro ativado ([SPEC 004](004-funil-da-pilar-no-bandit.md)) e
 o publish real do X.
 
 ## Requisitos

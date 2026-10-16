@@ -3,7 +3,8 @@
 > Cérebro do agente de marketing. Diz o que cada perfil transmite, que formato existe, quando
 > publicar, que campanha roda em cada fase, como medir e o que o agente decide toda semana.
 > Lê junto com `posicionamento.md`, `pilares.md`, `voice.md` e `brand.md`.
-> Contrato com o Pilar: SPEC 124 e ADR 0060 no repo do produto.
+> Contrato com o Pilar: ADR 0061 e SPEC 128 no repo do produto (a Pilar só devolve o funil por UTM;
+> nenhuma métrica de rede vai para lá). Aqui: [ADR 0002](adr/0002-plataforma-como-produto-proprio.md) e [SPEC 004](specs/004-funil-da-pilar-no-bandit.md).
 > Data guia: lançamento público na terça, 19/01/2027 (T0). Antecipar é permitido.
 
 ## 1. O que o perfil transmite
@@ -244,10 +245,12 @@ Com `utm_content` = id do post, o Pilar devolve cadastros e ativados por post
 
 ## 9. O agente de marketing
 
-Vive neste repo e neste banco. O Pilar só mostra o resultado (Ultra › Time › Marketing).
+Vive neste repo e neste banco, e os painéis ficam nesta plataforma. No Ultra da Pilar, o card
+de Marketing só tem o botão "Abrir plataforma de marketing" (ADR 0061).
 
 **Todo dia, 06h:** coleta métricas de Instagram, LinkedIn, X, anúncios, Search Console e
-PageSpeed; busca o funil por UTM no Pilar; envia o snapshot assinado para o `ops-ingest`.
+PageSpeed; busca o funil por UTM no Pilar (`ops-export-funil`, SPEC 004). Os painéis ficam nesta
+plataforma; a Pilar só abre o link para cá.
 
 **Segunda, 07h:**
 
@@ -274,7 +277,7 @@ Em ordem:
 3. Carrossel em PDF para o LinkedIn.
 4. Render de Reels: roteiro do `reel.js` → HyperFrames → voz pt-BR → aprovação.
 5. Coletores: Meta Ads, Search Console, PageSpeed; X só se a leitura for viável.
-6. Envio diário assinado para o `ops-ingest` do Pilar e leitura do `ops-export-funil`.
+6. Leitura diária do `ops-export-funil` (SPEC 004). O envio para o `ops-ingest` saiu com o ADR 0061.
 7. Prêmio do bandit com cadastro ativado.
 8. Pauta semanal automática e resumo de segunda.
 

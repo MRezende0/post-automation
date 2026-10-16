@@ -11,7 +11,7 @@ variações, e `scheduled_posts` guarda uma imagem ou slides. O plano de presen�
 (`docs/plano-presenca-social.md`) pede outra unidade: uma semana de campanha com várias
 peças, uma ideia central desdobrada em formatos diferentes (texto, foto-pergunta,
 carrossel, carrossel em PDF, Reels, story, thread), cada peça publicada em um ou mais
-canais e medida até o cadastro ativado na Pilar (ADR 0060 do repo da Pilar).
+canais e medida até o cadastro ativado na Pilar (ADR 0060, hoje 0061, do repo da Pilar).
 
 Sem um modelo que separe ideia, peça e publicação:
 
