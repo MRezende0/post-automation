@@ -75,7 +75,7 @@ jobs:
           set -euo pipefail
           falhou=0
           for f in supabase/migrations/*.sql; do
-            if grep -qiE '^[[:space:]]*(drop (table|schema|column)|truncate|delete from)' "$f" \
+            if grep -qiE '^[[:space:]]*(drop (table|schema|column)|truncate|delete from|alter table [^;]*drop column)' "$f" \
                && ! grep -q -- '-- allow-destructive' "$f"; then
               echo "::error file=$f::comando destrutivo sem '-- allow-destructive' no arquivo"
               falhou=1

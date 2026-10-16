@@ -8,6 +8,9 @@
 --    inbox.
 --
 -- Reaplicável (o CI roda duas vezes).
+--
+-- allow-destructive: as três colunas apagadas guardavam só ids de mensagem do Telegram, que
+-- saiu inteiro; nenhuma outra parte do sistema as lia (aval registrado depois, na SPEC 008).
 
 create table if not exists notifications (
   id          bigint generated always as identity primary key,

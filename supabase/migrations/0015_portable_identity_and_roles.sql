@@ -10,7 +10,10 @@
 --    A matriz mora em `role_permissions` e as policies perguntam a app.can().
 -- 3. Toda conta com administrador mantém pelo menos um: o último não sai nem é rebaixado.
 --
--- Reaplicável (o CI roda duas vezes). Os papéis de API (anon, authenticated, service_role)
+-- Reaplicável (o CI roda duas vezes).
+--
+-- allow-destructive: o único `delete` limpa `role_permissions`, a matriz que esta mesma migration
+-- semeia logo em seguida. Nenhum dado de cliente é apagado. Os papéis de API (anon, authenticated, service_role)
 -- continuam vindo do Supabase ou de supabase/ci/bootstrap.sql.
 
 -- ─────────────────────────────────────────────────────────────────────────────
