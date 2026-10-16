@@ -56,6 +56,14 @@ export default async function SettingsPage() {
       </div>
 
       <div className="space-y-2">
+        <h2 className="text-lg font-semibold">Seus dados</h2>
+        <p className="text-sm text-muted">Baixe tudo que a plataforma guarda da sua conta: posts, ideias, feedback, regras e métricas.</p>
+        <a href="/api/export" className="btn btn-ghost inline-block" download>
+          Baixar meus dados (JSON)
+        </a>
+      </div>
+
+      <div className="space-y-2">
         <h2 className="text-lg font-semibold">O que cada rede aceita</h2>
         <p className="text-sm text-muted">
           Formato que não publica sozinho nunca vai para a API. Manual: a plataforma entrega o texto e você publica no app.
