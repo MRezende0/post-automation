@@ -67,6 +67,8 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           STATE_BACKEND: ${{ vars.STATE_BACKEND }}
+          # LinkedIn é prioridade 1 no plano de presença social; sem isto o index.js gera só Instagram.
+          CHANNELS: ${{ vars.CHANNELS || 'instagram,linkedin' }}
           DRY_RUN: ${{ inputs.dry_run }}
           SKIP_APPROVAL: ${{ inputs.skip_approval }}
         run: npm start
