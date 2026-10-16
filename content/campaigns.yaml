@@ -7,6 +7,7 @@
 #     end: YYYY-MM-DD               # opcional (sem end = pra sempre)
 #     pillar: dor | dica | building | prova   # opcional — força o pilar
 #     angle: <ângulo válido>        # opcional — ver docs/pilares.md
+#     slug: string                  # opcional; padrão = name sem acento em kebab-case (vira utm_campaign)
 #     context: |                    # tema injetado no prompt
 #       ...
 #
@@ -39,6 +40,7 @@
     Bastidores da reta final e contagem regressiva para 19/01. Mostra trechos reais do
     produto e o porquê de cada decisão. CTA: entrar na turma de lançamento.
 - name: Lançamento
+  slug: lancamento-2027-01
   start: 2027-01-19
   end: 2027-01-25
   context: |
