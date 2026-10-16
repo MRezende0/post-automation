@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1010" viewBox="0 0 1800 1010"><rect width="100%" height="100%" fill="#FBFBFA"/>
+<defs><marker id="an" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3A4450"/></marker></defs>
+<defs><marker id="aok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2E8B57"/></marker></defs>
+<defs><marker id="ano" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C9372C"/></marker></defs>
+<defs><marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8A929B"/></marker></defs>
+<text x="24" y="46" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#1B1F24" text-anchor="start">Jornadas da pessoa</text>
+<text x="24" y="74" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5B6570" text-anchor="start">Do cadastro ao primeiro post, a entrada de quem é convidado e o login do dia a dia.</text>
+<polyline points="1560,92 1605,92" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<text x="1613" y="97" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#2E8B57" text-anchor="start">permitido</text>
+<polyline points="1680,92 1725,92" fill="none" stroke="#C9372C" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ano)"/>
+<text x="1733" y="97" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#C9372C" text-anchor="start">negado</text>
+<rect x="24" y="110" width="1752" height="280" rx="14" fill="#FFFFFF" stroke="#D5D9DE" stroke-width="1.6"/>
+<text x="44" y="246.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#1B1F24" text-anchor="start">Cadastro</text>
+<text x="44" y="268.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="start">até o primeiro post</text>
+<rect x="24" y="410" width="1752" height="300" rx="14" fill="#F7F8F9" stroke="#D5D9DE" stroke-width="1.6"/>
+<text x="44" y="556.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#1B1F24" text-anchor="start">Equipe</text>
+<text x="44" y="578.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="start">convite na empresa</text>
+<rect x="24" y="730" width="1752" height="260" rx="14" fill="#FFFFFF" stroke="#D5D9DE" stroke-width="1.6"/>
+<text x="44" y="856.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#1B1F24" text-anchor="start">Dia a dia</text>
+<text x="44" y="878.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="start">entrar e trabalhar</text>
+<rect x="224" y="175" width="170" height="90" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="309.0" y="205.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Criar conta</text>
+<text x="309.0" y="225.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">PF ou empresa;</text>
+<text x="309.0" y="245.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">teste grátis começa</text>
+<polygon points="500,165.0 585.0,220 500,275.0 415.0,220" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="500" y="216.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">E-mail</text>
+<text x="500" y="233.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">confirmado?</text>
+<rect x="610" y="175" width="170" height="90" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="695.0" y="205.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">1. Conectar rede</text>
+<text x="695.0" y="225.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">login do Instagram</text>
+<text x="695.0" y="245.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">ou do LinkedIn</text>
+<rect x="830" y="175" width="170" height="90" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
+<text x="915.0" y="205.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">2. Sobre o negócio</text>
+<text x="915.0" y="225.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">nicho, público</text>
+<text x="915.0" y="245.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e voz</text>
+<rect x="1050" y="175" width="170" height="90" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="1135.0" y="205.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">3. Primeira ideia</text>
+<text x="1135.0" y="225.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">a IA gera; aviso</text>
+<text x="1135.0" y="245.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">de post pronto</text>
+<rect x="1270" y="175" width="170" height="90" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="1355.0" y="215.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Aprovar e agendar</text>
+<text x="1355.0" y="235.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">na inbox</text>
+<rect x="1490" y="175" width="170" height="90" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="1575.0" y="215.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Publicado</text>
+<text x="1575.0" y="235.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">aviso e métricas</text>
+<polyline points="394,220 415,220" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="585,220 610,220" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="582.28" y="199" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="597" y="212" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">sim</text>
+<polyline points="780,220 830,220" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="1000,220 1050,220" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="1220,220 1270,220" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="1440,220 1490,220" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="415" y="315" width="170" height="46" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="500.0" y="343.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#1B1F24" text-anchor="middle">Reenviar o link</text>
+<polyline points="500,275 500,315" fill="none" stroke="#8A929B" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#am)"/>
+<rect x="500.28" y="287" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="515" y="300" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#8A929B" text-anchor="middle">não</text>
+<rect x="610" y="300" width="610" height="70" rx="14" fill="#F6F4FC" stroke="#6B5BB5" stroke-width="1.6"/>
+<text x="915" y="330" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#1B1F24" text-anchor="middle">Checklist do onboarding: o progresso vem do dado.</text>
+<text x="915" y="352" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5B6570" text-anchor="middle">Dá para pular um passo e voltar depois.</text>
+<rect x="224" y="500" width="170" height="90" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="309.0" y="530.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Convidar</text>
+<text x="309.0" y="550.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e-mail e papel;</text>
+<text x="309.0" y="570.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">dono ou admin</text>
+<rect x="444" y="500" width="180" height="90" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="534.0" y="540.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">E-mail de convite</text>
+<text x="534.0" y="560.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">vale 7 dias</text>
+<polygon points="760,490.0 855.0,545 760,600.0 665.0,545" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="760" y="541.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">Convite</text>
+<text x="760" y="558.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">válido?</text>
+<polygon points="990,490.0 1080.0,545 990,600.0 900.0,545" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="990" y="541.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">Já tem</text>
+<text x="990" y="558.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">login?</text>
+<polygon points="1220,490.0 1310.0,545 1220,600.0 1130.0,545" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="1220" y="541.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">Papel é dono</text>
+<text x="1220" y="558.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">ou admin?</text>
+<rect x="1330" y="500" width="150" height="90" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="1405.0" y="540.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Configura MFA</text>
+<text x="1405.0" y="560.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">app autenticador</text>
+<rect x="1530" y="500" width="190" height="90" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="1625.0" y="530.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Entra na conta</text>
+<text x="1625.0" y="550.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">com o papel; dono</text>
+<text x="1625.0" y="570.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">recebe aviso e log</text>
+<polyline points="394,545 444,545" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="624,545 665,545" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="855,545 900,545" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="862.28" y="524" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="877" y="537" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">sim</text>
+<polyline points="1080,545 1130,545" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="1090.28" y="524" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="1105" y="537" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">sim</text>
+<polyline points="1310,545 1330,545" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="1480,545 1530,545" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="650" y="630" width="220" height="56" rx="10" fill="#FDE8E6" stroke="#C9372C" stroke-width="2"/>
+<text x="760.0" y="653.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#1B1F24" text-anchor="middle">Expirado: pedir outro</text>
+<text x="760.0" y="673.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">já aceito: só entrar</text>
+<polyline points="760,600 760,630" fill="none" stroke="#C9372C" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ano)"/>
+<rect x="760.28" y="603" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="775" y="616" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#C9372C" text-anchor="middle">não</text>
+<rect x="905" y="630" width="170" height="46" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="990.0" y="658.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#1B1F24" text-anchor="middle">Cria a senha</text>
+<polyline points="990,600 990,630" fill="none" stroke="#8A929B" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#am)"/>
+<rect x="990.28" y="603" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="1005" y="616" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#8A929B" text-anchor="middle">não</text>
+<polyline points="1075,653 1220,653 1220,600" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="1220,490 1220,440 1625,440 1625,500" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="1405.28" y="419" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="1420" y="432" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">não</text>
+<rect x="224" y="810" width="170" height="90" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="309.0" y="840.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Entrar</text>
+<text x="309.0" y="860.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">senha ou link</text>
+<text x="309.0" y="880.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">por e-mail</text>
+<polygon points="520,800.0 610.0,855 520,910.0 430.0,855" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="520" y="851.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">Precisa</text>
+<text x="520" y="868.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">de MFA?</text>
+<rect x="660" y="810" width="170" height="90" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="745.0" y="850.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Código MFA</text>
+<text x="745.0" y="870.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">app autenticador</text>
+<polygon points="960,800.0 1055.0,855 960,910.0 865.0,855" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="960" y="851.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">Está em mais</text>
+<text x="960" y="868.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1B1F24" text-anchor="middle">de uma conta?</text>
+<rect x="1105" y="810" width="170" height="90" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="1190.0" y="850.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Escolhe a conta</text>
+<text x="1190.0" y="870.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">lembra a última</text>
+<rect x="1325" y="810" width="220" height="90" rx="10" fill="#E6F4EA" stroke="#2E8B57" stroke-width="2"/>
+<text x="1435.0" y="840.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Início</text>
+<text x="1435.0" y="860.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">o que precisa de você:</text>
+<text x="1435.0" y="880.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">aprovar, falhas, avisos</text>
+<polyline points="394,855 430,855" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="610,855 660,855" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="620.28" y="834" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="635" y="847" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">sim</text>
+<polyline points="830,855 865,855" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="1055,855 1105,855" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="1065.28" y="834" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="1080" y="847" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">sim</text>
+<polyline points="1275,855 1325,855" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="520,800 520,765 960,765 960,800" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="725.28" y="744" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="740" y="757" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">não</text>
+<polyline points="960,910 960,955 1435,955 1435,900" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<rect x="1185.28" y="934" width="29.44" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="1200" y="947" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#2E8B57" text-anchor="middle">não</text>
+</svg>

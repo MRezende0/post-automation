@@ -11,6 +11,9 @@
 | [02 segurança](gcp/02-seguranca.png) | portões de cada rota de entrada |
 | [03 publicação](gcp/03-publicacao.png) | um post do despertador ao aviso |
 | [04 contas e papéis](gcp/04-contas-e-papeis.png) | PF e PJ, quem pode o quê |
+| [05 mapa de telas](gcp/05-mapa-de-telas.png) | cada tela por papel ([arquitetura de usuário](usuario.md)) |
+| [06 jornadas](gcp/06-jornadas.png) | cadastro, convite e login |
+| [07 ciclo por papel](gcp/07-ciclo-por-papel.png) | etapas do conteúdo e quem recebe cada aviso |
 
 ## Contas: PF e PJ no mesmo modelo
 
