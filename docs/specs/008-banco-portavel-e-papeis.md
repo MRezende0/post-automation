@@ -44,4 +44,6 @@
 - [x] Travas de catálogo: policy, função ou FK que dependa do schema `auth` reprova.
 - [x] Banco com `owner` e `editor` e pessoas no `auth.users` migra para `admin` e `creator`, com
       `users` preenchida.
+- [x] A trava de comando destrutivo do CI passa a pegar `alter table ... drop column` (a 0014 tinha
+      escapado; ganhou o aval com o motivo).
 - [x] Suíte de testes verde.
