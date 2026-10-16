@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getPendings } from '@/lib/queries';
 import { fmtDateTime } from '@/lib/format';
+import { groupIdeas, roleOf } from '@/lib/ideas-model';
 import type { PendingApproval } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -27,11 +28,16 @@ export default async function InboxPage() {
     err = e instanceof Error ? e.message : 'erro';
   }
 
+  // Redes da mesma rodada viram um cartão só (SPEC 003 R3); pendência avulsa abre a tela antiga.
+  const ideas = groupIdeas(pendings);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Inbox de aprovação</h1>
-        <span className="text-sm text-muted">{pendings.length} pendência(s)</span>
+        <span className="text-sm text-muted">
+          {ideas.length} {ideas.length === 1 ? 'ideia' : 'ideias'} · {pendings.length} {pendings.length === 1 ? 'rede' : 'redes'}
+        </span>
       </div>
 
       {err && <DbHint message={err} />}
@@ -41,11 +47,15 @@ export default async function InboxPage() {
       )}
 
       <div className="grid gap-3">
-        {pendings.map((p) => {
-          const top = p.generation?.variations?.find((v) => v.id === p.top_id) || p.generation?.variations?.[0];
-          const cover = p.images?.find((i) => i.url)?.url || null;
+        {ideas.map((idea) => {
+          const lead = idea.pendings[0];
+          const top = lead.generation?.variations?.find((v) => v.id === lead.top_id) || lead.generation?.variations?.[0];
+          const cover = idea.pendings.flatMap((p) => p.images || []).find((i) => i.url)?.url || null;
+          const href = idea.briefId
+            ? `/inbox/idea/${encodeURIComponent(idea.briefId)}`
+            : `/inbox/${encodeURIComponent(lead.pending_id)}`;
           return (
-            <Link key={p.pending_id} href={`/inbox/${encodeURIComponent(p.pending_id)}`} className="card flex gap-4 hover:border-muted">
+            <Link key={idea.key} href={href} className="card flex gap-4 hover:border-muted">
               {cover ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={cover} alt="" className="h-24 w-24 shrink-0 rounded-lg object-cover" />
@@ -56,13 +66,17 @@ export default async function InboxPage() {
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="chip uppercase">{p.channel}</span>
-                  {p.generation?.pillar && <span className="chip">{p.generation.pillar}</span>}
-                  {p.generation?.angle && <span className="chip">{p.generation.angle}</span>}
-                  <span className="chip">{p.generation?.variations?.length ?? 0} variações</span>
+                  {idea.pendings.map((p) => (
+                    <span key={p.pending_id} className="chip uppercase" title={roleOf(p)}>
+                      {p.channel}
+                      {roleOf(p) === 'reuse' ? ' ♻' : ''}
+                    </span>
+                  ))}
+                  {lead.generation?.pillar && <span className="chip">{lead.generation.pillar}</span>}
+                  {lead.generation?.angle && <span className="chip">{lead.generation.angle}</span>}
                 </div>
                 <p className="mt-2 line-clamp-2 font-medium">{top?.hook || '(sem hook)'}</p>
-                <p className="mt-1 text-xs text-muted">recebido {fmtDateTime(p.saved_at)}</p>
+                <p className="mt-1 text-xs text-muted">recebido {fmtDateTime(lead.saved_at)}</p>
               </div>
             </Link>
           );
