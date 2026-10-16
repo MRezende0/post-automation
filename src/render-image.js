@@ -71,7 +71,8 @@ function applyVars(html, vars, pillar) {
     eyebrow: vars.eyebrow || 'NOVO',
     subtitle: vars.subtitle || vars.body || '',
     cta: vars.cta || 'Saiba mais',
-    ...vars,
+    // undefined não pode apagar o padrão (o carrossel repassa brand/handle opcionais)
+    ...Object.fromEntries(Object.entries(vars).filter(([, v]) => v !== undefined)),
   };
   for (const [key, value] of Object.entries(merged)) {
     out = out.replaceAll(`{{${key}}}`, escapeHtml(String(value)));
@@ -88,7 +89,15 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
-export async function renderImage({ channel, pillar, vars, outPath }) {
+async function launchBrowser() {
+  return puppeteer.launch({
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
+}
+
+// Renderiza num navegador já aberto (o carrossel reusa um só pra todos os slides).
+async function renderWithBrowser(browser, { channel, pillar, vars, outPath }) {
   if (!DIMENSIONS[channel]) throw new Error(`Canal desconhecido pra render: ${channel}`);
 
   const templateFile = resolveTemplate(channel, pillar);
@@ -102,40 +111,85 @@ export async function renderImage({ channel, pillar, vars, outPath }) {
   if (!existsSync(TMP_DIR)) await mkdir(TMP_DIR, { recursive: true });
   const finalOut = outPath || path.join(TMP_DIR, `${channel}-${pillar}-${Date.now()}.png`);
 
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  const page = await browser.newPage();
   try {
-    const page = await browser.newPage();
     const { width, height } = DIMENSIONS[channel];
     await page.setViewport({ width, height, deviceScaleFactor: 2 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
     await page.screenshot({ path: finalOut, type: 'png', clip: { x: 0, y: 0, width, height } });
     return finalOut;
   } finally {
+    await page.close();
+  }
+}
+
+export async function renderImage({ channel, pillar, vars, outPath }) {
+  const browser = await launchBrowser();
+  try {
+    return await renderWithBrowser(browser, { channel, pillar, vars, outPath });
+  } finally {
     await browser.close();
   }
 }
 
-export async function renderCarousel({ channel, pillar, slides, brand, handle }) {
+export function slideVars(slide, i, total, { brand, handle } = {}) {
+  const isText = typeof slide === 'string';
+  const title = isText ? slide : (slide?.title || '');
+  const description = isText ? '' : (slide?.description || '');
+  return { step: `${i + 1}/${total}`, title, description, hook: title, body: description, brand, handle };
+}
+
+// Slides do carrossel sempre no desenho vertical do Instagram (1080x1350): o mesmo
+// PNG serve o carrossel do IG e as páginas do PDF do LinkedIn.
+export async function renderCarousel({ pillar, slides, brand, handle, slideChannel = 'instagram' }) {
   const out = [];
-  for (let i = 0; i < slides.length; i += 1) {
-    const slide = slides[i];
-    const vars = {
-      step: `${i + 1}/${slides.length}`,
-      title: typeof slide === 'string' ? slide : slide.title,
-      description: typeof slide === 'string' ? '' : (slide.description || ''),
-      hook: typeof slide === 'string' ? slide : slide.title,
-      body: typeof slide === 'string' ? '' : (slide.description || ''),
-      brand,
-      handle,
-    };
-    const outPath = path.join(TMP_DIR, `${channel}-${pillar}-carousel-${Date.now()}-${i}.png`);
-    const file = await renderImage({ channel, pillar, vars, outPath });
-    out.push(file);
+  const stamp = Date.now();
+  const browser = await launchBrowser();
+  try {
+    for (let i = 0; i < slides.length; i += 1) {
+      const vars = slideVars(slides[i], i, slides.length, { brand, handle });
+      const outPath = path.join(TMP_DIR, `${slideChannel}-${pillar}-carousel-${stamp}-${i}.png`);
+      out.push(await renderWithBrowser(browser, { channel: slideChannel, pillar, vars, outPath }));
+    }
+  } finally {
+    await browser.close();
   }
   return out;
 }
 
-export const _internal = { applyVars, resolveTemplate, DIMENSIONS };
+// Uma página por imagem, no tamanho exato do slide. Pura (testável).
+export function buildPdfHtml(imageDataUrls, { width, height }) {
+  const pages = imageDataUrls
+    .map(src => `<div class="page"><img src="${src}" /></div>`)
+    .join('');
+  return `<!doctype html><html><head><style>
+@page { size: ${width}px ${height}px; margin: 0; }
+* { margin: 0; padding: 0; }
+.page { width: ${width}px; height: ${height}px; page-break-after: always; overflow: hidden; }
+.page:last-child { page-break-after: auto; }
+img { width: ${width}px; height: ${height}px; display: block; }
+</style></head><body>${pages}</body></html>`;
+}
+
+// PDF dos slides já renderizados: é o "carrossel" do LinkedIn (post de documento).
+export async function renderPdf({ imagePaths, outPath, slideChannel = 'instagram' }) {
+  if (!imagePaths?.length) throw new Error('PDF sem slides');
+  const { width, height } = DIMENSIONS[slideChannel];
+  const dataUrls = [];
+  for (const file of imagePaths) {
+    dataUrls.push(`data:image/png;base64,${(await readFile(file)).toString('base64')}`);
+  }
+  if (!existsSync(TMP_DIR)) await mkdir(TMP_DIR, { recursive: true });
+  const finalOut = outPath || path.join(TMP_DIR, `carousel-${Date.now()}.pdf`);
+  const browser = await launchBrowser();
+  try {
+    const page = await browser.newPage();
+    await page.setContent(buildPdfHtml(dataUrls, { width, height }), { waitUntil: 'load' });
+    await page.pdf({ path: finalOut, width: `${width}px`, height: `${height}px`, printBackground: true, pageRanges: '' });
+    return finalOut;
+  } finally {
+    await browser.close();
+  }
+}
+
+export const _internal = { applyVars, resolveTemplate, DIMENSIONS, buildPdfHtml, slideVars };

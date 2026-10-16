@@ -24,9 +24,11 @@ async function loadPending(pendingId: string): Promise<PendingApproval | null> {
   return (data?.[0] as PendingApproval) ?? null;
 }
 
-function mediaKindOf(channel: string, variation: Variation, imageUrl: string | null, caption = ''): MediaKind {
+export function mediaKindOf(channel: string, variation: Variation, imageUrl: string | null, caption = ''): MediaKind {
   if (channel === 'twitter') return splitThread(caption).length > 1 ? 'thread' : imageUrl ? 'image' : 'text';
-  if (variation.format === 'carousel') return 'carousel';
+  if (channel === 'linkedin' && variation.documentUrl) return 'document';
+  // carrossel sem slides renderizados sai como imagem única no publish
+  if (variation.format === 'carousel' && (variation.slideUrls?.length ?? 0) >= 2) return 'carousel';
   if (channel === 'linkedin' && !imageUrl) return 'text';
   return 'image';
 }
@@ -83,7 +85,8 @@ export async function approvePending(input: ApproveInput): Promise<{ scheduledFo
       caption_final: captionFinal,
       image_url: imageUrl,
       chosen_art_id: input.artId,
-      slide_urls: null,
+      slide_urls: variation.slideUrls?.length ? variation.slideUrls : null,
+      document_url: variation.documentUrl ?? null,
       generation: p.generation,
       seed: p.seed ?? null,
       status: 'scheduled',

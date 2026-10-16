@@ -4,7 +4,14 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fmtDateTime, isoToLocalInput, localInputToIso } from '@/lib/format';
 import { splitThread } from '@/lib/thread';
-import type { PendingApproval } from '@/lib/types';
+import type { PendingApproval, Variation } from '@/lib/types';
+
+function carouselNote(v?: Variation): string {
+  if (v?.format !== 'carousel') return '';
+  const n = v.slideUrls?.length ?? 0;
+  if (n < 2) return 'Carrossel sem slides renderizados: sai como imagem única';
+  return v.documentUrl ? `Carrossel: ${n} slides e PDF prontos` : `Carrossel: ${n} slides prontos`;
+}
 
 export default function ApproveForm({
   pending,
@@ -213,7 +220,7 @@ export default function ApproveForm({
           Rejeitar
         </button>
         <span className="ml-auto self-center text-xs text-muted">
-          {chosenVariation?.format === 'carousel' ? '⚠️ carrossel: slides renderizam no publish' : ''}
+          {carouselNote(chosenVariation)}
         </span>
       </div>
     </div>
