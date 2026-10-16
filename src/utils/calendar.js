@@ -25,10 +25,11 @@ function atUtcMidnight(date) {
   return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 }
 
+// Aceita 'YYYY-MM-DD' ou Date: o js-yaml converte data sem aspas em Date (meia-noite UTC).
 function parseDay(s) {
   if (!s) return null;
-  const d = new Date(`${s}T00:00:00Z`);
-  return Number.isNaN(d.getTime()) ? null : d.getTime();
+  const d = s instanceof Date ? s : new Date(`${s}T00:00:00Z`);
+  return Number.isNaN(d.getTime()) ? null : atUtcMidnight(d);
 }
 
 // Campanha ativa = a primeira cujo intervalo [start, end] contém `today` (inclusive).
