@@ -5,7 +5,8 @@
 
 import 'dotenv/config';
 import { getPending, savePending, clearPending, markPublished, markRejected } from './utils/queue.js';
-import { prepareGeneration, publishToChannel } from './pipeline.js';
+import { prepareGeneration, prepareReuse, publishToChannel } from './pipeline.js';
+import { motherFormat } from './utils/brief.js';
 import { sendApprovalRequest, fetchDecisions, confirmDecisions, finalizeKeyboard, showArtSelection, notify, escapeHtml } from './telegram.js';
 import { resolveTenant } from './tenant.js';
 
@@ -144,6 +145,56 @@ async function handleRegen(p, tenant) {
   });
 }
 
+// Pedido feito na tela da ideia (SPEC 003 R3.2): troca a versão de uma rede por um post
+// próprio ou pela readaptação de uma variação do conteúdo-mãe. A pendência nova substitui a
+// antiga (upsert por canal) e mantém o vínculo com a ideia.
+async function handleRework(p, pendings, tenant) {
+  const { rework: request = {}, ...seed } = p.seed || {};
+  const briefId = p.brief_id ?? seed.brief_id ?? null;
+  let prepared;
+  if (request.mode === 'reuse') {
+    const mother = pendings.find(q => q.channel === seed.mother_channel && (q.brief_id ?? q.seed?.brief_id ?? null) === briefId);
+    if (!mother) throw new Error(`o conteúdo-mãe (${seed.mother_channel}) já saiu da fila; não dá para readaptar`);
+    const topId = request.source_variation_id ?? mother.top_id;
+    const source = mother.generation.variations.find(v => v.id === topId);
+    if (!source) throw new Error(`variação #${topId} não existe no conteúdo-mãe`);
+    prepared = await prepareReuse({
+      channel: p.channel,
+      mother: { channel: mother.channel, generation: mother.generation, topId, images: mother.images },
+      kind: motherFormat(source, { longTextChars: tenant.reuse?.longTextChars }),
+      tenant,
+    });
+  } else {
+    prepared = await prepareGeneration({ channel: p.channel, seed, tenant });
+  }
+
+  await finalizeKeyboard({ messageId: p.keyboard_message_id, text: '🔁 Substituído por uma nova versão.', dryRun: DRY_RUN });
+  const pendingId = newPendingId(p.channel);
+  const { keyboardMessageId, messageIds } = await sendApprovalRequest({
+    channel: p.channel,
+    pillar: prepared.generation.pillar,
+    angle: prepared.generation.angle,
+    variations: prepared.generation.variations,
+    pendingId,
+    images: prepared.images,
+    dryRun: DRY_RUN,
+  });
+  await savePending({
+    channel: p.channel,
+    pending_id: pendingId,
+    brief_id: briefId,
+    generation: prepared.generation,
+    top_id: prepared.topId,
+    images: prepared.images,
+    seed: { ...seed, reuse_plan: { ...(seed.reuse_plan || {}), [p.channel]: { mode: request.mode === 'reuse' ? 'reuse' : 'own' } } },
+    message_ids: messageIds,
+    keyboard_message_id: keyboardMessageId,
+    regen_count: p.regen_count ?? 0,
+    status: 'awaiting_decision',
+  });
+  await notify(`🔁 Nova versão de ${p.channel} pronta (${request.mode === 'reuse' ? 'readaptada' : 'post próprio'}). Aprove na plataforma.`, { dryRun: DRY_RUN });
+}
+
 async function handleReject(p) {
   log(`Rejeitado ${p.channel} (pending ${p.pending_id}) — aguardando motivo`);
   await savePending({ ...p, status: 'awaiting_reason', reason_requested_at: new Date().toISOString() });
@@ -185,6 +236,20 @@ async function main() {
 
   // Motivos de rejeição primeiro (consome textos de runs anteriores).
   await resolveReasons(pendings, texts);
+
+  // Pedidos da plataforma: nova versão de uma rede da ideia. Falha devolve a pendência
+  // pro estado normal, pra não travar a aprovação.
+  for (const p of pendings.filter(x => x.status === 'rework_requested')) {
+    try {
+      log(`Nova versão pedida: ${p.channel} (${p.seed?.rework?.mode}), pending ${p.pending_id}`);
+      await handleRework(p, pendings, tenant);
+    } catch (e) {
+      log(`Falha na nova versão de ${p.channel}: ${e.message}`);
+      const { rework: _drop, ...seed } = p.seed || {};
+      await savePending({ ...p, seed, status: 'awaiting_decision' });
+      await notify(`⚠️ Não deu para gerar a nova versão de ${p.channel}: ${escapeHtml(e.message)}`, { dryRun: DRY_RUN });
+    }
+  }
 
   // Processa em ORDEM cronológica com estado em memória — o fluxo de 2 cliques
   // (legenda → arte) exige que a legenda seja aplicada antes da arte no mesmo run.
