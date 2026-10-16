@@ -62,6 +62,18 @@ const PILAR = {
     pillarWeights: ranking.PILLAR_WEIGHTS,
     angles: ranking.ANGLES,
     formats: ranking.FORMATS,
+    // Formatos por canal: o LinkedIn alterna por rodízio enquanto não há métrica (SPEC 005).
+    // Vídeo entra quando houver vídeo pronto pra publicar.
+    formatsByChannel: {
+      linkedin: ['text', 'single', 'carousel'],
+    },
+  },
+
+  // Engajamento no LinkedIn (SPEC 005 R3): todo comentário passa por aprovação na plataforma.
+  engage: {
+    weeklyGoal: 15,
+    dailyCap: 20,
+    minIntervalSeconds: 60,
   },
 
   // Persona injetada nos prompts — substitui o hardcode em generate.js (passo 3).

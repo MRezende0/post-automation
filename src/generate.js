@@ -217,7 +217,13 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     buildFewShot(examples),
   ].filter(Boolean).join('\n\n---\n\n');
 
-  const targetFormat = channel === 'instagram' ? chooseNextFormat(published, {}, tenant.taxonomy) : null;
+  // Instagram: bandit sobre todo o histórico (como sempre). LinkedIn: histórico do canal e
+  // rodízio enquanto não há métrica (SPEC 005 R1).
+  const targetFormat = channel === 'instagram'
+    ? chooseNextFormat(published, {}, tenant.taxonomy)
+    : channel === 'linkedin'
+      ? chooseNextFormat(published, { channel, rotate: true, windowSize: 8 }, tenant.taxonomy)
+      : null;
   const userMessage = buildUserMessage({ channel, pillar: chosenPillar, angle: chosenAngle, context, recentHooks, targetFormat });
 
   // Retry com backoff: o Gemini dá 503 "high demand" / 429 com frequência.

@@ -41,7 +41,8 @@ async function apiJson(method: string, endpoint: string, body?: unknown): Promis
   if (res.status === 201 || res.status === 204) {
     return { id: res.headers.get('x-restli-id') || res.headers.get('x-linkedin-id') };
   }
-  return res.json();
+  const text = await res.text(); // finalizeUpload responde 200 sem corpo
+  return text ? JSON.parse(text) : {};
 }
 
 async function uploadImageFromUrl(imageUrl: string): Promise<string> {
@@ -82,15 +83,23 @@ export function documentTitle(hook?: string | null): string {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-// O documento é processado de forma assíncrona depois do upload. Espera ficar
+// Documento e vídeo são processados de forma assíncrona depois do upload. Espera ficar
 // AVAILABLE (até ~20s, cabe no maxDuration do cron); se não ficar, tenta postar mesmo assim.
-async function waitDocumentAvailable(documentUrn: string, tries = 10, intervalMs = 2000): Promise<string> {
+async function waitAvailable(
+  resource: 'documents' | 'videos',
+  urn: string,
+  tries = 10,
+  intervalMs = 2000,
+): Promise<string> {
+  const label = resource === 'documents' ? 'o PDF' : 'o vídeo';
   let status = 'UNKNOWN';
   for (let i = 0; i < tries; i += 1) {
-    const doc = await apiJson('GET', `/documents/${encodeURIComponent(documentUrn)}`);
-    status = doc?.status ?? 'UNKNOWN';
+    const asset = await apiJson('GET', `/${resource}/${encodeURIComponent(urn)}`);
+    status = asset?.status ?? 'UNKNOWN';
     if (status === 'AVAILABLE') return status;
-    if (status === 'PROCESSING_FAILED') throw new Error('LinkedIn não conseguiu processar o PDF (PROCESSING_FAILED)');
+    if (status === 'PROCESSING_FAILED') {
+      throw new Error(`LinkedIn não conseguiu processar ${label} (${asset?.processingFailureReason || 'PROCESSING_FAILED'})`);
+    }
     await sleep(intervalMs);
   }
   return status;
@@ -121,7 +130,7 @@ export async function publishDocument(
   title?: string | null,
 ): Promise<{ id: string; channel: 'linkedin'; document: string; documentStatus: string }> {
   const documentUrn = await uploadDocumentFromUrl(documentUrl);
-  const documentStatus = await waitDocumentAvailable(documentUrn);
+  const documentStatus = await waitAvailable('documents', documentUrn);
   const r = await apiJson('POST', '/posts', {
     author: authorUrn(),
     commentary: text,
@@ -150,4 +159,57 @@ export async function publishText(text: string, imageUrl?: string | null): Promi
 
   const r = await apiJson('POST', '/posts', body);
   return { id: r.id, channel: 'linkedin' };
+}
+
+// Vídeo (SPEC 005 R2): initializeUpload devolve as partes (4 MB cada); cada PUT devolve um
+// ETag, que o finalizeUpload recebe na mesma ordem. MP4, de 3 s a 30 min.
+// Docs: learn.microsoft.com/linkedin/marketing/community-management/shares/videos-api
+export async function uploadVideoFromUrl(videoUrl: string): Promise<string> {
+  const res = await fetch(videoUrl);
+  if (!res.ok) throw new Error(`Falha ao baixar vídeo ${videoUrl}: ${res.status}`);
+  const bytes = new Uint8Array(await res.arrayBuffer());
+
+  const init = await apiJson('POST', '/videos?action=initializeUpload', {
+    initializeUploadRequest: { owner: authorUrn(), fileSizeBytes: bytes.length, uploadCaptions: false, uploadThumbnail: false },
+  });
+  const videoUrn = init.value?.video;
+  const parts: { uploadUrl: string; firstByte: number; lastByte: number }[] = init.value?.uploadInstructions || [];
+  if (!videoUrn || !parts.length) throw new Error('Resposta inesperada de videos initializeUpload');
+
+  const etags: string[] = [];
+  for (const part of parts) {
+    const up = await fetch(part.uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: bytes.slice(part.firstByte, part.lastByte + 1),
+    });
+    if (!up.ok) throw new Error(`Falha upload vídeo LinkedIn (bytes ${part.firstByte}-${part.lastByte}): ${up.status}`);
+    const etag = up.headers.get('etag');
+    if (!etag) throw new Error('LinkedIn não devolveu o ETag da parte do vídeo');
+    etags.push(etag);
+  }
+
+  await apiJson('POST', '/videos?action=finalizeUpload', {
+    finalizeUploadRequest: { video: videoUrn, uploadToken: init.value?.uploadToken ?? '', uploadedPartIds: etags },
+  });
+  return videoUrn;
+}
+
+export async function publishVideo(
+  text: string,
+  videoUrl: string,
+  title?: string | null,
+): Promise<{ id: string; channel: 'linkedin'; video: string; videoStatus: string }> {
+  const videoUrn = await uploadVideoFromUrl(videoUrl);
+  const videoStatus = await waitAvailable('videos', videoUrn);
+  const r = await apiJson('POST', '/posts', {
+    author: authorUrn(),
+    commentary: text,
+    visibility: 'PUBLIC',
+    distribution: { feedDistribution: 'MAIN_FEED', targetEntities: [], thirdPartyDistributionChannels: [] },
+    content: { media: { title: documentTitle(title), id: videoUrn } },
+    lifecycleState: 'PUBLISHED',
+    isReshareDisabledByAuthor: false,
+  });
+  return { id: r.id, channel: 'linkedin', video: videoUrn, videoStatus };
 }

@@ -19,7 +19,14 @@ type NetState = {
   edited: boolean;
   when: 'slot' | 'manual';
   manual: string;
+  noImage: boolean; // texto puro (SPEC 005); o Instagram exige imagem
 };
+
+function textOnlyByDefault(p: PendingApproval, captionId: number): boolean {
+  if (p.channel === 'instagram') return false;
+  const format = p.generation?.variations?.find((v) => v.id === captionId)?.format as string | undefined;
+  return format === 'text' || !(p.images || []).some((i) => i.url);
+}
 
 const ROLE_LABEL = { mother: 'Conteúdo-mãe', own: 'Post próprio', single: 'Post avulso' } as const;
 
@@ -35,6 +42,7 @@ function initialState(p: PendingApproval, suggested: Record<number, string>, nex
     edited: false,
     when: nextSlot ? 'slot' : 'manual',
     manual: nextSlot ? isoToLocalInput(nextSlot) : '',
+    noImage: textOnlyByDefault(p, captionId),
   };
 }
 
@@ -87,6 +95,7 @@ export default function IdeaForm({
         enabled: s.enabled,
         captionId: s.captionId,
         artId: s.artId,
+        noImage: s.noImage,
         captionText: s.captionText,
         scheduledFor: s.when === 'manual' && s.manual ? localInputToIso(s.manual) : undefined,
       };
@@ -243,7 +252,13 @@ function NetworkCard({
               {variations.map((v) => (
                 <button
                   key={v.id}
-                  onClick={() => onChange({ captionId: v.id, ...(s.edited ? {} : { captionText: suggested[v.id] ?? '' }) })}
+                  onClick={() =>
+                    onChange({
+                      captionId: v.id,
+                      noImage: textOnlyByDefault(p, v.id),
+                      ...(s.edited ? {} : { captionText: suggested[v.id] ?? '' }),
+                    })
+                  }
                   className={`rounded-lg border p-3 text-left text-sm transition ${
                     s.captionId === v.id ? 'border-accent ring-1 ring-accent' : 'border-edge hover:border-muted'
                   }`}
@@ -280,13 +295,23 @@ function NetworkCard({
             </ol>
           )}
 
-          {images.length > 0 && (
+          {(images.length > 0 || p.channel !== 'instagram') && (
             <div className="flex flex-wrap gap-2">
+              {p.channel !== 'instagram' && (
+                <button
+                  onClick={() => onChange({ noImage: true })}
+                  className={`flex h-24 w-24 items-center justify-center rounded-lg border text-xs ${
+                    s.noImage ? 'border-accent ring-1 ring-accent' : 'border-edge text-muted'
+                  }`}
+                >
+                  Sem imagem
+                </button>
+              )}
               {images.map((im) => (
                 <button
                   key={im.id}
-                  onClick={() => onChange({ artId: im.id })}
-                  className={`overflow-hidden rounded-lg border ${s.artId === im.id ? 'border-accent ring-1 ring-accent' : 'border-edge'}`}
+                  onClick={() => onChange({ artId: im.id, noImage: false })}
+                  className={`overflow-hidden rounded-lg border ${!s.noImage && s.artId === im.id ? 'border-accent ring-1 ring-accent' : 'border-edge'}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={im.url!} alt={`arte ${im.id}`} className="h-24 w-24 object-cover" />

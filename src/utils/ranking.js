@@ -34,6 +34,7 @@ function withTaxonomy(taxonomy) {
     pillarWeights: taxonomy?.pillarWeights ?? PILLAR_WEIGHTS,
     angles: taxonomy?.angles ?? ANGLES,
     formats: taxonomy?.formats ?? FORMATS,
+    formatsByChannel: taxonomy?.formatsByChannel ?? {},
   };
 }
 
@@ -133,16 +134,29 @@ export function chooseNextPillar(publishedHistory, windowSize = 20, taxonomy) {
 // Escolhe o formato da próxima leva (single/carrossel). Bandit por engajamento
 // quando há sinal; no cold start injeta VARIEDADE — quebra sequência monótona do
 // mesmo formato. Retorna null = sem preferência (modelo/pilar decide).
-export function chooseNextFormat(publishedHistory, { windowSize = 12 } = {}, taxonomy) {
-  const { formats } = withTaxonomy(taxonomy);
+// `channel` restringe histórico e formatos ao canal (taxonomy.formatsByChannel). `rotate`:
+// sem nota suficiente pro bandit, o formato menos usado na janela vence (SPEC 005), pra o
+// canal alternar mesmo sem métrica (perfil pessoal do LinkedIn não tem métrica por API).
+export function chooseNextFormat(publishedHistory, { windowSize = 12, channel = null, rotate = false } = {}, taxonomy) {
+  const { formats: all, formatsByChannel } = withTaxonomy(taxonomy);
+  const formats = (channel && formatsByChannel[channel]) || all;
   // Normaliza: formato vive em post.format (YAML) ou format (DB) — achata pro bandit.
-  const hist = (publishedHistory || []).map(p => ({
-    format: p.format || p.post?.format,
-    engagement_score: p.engagement_score,
-    published_at: p.published_at,
-  }));
+  const hist = (publishedHistory || [])
+    .filter(p => !channel || (p.channel || Object.keys(p.channels || {})[0]) === channel)
+    .map(p => ({
+      format: p.format || p.post?.format,
+      engagement_score: p.engagement_score,
+      published_at: p.published_at,
+    }));
   const bandit = thompsonChoose(formats, hist, { keyField: 'format', priorStrength: 1, halfLifeDays: 45, minScored: 6 });
   if (bandit) return bandit;
+  if (rotate) {
+    const recent = hist.slice(-windowSize).map(p => p.format);
+    const count = f => recent.filter(r => r === f).length;
+    const lastUse = f => recent.lastIndexOf(f);
+    // menos usado; empate: o que saiu há mais tempo; depois a ordem da lista
+    return [...formats].sort((a, b) => count(a) - count(b) || lastUse(a) - lastUse(b))[0] ?? null;
+  }
 
   const recent = hist.slice(-windowSize).map(p => p.format).filter(Boolean);
   const lastThree = recent.slice(-3);
