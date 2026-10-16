@@ -8,8 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check:db": "node scripts/check-db.mjs",
-    "apply:migration": "node scripts/apply-migration.mjs"
+    "check:db": "node scripts/check-db.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
