@@ -1,6 +1,9 @@
 import { getSlots, getActiveCampaign } from '@/lib/queries';
 import { bioLink } from '@/lib/utm';
 import SlotEditor from '@/components/SlotEditor';
+import PauseControl from '@/components/PauseControl';
+import CapabilityTable from '@/components/CapabilityTable';
+import { getPauseState, countOverdue, type PauseState } from '@/lib/pause';
 import type { PublishSlot, Campaign } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -8,9 +11,11 @@ export const dynamic = 'force-dynamic';
 export default async function SettingsPage() {
   let slots: PublishSlot[] = [];
   let campaign: Campaign | null = null;
+  let pause: PauseState = { paused: false, reason: null, pausedAt: null };
+  let overdue = 0;
   let err = '';
   try {
-    [slots, campaign] = await Promise.all([getSlots(), getActiveCampaign()]);
+    [slots, campaign, pause, overdue] = await Promise.all([getSlots(), getActiveCampaign(), getPauseState(), countOverdue()]);
   } catch (e) {
     err = e instanceof Error ? e.message : 'erro';
   }
@@ -18,8 +23,13 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-4">
+      <div className="space-y-2">
+        <h1 className="text-xl font-semibold">Publicação</h1>
+        <PauseControl state={pause} overdue={overdue} />
+      </div>
+
       <div>
-        <h1 className="text-xl font-semibold">Slots editoriais</h1>
+        <h2 className="text-lg font-semibold">Slots editoriais</h2>
         <p className="text-sm text-muted">
           Grade recorrente por canal. Aprovar um post o joga no próximo slot livre. Horário no fuso editorial (BRT).
         </p>
@@ -35,6 +45,14 @@ export default async function SettingsPage() {
             : 'Nenhuma campanha ativa. O link mede o perfil como um todo.'}
         </p>
         <code className="card block break-all text-xs">{bio}</code>
+      </div>
+
+      <div className="space-y-2">
+        <h2 className="text-lg font-semibold">O que cada rede aceita</h2>
+        <p className="text-sm text-muted">
+          Formato que não publica sozinho nunca vai para a API. Manual: a plataforma entrega o texto e você publica no app.
+        </p>
+        <CapabilityTable />
       </div>
     </div>
   );

@@ -1,0 +1,38 @@
+{
+  "_doc": "O que cada rede aceita, por formato, e como o post sai: auto (a plataforma publica pela API), planned (a API aceita, falta construir), manual (a API não oferece; a plataforma entrega o texto pronto e você publica). Fonte única para Node (src/channels/capabilities.js) e plataforma (platform/src/lib/capabilities.ts). Revisar quando uma API mudar.",
+  "reviewed_at": "2026-10-16",
+  "channels": {
+    "instagram": {
+      "label": "Instagram (conta profissional)",
+      "metrics": { "source": "api", "note": "Insights por post: alcance, curtidas, comentários, salvamentos e compartilhamentos." },
+      "formats": {
+        "single": { "publish": "auto", "label": "Imagem" },
+        "pergunta": { "publish": "auto", "label": "Foto-pergunta", "note": "Sai como imagem única." },
+        "carousel": { "publish": "auto", "label": "Carrossel", "note": "De 2 a 10 slides." },
+        "reel": { "publish": "planned", "label": "Reels", "note": "A API aceita (media_type REELS). Falta o render do vídeo e o publish na plataforma (SPEC 001 R6)." },
+        "story": { "publish": "planned", "label": "Story", "note": "A API aceita imagem e vídeo, sem sticker." },
+        "story_interativo": { "publish": "manual", "label": "Story com enquete, caixinha ou link", "note": "Sticker não existe na API. Publique pelo app com o texto pronto." }
+      }
+    },
+    "linkedin": {
+      "label": "LinkedIn (perfil pessoal)",
+      "metrics": { "source": "csv", "note": "A API não devolve impressões do perfil pessoal. Exporte o CSV semanal até a aprovação da Community Management API." },
+      "formats": {
+        "text": { "publish": "auto", "label": "Texto" },
+        "single": { "publish": "auto", "label": "Texto com imagem" },
+        "carousel": { "publish": "auto", "label": "Documento (PDF)", "note": "O carrossel sai como PDF, uma página por slide." },
+        "video": { "publish": "planned", "label": "Vídeo", "note": "A API aceita (Videos API). Falta construir." },
+        "poll": { "publish": "manual", "label": "Enquete", "note": "Enquete por API não foi validada para perfil pessoal. Publique pelo app." }
+      }
+    },
+    "twitter": {
+      "label": "X",
+      "metrics": { "source": "none", "note": "Leitura de métricas é paga por uso e está fora de escopo (SPEC 002)." },
+      "formats": {
+        "single": { "publish": "auto", "label": "Post", "note": "Precisa das credenciais do X configuradas." },
+        "text": { "publish": "auto", "label": "Post", "note": "Precisa das credenciais do X configuradas." },
+        "thread": { "publish": "auto", "label": "Thread", "note": "Precisa das credenciais do X configuradas. Custo por post na API." }
+      }
+    }
+  }
+}
