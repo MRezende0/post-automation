@@ -2,8 +2,8 @@ name: Resolve approvals
 
 on:
   schedule:
-    # A cada 10min na janela 17h–23h BRT (20:00–02:59 UTC) — processa cliques
-    # do Telegram logo após você decidir. Fora da janela, runs ficam ociosos.
+    # A cada 10min na janela 17h–23h BRT (20:00–02:59 UTC): atende os pedidos de nova
+    # versão feitos na plataforma. Fora da janela, runs ficam ociosos.
     - cron: '*/10 20-23,0-2 * * *'
   workflow_dispatch: {}
 
@@ -43,8 +43,6 @@ jobs:
           LINKEDIN_AUTHOR_URN: ${{ secrets.LINKEDIN_AUTHOR_URN }}
           LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
           LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

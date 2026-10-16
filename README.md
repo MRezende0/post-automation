@@ -1,6 +1,6 @@
 # post-automation
 
-Automação de postagens Instagram + LinkedIn pra SaaS B2B. Geração via Claude, aprovação rápida via Telegram, publicação automática via GitHub Actions.
+Automação de postagens Instagram + LinkedIn pra SaaS B2B. Geração via Gemini, aprovação na plataforma web (`platform/`), publicação no horário agendado.
 
 ## O que faz
 
@@ -8,11 +8,13 @@ Automação de postagens Instagram + LinkedIn pra SaaS B2B. Geração via Claude
 - Lê próximo post da fila (`content/queue.yaml`) ou gera ideia automática baseada em pilar
 - Pede 3 variações ao Claude (few-shot com seus high-performers)
 - Renderiza um preview de imagem por variação via Puppeteer
-- **Fase gerar** (`post.yml`): manda no Telegram 1 mensagem por variação + botões
-  "aprovar #1 / #2 / #3 / regenerar / rejeitar", salva o pending e encerra
-- **Fase resolver** (`resolve.yml`, cron a cada 10min na janela útil): lê sua
-  decisão e publica / regenera / rejeita — o runner nunca fica preso esperando
-- Você decide quando quiser; publica no próximo tick (≤10min)
+- **Fase gerar** (`post.yml`): salva a pendência de cada rede e avisa na plataforma que há
+  post para aprovar
+- **Inbox da plataforma**: você aprova, rejeita ou pede nova versão; aprovar agenda o post
+- **Fase resolver** (`resolve.yml`, cron a cada 10min na janela útil): gera as novas versões
+  pedidas na plataforma
+- Avisos (pronto para aprovar, agendado, publicado, falhou, relatório) ficam em
+  `notifications` (SPEC 007)
 - Publica em IG e LinkedIn e atualiza histórico (`content/published.yaml`)
 
 ## Setup rápido
@@ -29,8 +31,8 @@ Automação de postagens Instagram + LinkedIn pra SaaS B2B. Geração via Claude
 | `npm test` | Roda testes Vitest |
 | `npm run dry-run` | Pipeline completo mockando APIs externas |
 | `npm run publish:test` | Posta 1 item hardcoded em sandbox (precisa credencial) |
-| `npm start` | Fase gerar: gera, manda preview, salva pending (workflow `post.yml`) |
-| `npm run resolve` | Fase resolver: processa decisões do Telegram (workflow `resolve.yml`) |
+| `npm start` | Fase gerar: gera, salva a pendência e avisa (workflow `post.yml`) |
+| `npm run resolve` | Fase resolver: gera as novas versões pedidas na plataforma (workflow `resolve.yml`) |
 | `npm run metrics` | Coleta insights da semana (TODO) |
 | `npm run refresh-tokens` | Renova tokens IG + LinkedIn |
 
@@ -47,11 +49,11 @@ src/         lógica
 
 ## Estado atual
 
-- [x] Estrutura base + geração + aprovação Telegram
+- [x] Estrutura base + geração + aprovação na plataforma
 - [x] Publicação Instagram + LinkedIn (single image + carrossel)
 - [ ] Reels (fase 2)
 - [ ] Métricas e ajuste automático do mix de pilares
-- [ ] Dashboard web (provavelmente nunca — Telegram resolve)
+- [x] Plataforma web (inbox, agenda, histórico)
 
 ## Custo mensal estimado
 
@@ -59,5 +61,4 @@ src/         lógica
 |---|---|
 | Claude API | R$ 5–15 |
 | GitHub Actions | R$ 0 (free tier) |
-| Telegram | R$ 0 |
 | **Total** | **< R$ 20** |

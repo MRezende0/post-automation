@@ -1,0 +1,38 @@
+// notifications.js: avisos da conta (SPEC 007), gravados em `notifications` e lidos pela
+// plataforma. Substitui o Telegram. Best-effort: falha ao gravar vai para o log e nunca derruba
+// o job. Sem banco (STATE_BACKEND=yaml) ou em DRY_RUN, o aviso só sai no log.
+
+import { usingSupabase, supabase } from './db.js';
+import { resolveTenant } from '../tenant.js';
+
+const LEVELS = new Set(['info', 'warning', 'error']);
+const TITLE_MAX = 200;
+const CHANNEL_NAMES = { instagram: 'Instagram', linkedin: 'LinkedIn', twitter: 'X' };
+
+export function channelName(channel) {
+  return CHANNEL_NAMES[channel] ?? channel;
+}
+
+// Aviso malformado é erro de código, não de runtime: falha alto no teste.
+export function buildNotice({ kind, level = 'info', title, body = null, link = null }) {
+  if (!kind || !title) throw new Error('aviso precisa de kind e title');
+  if (!LEVELS.has(level)) throw new Error(`nível de aviso inválido: ${level}`);
+  if (link && !link.startsWith('/')) throw new Error(`link de aviso precisa ser um caminho da plataforma: ${link}`);
+  return { kind, level, title: String(title).slice(0, TITLE_MAX), body: body ?? null, link };
+}
+
+export async function notify(notice, { dryRun = false, tenantId = resolveTenant().id } = {}) {
+  const row = buildNotice(notice);
+  if (dryRun || !usingSupabase()) {
+    console.log(`[aviso] ${row.level} ${row.kind}: ${row.title}`);
+    return { stored: false };
+  }
+  try {
+    const { error } = await supabase().from('notifications').insert({ ...row, tenant_id: tenantId });
+    if (error) throw new Error(error.message);
+    return { stored: true };
+  } catch (e) {
+    console.error(`[aviso] não gravado (${row.kind}): ${e.message}`);
+    return { stored: false, error: e.message };
+  }
+}

@@ -2,7 +2,7 @@
   "name": "post-automation-platform",
   "version": "0.1.0",
   "private": true,
-  "description": "Cockpit web do post-automation: aprovar, escolher legenda/arte, agendar e publicar. Telegram só pra notificações.",
+  "description": "Cockpit web do post-automation: aprovar, escolher legenda/arte, agendar e publicar, com avisos da conta.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

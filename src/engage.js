@@ -13,7 +13,6 @@
 
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
-import { notify } from './telegram.js';
 
 const MODEL = 'gemini-2.5-flash-lite';
 const DRY_RUN = process.env.DRY_RUN === 'true';
@@ -77,9 +76,7 @@ async function main() {
     return;
   }
   const comments = await draftComments({ targetText });
-  const msg = ['💬 *Comentários sugeridos:*', '', ...comments.map((c, i) => `${i + 1}. ${c}`)].join('\n');
-  await notify(msg).catch(() => {});
-  console.log(`[engage] ${comments.length} comentários enviados.`);
+  console.log(['[engage] Comentários sugeridos:', '', ...comments.map((c, i) => `${i + 1}. ${c}`)].join('\n'));
 }
 
 if (process.argv[1] && process.argv[1].endsWith('engage.js')) {

@@ -11,7 +11,7 @@ on:
         type: boolean
         default: false
       skip_approval:
-        description: 'Pular aprovação Telegram e publicar top-1?'
+        description: 'Pular a aprovação e publicar o top-1?'
         type: boolean
         default: false
 
@@ -60,8 +60,6 @@ jobs:
           LINKEDIN_AUTHOR_URN: ${{ secrets.LINKEDIN_AUTHOR_URN }}
           LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
           LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

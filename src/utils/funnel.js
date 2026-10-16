@@ -84,7 +84,7 @@ export function totalsBy(rows, key) {
 
 const fmtTotals = t => `cadastros ${t.cadastros} · ativados ${t.ativados} · pagantes ${t.pagantes}`;
 
-// Bloco do relatório semanal (Telegram, markdown). Vazio quando não há nenhum cadastro.
+// Bloco do relatório semanal (markdown simples). Vazio quando não há nenhum cadastro.
 export function buildFunnelReport({ rows = [], topPosts = [] } = {}) {
   const total = rows.reduce((t, r) => ({
     cadastros: t.cadastros + r.cadastros, ativados: t.ativados + r.ativados, pagantes: t.pagantes + r.pagantes,

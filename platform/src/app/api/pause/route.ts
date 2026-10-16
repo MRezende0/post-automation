@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { setPause } from '@/lib/pause';
-import { notify, escapeHtml } from '@/lib/telegram';
+import { notify } from '@/lib/notifications';
 import { requireTenant } from '@/lib/session';
 import { parsePause } from '@/lib/route-input';
 import { apiError, badRequest } from '@/lib/api';
@@ -11,11 +11,20 @@ export async function POST(req: Request) {
     const parsed = parsePause(await req.json().catch(() => null));
     if (!parsed.ok) return badRequest(parsed.error);
     const state = await setPause(t, parsed.value.paused, parsed.value.reason);
-    await notify(
-      state.paused
-        ? `⏸️ Publicação pausada${state.reason ? `: ${escapeHtml(state.reason)}` : ''}. Nada sai até retomar.`
-        : '▶️ Publicação retomada. Os agendados vencidos saem no próximo ciclo.',
-    );
+    await notify(t, state.paused
+      ? {
+          kind: 'publishing.paused',
+          level: 'warning',
+          title: 'Publicação pausada: nada sai até retomar',
+          body: state.reason || undefined,
+          link: '/settings',
+        }
+      : {
+          kind: 'publishing.resumed',
+          title: 'Publicação retomada',
+          body: 'Os posts agendados que venceram saem no próximo ciclo.',
+          link: '/calendar',
+        });
     return NextResponse.json({ ok: true, ...state });
   } catch (e) {
     return apiError(e, 'api/pause');

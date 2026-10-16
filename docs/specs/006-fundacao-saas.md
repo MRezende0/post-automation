@@ -102,13 +102,13 @@ tenant quando o usuário tem mais de um.
 - Error tracking (Sentry) no app e nos jobs, com release marcada no deploy.
 - Logging estruturado com scrub de dado pessoal.
 - Painel super admin mínimo + impersonation auditado + audit log das ações administrativas.
-- Alertas operacionais (já existe Telegram; formalizar falha de publicação, token vencendo,
-  job parado).
+- Alertas operacionais (avisos da conta em `notifications` desde a SPEC 007; falta o e-mail e o
+  alerta de job parado).
 - Exportação e exclusão de dado do tenant (LGPD).
 - Backup: plano pago do Supabase ou dump agendado; restore **executado**, não só documentado.
 - Staging separado de produção, com smoke antes de promover.
-- Trocar `node-telegram-bot-api` por chamada direta à API do Telegram (tira a dependência
-  crítica `request` do pacote raiz) e endurecer o `npm audit` da raiz para crítico.
+- Feito: o Telegram saiu inteiro na SPEC 007 (a lib que trazia o `request` já tinha saído).
+  Falta endurecer o `npm audit` da raiz para crítico.
 
 ### F6. Diferencial (com tração)
 

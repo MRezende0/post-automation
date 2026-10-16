@@ -10,6 +10,7 @@ export const TENANT_TABLES = [
   'feedback',
   'funnel_daily',
   'metrics_snapshots',
+  'notifications',
   'pending_approvals',
   'post_events',
   'post_variants',

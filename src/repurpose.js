@@ -7,7 +7,7 @@
 
 import 'dotenv/config';
 import { getPublished, isRealPost, pushToQueue } from './utils/queue.js';
-import { notify } from './telegram.js';
+import { notify, channelName } from './utils/notifications.js';
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
@@ -57,7 +57,11 @@ async function main() {
     return;
   }
   await pushToQueue(brief);
-  await notify(`♻️ Repurpose enfileirado: "${(candidate.post.hook || candidate.pillar).slice(0, 50)}" → ${brief.channels[0]}`, { dryRun: DRY_RUN }).catch(() => {});
+  await notify({
+    kind: 'repurpose.queued',
+    title: `Post de melhor desempenho volta adaptado para o ${channelName(brief.channels[0])}`,
+    body: (candidate.post.hook || candidate.pillar).slice(0, 120),
+  }, { dryRun: DRY_RUN });
 }
 
 // Só roda como script (não em import de teste).

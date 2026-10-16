@@ -1,8 +1,7 @@
 // index.js — FASE GERAR do workflow post.yml.
-// Gera as variações, manda o preview de aprovação no Telegram, salva o pending
-// e ENCERRA. A decisão (aprovar/regenerar/rejeitar) é processada depois pela
-// FASE RESOLVER (src/resolve.js), disparada por um cron curto. Assim o runner
-// nunca fica preso esperando o clique.
+// Gera as variações, salva a pendência de cada rede e ENCERRA. A decisão (aprovar,
+// rejeitar, pedir nova versão) acontece na inbox da plataforma; o aviso de que há post
+// pronto vai para `notifications` (SPEC 007).
 //
 // Flags via env: DRY_RUN, PUBLISH_TEST, SKIP_APPROVAL.
 
@@ -15,7 +14,7 @@ import { popNext, markPublished, loadPending, savePending, expirePending } from 
 import { uploadImage } from './utils/storage.js';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
-import { sendApprovalRequest, notify } from './telegram.js';
+import { notify, channelName } from './utils/notifications.js';
 import { getUpcomingHoliday, holidayContext } from './utils/holidays.js';
 import { getActiveCampaign, campaignContext } from './utils/calendar.js';
 import { resolveTenant } from './tenant.js';
@@ -46,7 +45,12 @@ async function main() {
   const expired = await expirePending();
   for (const e of expired) {
     log(`Pending expirado descartado: ${e.channel} (saved_at=${e.saved_at})`);
-    await notify(`🗑️ Pending ${e.channel} expirou (>7d) e foi descartado`, { dryRun: DRY_RUN }).catch(() => {});
+    await notify({
+      kind: 'pending.expired',
+      title: `Pendência do ${channelName(e.channel)} descartada`,
+      body: 'Ficou mais de 7 dias sem decisão.',
+      link: '/inbox',
+    }, { dryRun: DRY_RUN, tenantId: tenant.id });
   }
 
   // Espelha campaigns.yaml na tabela: a plataforma usa o slug no UTM da distribuição.
@@ -102,7 +106,12 @@ async function main() {
       continue;
     }
     log(`Pending ativo em ${channel} (${pending.pending_id}): pulando até resolver`);
-    await notify(`⏳ Já há um post ${channel} aguardando sua decisão. Resolva antes de gerar outro`, { dryRun: DRY_RUN }).catch(() => {});
+    await notify({
+      kind: 'pending.blocking',
+      title: `Há um post do ${channelName(channel)} esperando decisão`,
+      body: 'Aprove ou rejeite para a próxima ideia incluir essa rede.',
+      link: '/inbox',
+    }, { dryRun: DRY_RUN, tenantId: tenant.id });
   }
   const canGenerate = open.filter(c => tenant.platforms?.[c]?.publish !== false);
   if (!canGenerate.length) {
@@ -145,38 +154,34 @@ async function main() {
     } catch (e) {
       // Uma rede que falha não derruba as outras da mesma ideia.
       log(`Falha em ${channel}: ${e.message}`);
-      await notify(`⚠️ ${channel} ficou fora desta ideia: ${e.message}`, { dryRun: DRY_RUN }).catch(() => {});
+      await notify({
+        kind: 'generation.channel_failed',
+        level: 'warning',
+        title: `${channelName(channel)} ficou fora desta ideia`,
+        body: e.message,
+        link: '/inbox',
+      }, { dryRun: DRY_RUN, tenantId: tenant.id });
     }
   }
   log(`Tokens da ideia: ${JSON.stringify(sumUsage(results.map(r => r.prepared.generation.usage)))}`);
 
   for (const { channel, prepared } of results) {
-    await submitForApproval({ channel, prepared, seed: briefSeed, briefId });
+    await submitForApproval({ channel, prepared, seed: briefSeed, briefId, tenantId: tenant.id });
   }
   await markBrief(briefId, SKIP_APPROVAL ? 'approved' : 'ready');
 
-  log('\nFim da geração. Decisões serão processadas pelo resolve.');
+  log('\nFim da geração. A decisão acontece na inbox da plataforma.');
 }
 
-// Manda o preview e salva a pendência da rede. SKIP_APPROVAL/DRY_RUN publica direto.
-async function submitForApproval({ channel, prepared, seed, briefId }) {
+// Salva a pendência da rede e avisa que há post para aprovar. SKIP_APPROVAL/DRY_RUN publica direto.
+async function submitForApproval({ channel, prepared, seed, briefId, tenantId }) {
   const { generation, topId, images } = prepared;
   if (SKIP_APPROVAL) {
-    await publishApproved({ channel, generation, chosenId: topId, images, seed });
+    await publishApproved({ channel, generation, chosenId: topId, images, seed, tenantId });
     return;
   }
 
   const pendingId = newPendingId(channel);
-  const { keyboardMessageId, messageIds } = await sendApprovalRequest({
-    channel,
-    pillar: generation.pillar,
-    angle: generation.angle,
-    variations: generation.variations,
-    pendingId,
-    images,
-  });
-  log(`Preview enviado (${channel}, pending ${pendingId}, ${messageIds.length} msgs)`);
-
   await savePending({
     channel,
     pending_id: pendingId,
@@ -185,15 +190,22 @@ async function submitForApproval({ channel, prepared, seed, briefId }) {
     top_id: topId,
     images,
     seed,
-    message_ids: messageIds,
-    keyboard_message_id: keyboardMessageId,
     regen_count: 0,
     status: 'awaiting_decision',
   });
+  log(`Pendência salva (${channel}, ${pendingId}, ${generation.variations.length} variações)`);
+
+  const top = generation.variations.find(v => v.id === topId) || generation.variations[0];
+  await notify({
+    kind: 'pending.ready',
+    title: `Post do ${channelName(channel)} pronto para aprovar`,
+    body: top?.hook ? top.hook.slice(0, 120) : null,
+    link: `/inbox/${encodeURIComponent(pendingId)}`,
+  }, { tenantId });
 }
 
-// Caminho SKIP_APPROVAL/DRY_RUN: publica o top-1 sem passar pelo Telegram.
-async function publishApproved({ channel, generation, chosenId, images, seed }) {
+// Caminho SKIP_APPROVAL/DRY_RUN: publica o top-1 sem passar pela aprovação.
+async function publishApproved({ channel, generation, chosenId, images, seed, tenantId }) {
   const chosen = generation.variations.find(v => v.id === chosenId);
   const imageUrl = images.find(i => i.id === chosenId)?.url;
   const publishResult = await publishToChannel({ channel, variation: chosen, imageUrl, pillar: generation.pillar });
@@ -212,7 +224,12 @@ async function publishApproved({ channel, generation, chosenId, images, seed }) 
     },
     { chosenVariationId: chosen.id, channels: { [channel]: publishResult }, generation, images },
   );
-  await notify(`✅ Publicado em: ${channel} (variação #${chosen.id}, sem aprovação)`, { dryRun: DRY_RUN });
+  await notify({
+    kind: 'publish.ok',
+    title: `Publicado no ${channelName(channel)} sem aprovação`,
+    body: chosen.hook ? chosen.hook.slice(0, 120) : null,
+    link: '/history',
+  }, { tenantId });
 }
 
 async function runPublishTest() {
@@ -240,8 +257,11 @@ function log(...args) {
 
 main().catch(async (err) => {
   console.error('[post-automation] ERRO:', err);
-  try {
-    await notify(`🚨 Geração falhou: ${err.message}`, { dryRun: DRY_RUN });
-  } catch (_) {}
+  await notify({
+    kind: 'generation.failed',
+    level: 'error',
+    title: 'A geração de posts falhou',
+    body: `${err.message}. Nenhuma pendência nova foi criada nesta rodada.`,
+  }, { dryRun: DRY_RUN }).catch(() => {});
   process.exit(1);
 });

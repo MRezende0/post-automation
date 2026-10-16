@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Automação de postagens Instagram + LinkedIn via GitHub Actions, geração com Gemini API, aprovação via Telegram.",
+  "description": "Automação de postagens Instagram + LinkedIn via GitHub Actions, geração com Gemini API, aprovação na plataforma.",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

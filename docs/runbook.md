@@ -15,8 +15,8 @@ ciclo depois de retomar. Todo tenant novo nasce pausado (migration 0013).
   monitor externo (UptimeRobot, Better Stack) para ele. **Pendente:** monitor ainda não ligado.
 - Logs: a Vercel guarda uma linha JSON por evento (`level`, `scope`, `message`); campos com
   token, senha, chave ou email saem como `[mascarado]`. Procure por `"level":"error"`.
-- Falha de publicação: o Telegram recebe aviso a cada tentativa, e o item vira `failed` depois
-  de 3. `/calendar` tem o botão de tentar de novo.
+- Falha de publicação: cada tentativa vira um aviso da conta (`notifications`), e o item vira
+  `failed` depois de 3. `/calendar` tem o botão de tentar de novo.
 
 ## Criar um tenant (piloto ou cliente)
 

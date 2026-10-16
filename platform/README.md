@@ -1,8 +1,8 @@
 # Cockpit — plataforma do post-automation
 
-UI web (Next.js App Router) que substitui o Telegram como interface de aprovação.
+UI web (Next.js App Router) de aprovação.
 Você aprova, escolhe legenda + arte, **edita o texto** e **agenda** — a publicação sai
-no horário marcado (não na hora da aprovação). O Telegram fica só pra notificações.
+no horário marcado (não na hora da aprovação). Os avisos vão para `notifications` (SPEC 007).
 
 ## Arquitetura
 
@@ -14,7 +14,7 @@ Inbox (pending_approvals)  →  aprovar + agendar  →  scheduled_posts (status=
                                                   publica IG/LinkedIn
                                                   grava em `posts` (reusa observabilidade)
                                                   → status=published | failed
-                                                  → notifica Telegram
+                                                  → grava um aviso em `notifications`
 ```
 
 - **Acesso ao DB**: service_role só no server (Server Components / Route Handlers / cron).
@@ -46,7 +46,7 @@ Confira: `npm run check:db` → deve listar `publish_slots` e `scheduled_posts` 
 ### 2. Variáveis
 
 Copie `.env.local.example` → `.env.local` (dev) ou configure no Vercel (prod).
-As credenciais de Supabase/Telegram/IG/LinkedIn são as mesmas do backend.
+As credenciais de Supabase/IG/LinkedIn são as mesmas do backend.
 
 ### 3. Rodar
 
@@ -88,6 +88,5 @@ e desativar o Action.
 
 ## O que mudou no backend Node
 
-Nada (ainda). A plataforma lê/escreve o mesmo Supabase. Próximos passos opcionais:
-desligar o publish do GitHub Actions (resolve.js) e reduzir `src/telegram.js` a
-notificações, já que a aprovação migrou pra cá.
+O backend Node não publica nem pede aprovação: gera as pendências, atende os pedidos de nova
+versão (`resolve.js`) e grava avisos em `notifications`. O Telegram saiu inteiro (SPEC 007).
