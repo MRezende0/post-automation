@@ -5,7 +5,7 @@
 
 import { db } from './supabase';
 import { tenantDb, type TenantDb } from './tenant-db';
-import { notify, escapeHtml } from './telegram';
+import { notify, channelName } from './notifications';
 import * as instagram from './channels/instagram';
 import * as linkedin from './channels/linkedin';
 import * as x from './channels/x';
@@ -97,7 +97,7 @@ async function persistPublishedPost(t: TenantDb, s: ScheduledPost, result: Recor
 // Formato que a rede não publica por API: falha na hora, sem retry e sem chamar a rede.
 class NotPublishableError extends Error {}
 
-async function publishToChannel(s: ScheduledPost): Promise<Record<string, unknown>> {
+async function publishToChannel(t: TenantDb, s: ScheduledPost): Promise<Record<string, unknown>> {
   const format = s.variation?.format ?? null;
   if (!canAutoPublish(s.channel, format)) throw new NotPublishableError(notPublishableReason(s.channel, format));
   const caption = s.caption_final || '';
@@ -115,51 +115,69 @@ async function publishToChannel(s: ScheduledPost): Promise<Record<string, unknow
         ? await linkedin.publishDocument(caption, s.document_url, s.variation?.hook)
         : await linkedin.publishText(caption, s.image_url);
     if (LINK_POLICY.linkedin === 'first_comment' && s.utm?.url && result.id) {
-      result.link_comment = await postLinkComment(String(result.id), linkCommentText(s.utm));
+      result.link_comment = await postLinkComment(t, String(result.id), linkCommentText(s.utm));
     }
     return result;
   }
-  if (s.channel === 'twitter') return publishX(s, caption);
+  if (s.channel === 'twitter') return publishX(t, s, caption);
   throw new Error(`Canal desconhecido: ${s.channel}`);
 }
 
 // X (SPEC 002): thread pela legenda, link UTM na resposta ao último tweet. Depois que o
 // 1º tweet saiu, nada aqui pode lançar: retry duplicaria o post. Erros vão no resultado.
-async function publishX(s: ScheduledPost, caption: string): Promise<Record<string, unknown>> {
+async function publishX(t: TenantDb, s: ScheduledPost, caption: string): Promise<Record<string, unknown>> {
   const result: Record<string, unknown> = await x.publishThread({
     tweets: x.splitThread(caption),
     imageUrl: s.image_url,
     videoUrl: s.video_url,
   });
   if (result.partial_error) {
-    await notify(`⚠️ Thread no X saiu incompleta: ${escapeHtml(String(result.partial_error))}`);
+    await notify(t, {
+      kind: 'publish.partial',
+      level: 'warning',
+      title: 'A thread no X saiu incompleta',
+      body: `${String(result.partial_error)}. Confira no X e complete à mão.`,
+      link: '/history',
+    });
     return result;
   }
   if (LINK_POLICY.twitter === 'reply' && s.utm?.url) {
     const ids = result.ids as string[];
-    result.link_reply = await postLinkReply(ids[ids.length - 1], linkCommentText(s.utm));
+    result.link_reply = await postLinkReply(t, ids[ids.length - 1], linkCommentText(s.utm));
   }
   return result;
 }
 
-async function postLinkReply(tweetId: string, text: string): Promise<Record<string, unknown>> {
+async function postLinkReply(t: TenantDb, tweetId: string, text: string): Promise<Record<string, unknown>> {
   try {
     return { ok: true, ...(await x.replyWithLink(tweetId, text)) };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    await notify(`⚠️ Post no X saiu, mas a resposta com o link falhou: ${escapeHtml(msg)}`);
+    await notify(t, {
+      kind: 'publish.link_failed',
+      level: 'warning',
+      title: 'O post no X saiu, mas a resposta com o link falhou',
+      body: `${msg}. Cole o link à mão: ${text}`,
+      link: '/history',
+    });
     return { ok: false, error: msg, text };
   }
 }
 
 // O post já está no ar: falha no comentário NÃO pode virar retry (duplicaria o post).
 // Registra o erro no resultado e avisa; o link pode ser colado à mão.
-async function postLinkComment(postUrn: string, text: string): Promise<Record<string, unknown>> {
+async function postLinkComment(t: TenantDb, postUrn: string, text: string): Promise<Record<string, unknown>> {
   try {
     return { ok: true, ...(await linkedin.commentOnPost(postUrn, text)) };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    await notify(`⚠️ Post no LinkedIn saiu, mas o comentário com o link falhou: ${escapeHtml(msg)}`);
+    await notify(t, {
+      kind: 'publish.link_failed',
+      level: 'warning',
+      title: 'O post no LinkedIn saiu, mas o comentário com o link falhou',
+      body: `${msg}. Cole o link à mão: ${text}`,
+      link: '/history',
+    });
     return { ok: false, error: msg, text };
   }
 }
@@ -170,7 +188,7 @@ async function postLinkComment(postUrn: string, text: string): Promise<Record<st
 async function processOne(t: TenantDb, s: ScheduledPost): Promise<{ ok: boolean; error?: string }> {
   let result: Record<string, unknown>;
   try {
-    result = await publishToChannel(s);
+    result = await publishToChannel(t, s);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     const attempts = (s.attempts ?? 0) + 1;
@@ -178,11 +196,21 @@ async function processOne(t: TenantDb, s: ScheduledPost): Promise<{ ok: boolean;
     await t
       .update('scheduled_posts', { status: failed ? 'failed' : 'scheduled', attempts, last_error: msg })
       .eq('id', s.id);
-    await notify(
-      failed
-        ? `🚨 Falha definitiva ao publicar em <b>${s.channel}</b> (${attempts} tentativas): ${escapeHtml(msg)}`
-        : `⚠️ Falha ao publicar em <b>${s.channel}</b> (tentativa ${attempts}/${MAX_ATTEMPTS}), vou tentar de novo: ${escapeHtml(msg)}`,
-    );
+    await notify(t, failed
+      ? {
+          kind: 'publish.failed',
+          level: 'error',
+          title: `Não foi possível publicar no ${channelName(s.channel)}`,
+          body: `${msg}. Depois de ${attempts} tentativa(s), o post ficou como falhou. Corrija e agende de novo.`,
+          link: '/calendar',
+        }
+      : {
+          kind: 'publish.retry',
+          level: 'warning',
+          title: `Falha ao publicar no ${channelName(s.channel)}, nova tentativa no próximo ciclo`,
+          body: `${msg} (tentativa ${attempts} de ${MAX_ATTEMPTS}).`,
+          link: '/calendar',
+        });
     return { ok: false, error: msg };
   }
 
@@ -198,12 +226,16 @@ async function processOne(t: TenantDb, s: ScheduledPost): Promise<{ ok: boolean;
   await t
     .update('scheduled_posts', { status: 'published', published_at: new Date().toISOString(), post_id: postId, last_error: persistError })
     .eq('id', s.id);
-  const hook = escapeHtml((s.variation?.hook || '').slice(0, 80));
-  await notify(
-    persistError
-      ? `⚠️ Publicado em <b>${s.channel}</b>, mas sem histórico (métricas não vão ligar a este post): ${escapeHtml(persistError)}`
-      : `✅ Publicado em <b>${s.channel}</b>: ${hook}`,
-  );
+  const hook = (s.variation?.hook || '').slice(0, 80);
+  await notify(t, persistError
+    ? {
+        kind: 'publish.unrecorded',
+        level: 'warning',
+        title: `Publicado no ${channelName(s.channel)}, mas sem histórico`,
+        body: `${persistError}. As métricas não vão ligar a este post.`,
+        link: '/history',
+      }
+    : { kind: 'publish.ok', title: `Publicado no ${channelName(s.channel)}`, body: hook || undefined, link: '/history' });
   return { ok: true };
 }
 

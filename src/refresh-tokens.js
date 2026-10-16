@@ -4,7 +4,7 @@
 import 'dotenv/config';
 import * as instagram from './channels/instagram.js';
 import * as linkedin from './channels/linkedin.js';
-import { notify } from './telegram.js';
+import { notify } from './utils/notifications.js';
 import { updateSecret, canUpdateSecrets } from './utils/github-secrets.js';
 
 const MODE = process.argv[2] || 'refresh'; // refresh | check
@@ -34,9 +34,15 @@ async function main() {
   const needsAlert = MODE === 'check' && hasUrgency(results);
   const failed = Object.values(results).some(r => r.error);
 
-  // Em refresh, sempre notifica (rotação mensal, baixo ruído, confirma que rodou).
+  // Em refresh, sempre avisa (rotação mensal, baixo ruído, confirma que rodou).
   if (needsAlert || failed || MODE === 'refresh') {
-    await notify(summary).catch(() => {});
+    await notify({
+      kind: 'tokens.health',
+      level: failed ? 'error' : needsAlert ? 'warning' : 'info',
+      title: tokenTitle({ failed, needsAlert }),
+      body: summary,
+      link: '/settings',
+    });
   }
 
   if (failed) process.exit(1);
@@ -54,7 +60,7 @@ async function persistTokens(results) {
 
   if (updates.length === 0) return '';
   if (!canUpdateSecrets()) {
-    return `⚠️ ${updates.length} token(s) renovado(s) mas GH_ADMIN_TOKEN ausente — atualize os secrets manualmente (${updates.map(u => u[0]).join(', ')}).`;
+    return `${updates.length} token(s) renovado(s), mas falta o GH_ADMIN_TOKEN: atualize os secrets à mão (${updates.map(u => u[0]).join(', ')}).`;
   }
 
   const done = [];
@@ -64,10 +70,15 @@ async function persistTokens(results) {
       done.push(name);
     } catch (e) {
       console.error(`[refresh-tokens] falha ao atualizar ${name}: ${e.message}`);
-      return `🔑 Secrets atualizados: ${done.join(', ') || 'nenhum'} · ❌ falhou ${name}: ${e.message}`;
+      return `Secrets atualizados: ${done.join(', ') || 'nenhum'}. Falhou ${name}: ${e.message}`;
     }
   }
-  return `🔑 Secrets atualizados automaticamente: ${done.join(', ')}.`;
+  return `Secrets atualizados automaticamente: ${done.join(', ')}.`;
+}
+
+function tokenTitle({ failed, needsAlert }) {
+  if (MODE === 'check') return failed ? 'Falha ao checar os tokens das redes' : 'Token de rede perto de vencer: reconecte';
+  return failed ? 'Falha ao renovar os tokens das redes' : 'Tokens das redes renovados';
 }
 
 async function runStep(name, fn) {
@@ -88,13 +99,13 @@ function hasUrgency(results) {
 }
 
 function formatSummary(results) {
-  const lines = [`🔑 *Token ${MODE}* — ${new Date().toISOString().slice(0, 10)}`];
+  const lines = [`Tokens (${MODE}) em ${new Date().toISOString().slice(0, 10)}`];
   for (const r of Object.values(results)) {
     if (r.error) {
-      lines.push(`❌ ${r.name}: ${r.error}`);
+      lines.push(`${r.name}: falhou (${r.error})`);
     } else {
-      const days = r.daysLeft != null ? ` (${r.daysLeft}d restantes)` : '';
-      lines.push(`✅ ${r.name}: ok${days}`);
+      const days = r.daysLeft != null ? ` (${r.daysLeft} dias restantes)` : '';
+      lines.push(`${r.name}: ok${days}`);
     }
   }
   return lines.join('\n');

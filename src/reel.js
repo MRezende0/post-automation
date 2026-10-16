@@ -1,6 +1,6 @@
 // reel.js — gera ROTEIRO de Reels faceless (hook 0-3s, cenas, voiceover, legendas,
 // CTA) a partir de um pilar/ângulo ou de um high-performer (repurpose → vídeo).
-// O roteiro vai pro Telegram pronto pra produzir. A renderização do vídeo
+// O roteiro vira um aviso na plataforma (SPEC 007), pronto pra produzir. A renderização do vídeo
 // (TTS + ffmpeg/Remotion) é etapa à parte — ver publishReel + nota no README.
 //
 // Rodar: npm run reel   (gera do próximo pilar)  |  REEL_FROM_TOP=true npm run reel (do melhor post)
@@ -10,7 +10,7 @@ import { GoogleGenAI } from '@google/genai';
 import { chooseNextPillar, chooseNextAngle } from './utils/ranking.js';
 import { getPublished, isRealPost } from './utils/queue.js';
 import { pickRepurposeCandidate } from './repurpose.js';
-import { notify } from './telegram.js';
+import { notify } from './utils/notifications.js';
 
 const MODEL = 'gemini-2.5-flash';
 const DRY_RUN = process.env.DRY_RUN === 'true';
@@ -72,17 +72,16 @@ export async function generateReelScript({ pillar, angle, context }) {
   return normalizeReelScript(parseJson(response.text || ''));
 }
 
-function formatForTelegram(script, { pillar, angle }) {
-  const lines = [`🎬 *Roteiro de Reel* — ${pillar}${angle ? `/${angle}` : ''}`, ''];
-  lines.push(`*Hook (0-3s):* ${script.hook_0_3s}`, '');
+export function formatScript(script) {
+  const lines = [`Hook (0 a 3s): ${script.hook_0_3s}`, ''];
   for (const s of script.scenes) {
-    lines.push(`*Cena ${s.n}*${s.visual ? ` — _${s.visual}_` : ''}`);
-    if (s.voiceover) lines.push(`🎙️ ${s.voiceover}`);
-    if (s.caption) lines.push(`📝 ${s.caption}`);
+    lines.push(`Cena ${s.n}${s.visual ? `: ${s.visual}` : ''}`);
+    if (s.voiceover) lines.push(`Voz: ${s.voiceover}`);
+    if (s.caption) lines.push(`Legenda: ${s.caption}`);
     lines.push('');
   }
-  if (script.cta) lines.push(`*CTA:* ${script.cta}`);
-  if (script.duration_s) lines.push(`_~${script.duration_s}s · ${script.visual_style || 'estilo livre'}_`);
+  if (script.cta) lines.push(`CTA: ${script.cta}`);
+  if (script.duration_s) lines.push(`Cerca de ${script.duration_s}s · ${script.visual_style || 'estilo livre'}`);
   return lines.join('\n');
 }
 
@@ -111,11 +110,20 @@ async function main() {
 
   const script = await generateReelScript({ pillar, angle, context });
   if (!script) {
-    await notify('🎬 Falha ao gerar roteiro de Reel (resposta inválida).').catch(() => {});
+    await notify({
+      kind: 'reel.failed',
+      level: 'warning',
+      title: 'Não deu para gerar o roteiro de Reel',
+      body: 'A resposta do modelo veio inválida. Rode de novo.',
+    });
     return;
   }
-  await notify(formatForTelegram(script, { pillar, angle })).catch(() => {});
-  console.log(`[reel] roteiro enviado: ${pillar}/${angle}, ${script.scenes.length} cenas`);
+  await notify({
+    kind: 'reel.script',
+    title: `Roteiro de Reel pronto: ${pillar}${angle ? `/${angle}` : ''}`,
+    body: formatScript(script),
+  });
+  console.log(`[reel] roteiro salvo: ${pillar}/${angle}, ${script.scenes.length} cenas`);
 }
 
 if (process.argv[1] && process.argv[1].endsWith('reel.js')) {

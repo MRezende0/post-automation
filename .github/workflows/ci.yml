@@ -121,6 +121,8 @@ jobs:
             values ('pilar', 'resposta', 'https://www.linkedin.com/feed/update/urn:li:activity:1/', 'urn:li:activity:1',
                     'urn:li:comment:(urn:li:activity:1,2)', 'texto', '["a"]', 'publicado');
           insert into engage_targets (tenant_id, name, profile_url) values ('pilar', 'Ana', 'https://www.linkedin.com/in/ana/');
+          insert into notifications (tenant_id, kind, level, title, body, link)
+            values ('pilar', 'publish.ok', 'info', 'Publicado no LinkedIn', null, '/history');
           SQL
 
       # Isolamento por tenant provado como o app acessa (authenticated com JWT), não como

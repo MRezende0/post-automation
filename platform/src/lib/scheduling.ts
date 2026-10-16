@@ -1,9 +1,8 @@
-// scheduling.ts: ações de aprovação/agendamento (lado escrita). Substitui o que
-// o resolve.js fazia a partir dos cliques do Telegram: aprovar uma pendência vira
+// scheduling.ts: ações de aprovação/agendamento (lado escrita). Aprovar uma pendência vira
 // um scheduled_post (não publica na hora); cancelar/reagendar mexem na fila.
 
 import type { TenantDb } from './tenant-db';
-import { notify, escapeHtml } from './telegram';
+import { notify, channelName } from './notifications';
 import { composeCaption } from './caption';
 import { nextFreeSlot } from './slots';
 import { distributionUtm } from './utm';
@@ -108,7 +107,12 @@ export async function approvePending(t: TenantDb, input: ApproveInput): Promise<
   // consome a pendência
   await t.delete('pending_approvals').eq('pending_id', p.pending_id);
 
-  await notify(`🗓️ Agendado em <b>${p.channel}</b> pra <b>${fmtLocal(scheduledFor)}</b> — ${escapeHtml((variation.hook || '').slice(0, 80))}`);
+  await notify(t, {
+    kind: 'schedule.created',
+    title: `Agendado no ${channelName(p.channel)} para ${fmtLocal(scheduledFor)}`,
+    body: (variation.hook || '').slice(0, 80) || undefined,
+    link: '/calendar',
+  });
   return { scheduledFor, id: data!.id as string };
 }
 
@@ -126,7 +130,12 @@ export async function rejectPending(t: TenantDb, pendingId: string, reason?: str
     reason: reason || 'rejeitado via plataforma',
   });
   await t.delete('pending_approvals').eq('pending_id', p.pending_id);
-  await notify(`❌ Pendência ${p.channel} rejeitada${reason ? `: ${escapeHtml(reason)}` : ''}`);
+  await notify(t, {
+    kind: 'pending.rejected',
+    title: `Post do ${channelName(p.channel)} rejeitado`,
+    body: reason || undefined,
+    link: '/learning',
+  });
 }
 
 export async function reschedulePost(t: TenantDb, id: string, scheduledFor: string): Promise<void> {

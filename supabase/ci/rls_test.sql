@@ -85,6 +85,7 @@ insert into tenant_members (tenant_id, user_id, role) values
   ('acme',  '00000000-0000-0000-0000-00000000000b', 'viewer');
 insert into feedback (tenant_id, aspect, note) values ('pilar', 'tom', 'rls-pilar'), ('acme', 'tom', 'rls-acme');
 insert into posts (tenant_id, pillar, channel) values ('pilar', 'dica', 'instagram'), ('acme', 'dica', 'instagram');
+insert into notifications (tenant_id, kind, title) values ('pilar', 'rls', 'rls-pilar'), ('acme', 'rls', 'rls-acme');
 
 -- ── A: editor da pilar ───────────────────────────────────────────────────────
 set role authenticated;
@@ -116,6 +117,16 @@ begin
     raise exception 'A gravou em posts (só jobs gravam)';
   exception when insufficient_privilege then null;
   end;
+
+  select count(*) into n from notifications where kind = 'rls';
+  if n <> 1 then raise exception 'A deveria ver 1 aviso, viu %', n; end if;
+  if exists (select 1 from notifications where tenant_id <> 'pilar') then raise exception 'A viu aviso de outro tenant'; end if;
+
+  begin
+    insert into notifications (tenant_id, kind, title) values ('pilar', 'rls', 'rls-a-forja');
+    raise exception 'A gravou aviso (só jobs gravam)';
+  exception when insufficient_privilege then null;
+  end;
 end $$;
 
 -- ── B: viewer da acme ────────────────────────────────────────────────────────
@@ -139,6 +150,7 @@ select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000
 do $$
 begin
   if exists (select 1 from feedback) then raise exception 'C sem tenant viu feedback'; end if;
+  if exists (select 1 from notifications) then raise exception 'C sem tenant viu aviso'; end if;
   if exists (select 1 from tenants) then raise exception 'C sem tenant viu tenant'; end if;
   if exists (select 1 from tenant_members) then raise exception 'C sem tenant viu membros'; end if;
 end $$;

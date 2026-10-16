@@ -306,11 +306,8 @@ function pendingRowToItem(row) {
     top_id: row.top_id ?? undefined,
     images: row.images ?? undefined,
     seed: row.seed ?? undefined,
-    message_ids: row.message_ids ?? undefined,
-    keyboard_message_id: row.keyboard_message_id ?? undefined,
     regen_count: row.regen_count ?? 0,
     status: row.status,
-    reason_requested_at: row.reason_requested_at ?? undefined,
     saved_at: row.saved_at,
   };
 }
@@ -363,11 +360,8 @@ export async function savePending(item) {
       top_id: item.top_id ?? null,
       images: item.images ?? null,
       seed: item.seed ?? null,
-      message_ids: item.message_ids ?? null,
-      keyboard_message_id: item.keyboard_message_id ?? null,
       regen_count: item.regen_count ?? 0,
       status: item.status ?? 'awaiting_decision',
-      reason_requested_at: item.reason_requested_at ?? null,
       saved_at: new Date().toISOString(),
     };
     // upsert por canal (espelha o YAML, que sobrescreve o pending do canal)

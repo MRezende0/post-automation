@@ -1,13 +1,13 @@
 // metrics.js — coleta engajamento dos posts publicados, grava no published.yaml,
 // sincroniza os exemplos de few-shot (top/bottom viram referência/anti-exemplo)
-// e envia relatório semanal. Chamado por: .github/workflows/weekly-report.yml.
+// e grava o relatório semanal como aviso na plataforma (SPEC 007). Chamado por: .github/workflows/weekly-report.yml.
 
 import 'dotenv/config';
 import { readdir, writeFile, unlink } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
-import { notify } from './telegram.js';
+import { notify } from './utils/notifications.js';
 import { getPublished, isRealPost } from './utils/queue.js';
 import { usingSupabase, supabase } from './utils/db.js';
 import { resolveTenant } from './tenant.js';
@@ -238,7 +238,7 @@ function buildReport(scored) {
 async function main() {
   const published = await getPublished();
   if (published.length === 0) {
-    await notify('📊 *Relatório semanal*\n\n_Nenhum post publicado ainda._', { dryRun: DRY_RUN });
+    await notify({ kind: 'report.weekly', title: 'Relatório semanal: nenhum post publicado ainda', link: '/history' }, { dryRun: DRY_RUN });
     return;
   }
 
@@ -284,8 +284,8 @@ async function main() {
     + await judgeCalibration()
     + await funnelReport();
 
-  await notify(report, { dryRun: DRY_RUN });
-  console.log('[metrics] Relatório enviado.', { collected, synced });
+  await notify({ kind: 'report.weekly', title: 'Relatório semanal', body: report, link: '/learning' }, { dryRun: DRY_RUN });
+  console.log('[metrics] Relatório gravado.', { collected, synced });
 }
 
 main().catch(err => {

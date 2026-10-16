@@ -99,18 +99,11 @@ Sugestão pra MVP: criar bucket gratuito Cloudflare R2 ou subir pra GitHub Pages
 
 ---
 
-## 4. Bot Telegram
+## 4. Avisos da conta
 
-**Tempo:** 10min
-
-1. Abra Telegram → procure `@BotFather` → `/newbot`
-2. Escolha nome e username — anote o **token** (formato `123:ABC...`) → `TELEGRAM_BOT_TOKEN`
-3. Mande **qualquer mensagem** pro seu bot novo (ele precisa ter pelo menos 1 chat ativo)
-4. Pegue seu chat ID:
-   ```bash
-   curl "https://api.telegram.org/botTOKEN/getUpdates"
-   ```
-   No JSON, `result[0].message.chat.id` → `TELEGRAM_CHAT_ID`
+Não há bot para configurar. Os avisos (post pronto para aprovar, agendado, publicado, falhou,
+relatório semanal) ficam na tabela `notifications` do tenant e aparecem na plataforma
+(SPEC 007). Sem `STATE_BACKEND=supabase`, saem só no log do job.
 
 ---
 
@@ -133,7 +126,7 @@ Sugestão pra MVP: criar bucket gratuito Cloudflare R2 ou subir pra GitHub Pages
 3. `git push -u origin main`
 4. No GitHub → Settings → Secrets and variables → Actions → New repository secret
 
-   Adicione todas as 12 vars do `.env.example`:
+   Adicione as vars do `.env.example`:
 
    - `ANTHROPIC_API_KEY`
    - `IG_ACCESS_TOKEN`
@@ -145,8 +138,6 @@ Sugestão pra MVP: criar bucket gratuito Cloudflare R2 ou subir pra GitHub Pages
    - `LINKEDIN_AUTHOR_URN`
    - `LINKEDIN_CLIENT_ID`
    - `LINKEDIN_CLIENT_SECRET`
-   - `TELEGRAM_BOT_TOKEN`
-   - `TELEGRAM_CHAT_ID`
 
 ---
 
@@ -173,7 +164,7 @@ Esperado: testes passam, dry-run gera 3 variações mock + 2 imagens (uma IG, um
    ```
 3. Acione manualmente: Actions tab → Post → Run workflow → `skip_approval=true` (pra primeiro teste sem ficar esperando)
 4. Veja a publicação em IG + LinkedIn
-5. Próximo post: deixar fluxo normal com aprovação Telegram
+5. Próximo post: deixar o fluxo normal, com aprovação na plataforma
 
 ---
 
@@ -183,5 +174,4 @@ Esperado: testes passam, dry-run gera 3 variações mock + 2 imagens (uma IG, um
 |---|---|---|
 | `IG API 400: image_url must be public` | URL não acessível externamente | Subir imagem pra S3/R2 |
 | `LinkedIn API 401` | Token expirado | `npm run refresh-tokens` |
-| `Telegram getUpdates returns []` | Bot sem mensagem inicial | Manda qualquer msg pro bot manualmente |
-| Workflow falha mas sem alerta Telegram | Telegram secrets erradas | Confere bot token / chat id |
+| Job rodou mas nenhum aviso apareceu | `STATE_BACKEND` não é `supabase` no workflow | Confere a variável do repo e o `SUPABASE_URL` |
