@@ -1,6 +1,7 @@
--- bootstrap.sql: o mínimo do Supabase que as migrations e o teste de RLS usam, para rodar
--- num Postgres puro (CI e teste local). Nunca roda num projeto Supabase de verdade: lá
--- tudo isto já existe.
+-- bootstrap.sql: o mínimo do Supabase para rodar as migrations num Postgres puro (CI, teste
+-- local e o Cloud SQL). Os papéis da API valem sempre; o schema `auth` só existe porque as
+-- migrations antigas (até a 0014) o citam: desde a 0015 nada ativo depende dele (SPEC 008).
+-- Nunca roda num projeto Supabase de verdade: lá tudo isto já existe.
 
 do $$
 begin

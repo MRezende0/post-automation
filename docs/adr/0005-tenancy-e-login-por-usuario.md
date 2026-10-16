@@ -1,6 +1,7 @@
 # ADR 0005: tenant no banco, isolamento por RLS e login por usuário
 
 - **Status:** aceito (parte de dado implementada na 0012; login na F2 da SPEC 006)
+- **Substituído em parte por:** [ADR 0007](0007-tres-papeis-de-conta.md) (papéis e identidade)
 - **Data:** 2026-10-16
 - **Substitui:** item 4 do [ADR 0002](0002-plataforma-como-produto-proprio.md) (login por tenant
   vem antes do 2º cliente, porque cada piloto do [ADR 0004](0004-construir-o-saas-sem-cnpj-validando-com-a-pilar.md) já é um tenant)
