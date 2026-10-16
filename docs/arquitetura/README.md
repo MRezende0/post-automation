@@ -1,7 +1,7 @@
 # Arquitetura SaaS no Google Cloud (proposta, 16/10/2026)
 
-> Proposta, não decisão. Quando aprovada, vira ADR 0006 (Google Cloud), ADR 0007 (contas e
-> papéis, substitui os papéis do [ADR 0005](../adr/0005-tenancy-e-login-por-usuario.md)) e a SPEC 007.
+> Decidido: [ADR 0006](../adr/0006-google-cloud-como-plataforma.md) (Google Cloud) e ADR 0007 (três
+> papéis de conta, na PR do banco portável). O resto é proposta e vira SPEC quando for construído.
 > Os desenhos estão em [`gcp/`](gcp/) (SVG editável e PNG). Preço de borda, KMS e instância
 > quente vem da minha memória dos catálogos: **não verificado**.
 
