@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1840" height="1180" viewBox="0 0 1840 1180"><rect width="100%" height="100%" fill="#FBFBFA"/>
+<defs><marker id="an" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3A4450"/></marker></defs>
+<defs><marker id="aok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2E8B57"/></marker></defs>
+<defs><marker id="ano" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C9372C"/></marker></defs>
+<defs><marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8A929B"/></marker></defs>
+<text x="24" y="46" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#1B1F24" text-anchor="start">Ciclo do conteúdo por papel</text>
+<text x="24" y="74" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5B6570" text-anchor="start">O caminho de um post, da ideia ao aprendizado, e o que cada papel faz em cada etapa.</text>
+<rect x="220" y="96" width="240" height="36" rx="8" fill="#EEF1F4" stroke="none"/>
+<text x="340.0" y="120" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">Ideia</text>
+<rect x="482" y="96" width="240" height="36" rx="8" fill="#EEF1F4" stroke="none"/>
+<text x="602.0" y="120" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">Produção</text>
+<rect x="744" y="96" width="240" height="36" rx="8" fill="#EEF1F4" stroke="none"/>
+<text x="864.0" y="120" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">Aprovação</text>
+<rect x="1006" y="96" width="240" height="36" rx="8" fill="#EEF1F4" stroke="none"/>
+<text x="1126.0" y="120" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">Agenda e publicação</text>
+<rect x="1268" y="96" width="240" height="36" rx="8" fill="#EEF1F4" stroke="none"/>
+<text x="1388.0" y="120" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">Resultado</text>
+<rect x="1530" y="96" width="240" height="36" rx="8" fill="#EEF1F4" stroke="none"/>
+<text x="1650.0" y="120" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">Aprendizado</text>
+<rect x="24" y="145" width="1792" height="140" rx="14" fill="#FFFFFF" stroke="#D5D9DE" stroke-width="1.6"/>
+<text x="44" y="211" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#1B1F24" text-anchor="start">Criador</text>
+<text x="44" y="233" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="start">produz</text>
+<rect x="24" y="295" width="1792" height="140" rx="14" fill="#F7F8F9" stroke="#D5D9DE" stroke-width="1.6"/>
+<text x="44" y="361" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#1B1F24" text-anchor="start">Administrador</text>
+<text x="44" y="383" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="start">decide; o dono também</text>
+<rect x="24" y="445" width="1792" height="140" rx="14" fill="#FFFFFF" stroke="#D5D9DE" stroke-width="1.6"/>
+<text x="44" y="511" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#1B1F24" text-anchor="start">Sistema</text>
+<text x="44" y="533" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="start">jobs e IA</text>
+<rect x="24" y="595" width="1792" height="140" rx="14" fill="#F7F8F9" stroke="#D5D9DE" stroke-width="1.6"/>
+<text x="44" y="661" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#1B1F24" text-anchor="start">Usuário</text>
+<text x="44" y="683" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="start">acompanha</text>
+<rect x="220" y="165" width="240" height="100" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="340.0" y="210.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Cria o brief</text>
+<text x="340.0" y="230.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">ou pede uma ideia à IA</text>
+<rect x="482" y="165" width="240" height="100" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="602.0" y="210.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Edita as versões</text>
+<text x="602.0" y="230.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">texto e arte por rede</text>
+<rect x="744" y="165" width="240" height="100" rx="10" fill="#E8F0FE" stroke="#3B6FD4" stroke-width="2"/>
+<text x="864.0" y="210.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Envia para aprovação</text>
+<text x="864.0" y="230.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">ou aprova, se liberado</text>
+<rect x="1006" y="165" width="240" height="100" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="1126.0" y="210.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Vê a agenda</text>
+<text x="1126.0" y="230.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">sem mexer no horário</text>
+<rect x="1268" y="165" width="240" height="100" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="1388.0" y="210.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Vê as métricas</text>
+<text x="1388.0" y="230.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">dos posts que fez</text>
+<rect x="1530" y="165" width="240" height="100" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
+<text x="1650.0" y="210.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Dá feedback</text>
+<text x="1650.0" y="230.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">por aspecto: tom, arte, tema</text>
+<rect x="220" y="315" width="240" height="100" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="340.0" y="360.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Define campanhas</text>
+<text x="340.0" y="380.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e o foco do mês</text>
+<rect x="744" y="315" width="240" height="100" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="864.0" y="350.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Aprova, pede nova</text>
+<text x="864.0" y="370.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">versão ou rejeita</text>
+<text x="864.0" y="390.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">com motivo</text>
+<rect x="1006" y="315" width="240" height="100" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="1126.0" y="360.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Agenda ou pausa</text>
+<text x="1126.0" y="380.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">reagenda e cancela</text>
+<rect x="1268" y="315" width="240" height="100" rx="10" fill="#FDE8E6" stroke="#C9372C" stroke-width="2"/>
+<text x="1388.0" y="360.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Recebe as falhas</text>
+<text x="1388.0" y="380.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">no app e por e-mail</text>
+<rect x="1530" y="315" width="240" height="100" rx="10" fill="#FFF4D6" stroke="#C98A00" stroke-width="2"/>
+<text x="1650.0" y="360.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Ajusta marca e regras</text>
+<text x="1650.0" y="380.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">voz, estilo, público</text>
+<rect x="220" y="465" width="240" height="100" rx="10" fill="#E0F4F4" stroke="#138A8A" stroke-width="2"/>
+<text x="340.0" y="500.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Sugere ideias</text>
+<text x="340.0" y="520.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">agenda semanal</text>
+<text x="340.0" y="540.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e campanha ativa</text>
+<rect x="482" y="465" width="240" height="100" rx="10" fill="#E0F4F4" stroke="#138A8A" stroke-width="2"/>
+<text x="602.0" y="500.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Gera as versões</text>
+<text x="602.0" y="520.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">texto, arte e formato</text>
+<text x="602.0" y="540.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">por rede</text>
+<rect x="744" y="465" width="240" height="100" rx="10" fill="#E0F4F4" stroke="#138A8A" stroke-width="2"/>
+<text x="864.0" y="510.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Avisa quem aprova</text>
+<text x="864.0" y="530.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">post pronto para aprovar</text>
+<rect x="1006" y="465" width="240" height="100" rx="10" fill="#E0F4F4" stroke="#138A8A" stroke-width="2"/>
+<text x="1126.0" y="510.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Publica no horário</text>
+<text x="1126.0" y="530.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">fila por rede, sem duplicar</text>
+<rect x="1268" y="465" width="240" height="100" rx="10" fill="#E0F4F4" stroke="#138A8A" stroke-width="2"/>
+<text x="1388.0" y="510.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Coleta métricas</text>
+<text x="1388.0" y="530.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e liga ao funil</text>
+<rect x="1530" y="465" width="240" height="100" rx="10" fill="#E0F4F4" stroke="#138A8A" stroke-width="2"/>
+<text x="1650.0" y="500.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Aprende</text>
+<text x="1650.0" y="520.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">feedback, rejeições</text>
+<text x="1650.0" y="540.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e métricas</text>
+<rect x="744" y="615" width="240" height="100" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="864.0" y="660.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Comenta</text>
+<text x="864.0" y="680.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">sem aprovar</text>
+<rect x="1006" y="615" width="240" height="100" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="1126.0" y="670.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Vê a agenda</text>
+<rect x="1268" y="615" width="240" height="100" rx="10" fill="#F1F2F4" stroke="#8A929B" stroke-width="2"/>
+<text x="1388.0" y="660.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Vê publicados</text>
+<text x="1388.0" y="680.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#5B6570" text-anchor="middle">e métricas</text>
+<rect x="1530" y="615" width="240" height="100" rx="10" fill="#EEEAF8" stroke="#6B5BB5" stroke-width="2"/>
+<text x="1650.0" y="670.0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1B1F24" text-anchor="middle">Dá feedback</text>
+<polyline points="460,215 471,215 471,515 482,515" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="602.0,465 602.0,265" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="722,215 744,215" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="864.0,265 864.0,315" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="984,365 995,365 995,515 1006,515" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="1246,515 1268,515" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="1508,515 1530,515" fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#aok)"/>
+<polyline points="1650.0,565 1650.0,578 340.0,578 340.0,565" fill="none" stroke="#8A929B" stroke-width="2.2" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#am)"/>
+<rect x="775.12" y="577" width="249.76000000000002" height="19" rx="4" fill="#FBFBFA" stroke="none"/>
+<text x="900" y="590" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#8A929B" text-anchor="middle">a próxima ideia já usa o que aprendeu</text>
+<text x="44" y="790" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#1B1F24" text-anchor="start">Quem recebe cada aviso</text>
+<text x="519.0" y="830" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">Dono</text>
+<text x="629.0" y="830" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">Admin</text>
+<text x="739.0" y="830" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">Criador</text>
+<text x="849.0" y="830" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">Usuário</text>
+<text x="959.0" y="830" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1B1F24" text-anchor="middle">E-mail</text>
+<rect x="44" y="845" width="970" height="42" rx="6" fill="#FFFFFF" stroke="#ECEEF1"/>
+<text x="58" y="872" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">Post pronto para aprovar</text>
+<circle cx="519.0" cy="866" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="513.5,866 517.5,870.5 525.0,861.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="629.0" cy="866" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="623.5,866 627.5,870.5 635.0,861.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="739.0" cy="866" r="11" fill="#FFF4D6" stroke="#C98A00" stroke-width="2.4"/>
+<text x="739.0" y="871" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#C98A00" text-anchor="middle">?</text>
+<circle cx="849.0" cy="866" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="959.0" cy="866" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<text x="58" y="914" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">Agendado e publicado</text>
+<circle cx="519.0" cy="908" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="513.5,908 517.5,912.5 525.0,903.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="629.0" cy="908" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="623.5,908 627.5,912.5 635.0,903.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="739.0" cy="908" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="733.5,908 737.5,912.5 745.0,903.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="849.0" cy="908" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="959.0" cy="908" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<rect x="44" y="929" width="970" height="42" rx="6" fill="#FFFFFF" stroke="#ECEEF1"/>
+<text x="58" y="956" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">Falha ao publicar</text>
+<circle cx="519.0" cy="950" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="513.5,950 517.5,954.5 525.0,945.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="629.0" cy="950" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="623.5,950 627.5,954.5 635.0,945.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="739.0" cy="950" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="733.5,950 737.5,954.5 745.0,945.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="849.0" cy="950" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="959.0" cy="950" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="953.5,950 957.5,954.5 965.0,945.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="58" y="998" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">Token de rede vencendo</text>
+<circle cx="519.0" cy="992" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="513.5,992 517.5,996.5 525.0,987.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="629.0" cy="992" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="623.5,992 627.5,996.5 635.0,987.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="739.0" cy="992" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="849.0" cy="992" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="959.0" cy="992" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="953.5,992 957.5,996.5 965.0,987.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="44" y="1013" width="970" height="42" rx="6" fill="#FFFFFF" stroke="#ECEEF1"/>
+<text x="58" y="1040" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">Relatório semanal</text>
+<circle cx="519.0" cy="1034" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="513.5,1034 517.5,1038.5 525.0,1029.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="629.0" cy="1034" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="623.5,1034 627.5,1038.5 635.0,1029.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="739.0" cy="1034" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="733.5,1034 737.5,1038.5 745.0,1029.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="849.0" cy="1034" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="843.5,1034 847.5,1038.5 855.0,1029.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="959.0" cy="1034" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="953.5,1034 957.5,1038.5 965.0,1029.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="58" y="1082" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">Cobrança, plano e teste grátis</text>
+<circle cx="519.0" cy="1076" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="513.5,1076 517.5,1080.5 525.0,1071.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="629.0" cy="1076" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="739.0" cy="1076" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="849.0" cy="1076" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="959.0" cy="1076" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="953.5,1076 957.5,1080.5 965.0,1071.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="44" y="1097" width="970" height="42" rx="6" fill="#FFFFFF" stroke="#ECEEF1"/>
+<text x="58" y="1124" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">Mudança na equipe</text>
+<circle cx="519.0" cy="1118" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="513.5,1118 517.5,1122.5 525.0,1113.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="629.0" cy="1118" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="739.0" cy="1118" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="849.0" cy="1118" r="4" fill="#C5CBD2" stroke="none" stroke-width="0"/>
+<circle cx="959.0" cy="1118" r="12" fill="#2E8B57" stroke="none" stroke-width="0"/>
+<polyline points="953.5,1118 957.5,1122.5 965.0,1113.5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1060" y="810" width="756" height="340" rx="14" fill="#FFFBF0" stroke="#C98A00" stroke-width="1.6"/>
+<text x="1074" y="832" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#C98A00" text-anchor="start">Regras do aviso</text>
+<text x="1082" y="860" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">1. Aviso vai para quem pode agir: post pronto vai para quem aprova.</text>
+<text x="1082" y="898" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">2. O criador recebe post pronto só se a conta liberar a aprovação dele.</text>
+<text x="1082" y="936" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">3. Falha, token vencendo e cobrança também vão por e-mail.</text>
+<text x="1082" y="974" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">4. Cada pessoa escolhe no perfil o que recebe por e-mail; o crítico não desliga.</text>
+<text x="1082" y="1012" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">5. Na conta PF, a dona recebe tudo: é o mesmo modelo.</text>
+<text x="1082" y="1050" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1B1F24" text-anchor="start">6. O aviso aponta para a tela onde se resolve.</text>
+</svg>
