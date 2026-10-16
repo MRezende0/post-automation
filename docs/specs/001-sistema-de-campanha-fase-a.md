@@ -1,6 +1,10 @@
 # SPEC 001: sistema de campanha, fase A
 
-- **Status:** proposta
+- **Status:** em andamento
+  - R1 e R2 entregues (#8); R5 entregue (#10); R4 na PR da foto-pergunta.
+  - R3 e R7 substituídos pela [SPEC 003](003-ideia-reaproveitamento-e-feedback.md) (uma ideia
+    por rodada, reaproveitamento entre redes, aprovação por ideia).
+  - R6 depende do piloto da fábrica de vídeo.
 - **Data:** 2026-10-15
 - **Prazo:** fase A do plano, 20/10 a 15/11/2026
 - **Depende de:** [ADR 0001](../adr/0001-campanha-brief-ativo-distribuicao.md), ADR 0060 e
@@ -66,6 +70,10 @@ o publish real do X.
 3. O modo atual (um post por canal) continua disponível por flag `GENERATION_MODE=post`.
 
 ### R4. Foto-pergunta
+
+> Entregue com: 21 croquis em `assets/croquis/` (lista em `index.json`), template
+> `templates/instagram/pergunta.html`, formato `pergunta` no tenant e no bandit, guardrail de
+> até 12 palavras com `?`, e cores da marca vindas de `tenant.brand`.
 
 1. Template `templates/instagram/foto-pergunta.html`: traço de croqui em ink sobre paper,
    um elemento em verde `#A4EC86`, pergunta de até 12 palavras, logo e handle.
