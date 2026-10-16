@@ -2,7 +2,7 @@
 // entre a fase GERAR (index.js) e a fase RESOLVER (resolve.js).
 
 import { readFile } from 'node:fs/promises';
-import { generatePost, judgeVariations, critiqueVariations, polishPost, checkGuardrails, composeCaption } from './generate.js';
+import { generatePost, judgeVariations, critiqueVariations, polishPost, checkGuardrails, composeCaption, adaptPost, startUsage, takeUsage } from './generate.js';
 import { resolveTenant } from './tenant.js';
 import { renderImage, renderCarousel, renderPdf, renderPergunta } from './render-image.js';
 import { pickSketch, sketchSvg } from './utils/croquis.js';
@@ -67,6 +67,7 @@ async function renderPreview({ channel, pillar, variation }) {
 // renderiza+sobe uma imagem PRA CADA variação — assim o preview mostra a imagem
 // real de cada opção e a publicação não precisa re-renderizar a escolhida.
 export async function prepareGeneration({ channel, seed, regenNote, tenant = resolveTenant() }) {
+  startUsage();
   const context = [seed.context, regenNote].filter(Boolean).join('\n\n') || undefined;
   const generation = await generatePost({
     channel,
@@ -156,7 +157,57 @@ export async function prepareGeneration({ channel, seed, regenNote, tenant = res
     }
   }
 
+  generation.usage = takeUsage();
   return { generation, topId, images };
+}
+
+// Reaproveitamento (SPEC 003 R2): adapta o top do conteúdo-mãe pra outra rede numa chamada
+// barata e reusa a arte. Sem crítico/judge/polish (o conteúdo-mãe já passou por eles);
+// guardrails rodam na versão adaptada. Slides ficam os mesmos; no LinkedIn o carrossel
+// vira PDF de novo (render local, sem token). Thread do X a partir de texto longo vai sem
+// imagem; nos outros casos a arte do conteúdo-mãe acompanha.
+export async function prepareReuse({ channel, mother, kind, tenant = resolveTenant() }) {
+  startUsage();
+  const source = mother.generation.variations.find(v => v.id === mother.topId) || mother.generation.variations[0];
+  const adapted = await adaptPost({
+    fromChannel: mother.channel,
+    toChannel: channel,
+    pillar: mother.generation.pillar,
+    angle: mother.generation.angle,
+    variation: source,
+    kind,
+    dryRun: DRY_RUN,
+    tenant,
+  });
+  const v = adapted.variations[0];
+  const guard = checkGuardrails(v, { pillar: adapted.pillar, tenant });
+  log(`Reaproveitou ${mother.channel}#${source.id} → ${channel} (${kind})${guard.clean ? '' : ` ⚠️ ${guard.flags.join(', ')}`}`);
+
+  if (channel === 'linkedin' && kind === 'carousel' && !DRY_RUN && isRenderableCarousel(v)) {
+    try {
+      Object.assign(v, await buildCarouselMedia({ channel, pillar: adapted.pillar, variation: v, tenant }));
+    } catch (e) {
+      log(`Falha ao montar o PDF do carrossel reaproveitado: ${e.message}`); // segue como texto + imagem
+    }
+  }
+
+  const images = [];
+  const art = mother.images?.find(i => i.id === source.id);
+  const textOnly = channel === 'twitter' && kind === 'texto_longo';
+  if (art && !textOnly) images.push({ ...art, id: v.id });
+  else if (!art && tenant.platforms?.[channel]?.rendersImage !== false) {
+    const imagePath = await renderPreview({ channel, pillar: adapted.pillar, variation: v });
+    if (imagePath && !DRY_RUN) images.push({ id: v.id, url: (await uploadImage(imagePath)).url });
+    else if (imagePath) images.push({ id: v.id, url: null, path: imagePath });
+  }
+
+  const generation = {
+    ...adapted,
+    guardrail_flags: guard.flags,
+    reuse: { from_channel: mother.channel, from_variation: source.id, kind },
+    usage: takeUsage(),
+  };
+  return { generation, topId: v.id, images };
 }
 
 const MAX_SLIDES = 10; // limite do carrossel do Instagram

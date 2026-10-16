@@ -21,6 +21,35 @@ const MODEL_SIMPLE = 'gemini-2.5-flash-lite';
 
 const ROOT = process.cwd();
 
+// Tokens por chamada (usageMetadata do Gemini), pra medir quanto custa cada ideia
+// (SPEC 003 R2.5). pipeline.js abre a contagem no início de uma geração e fecha no fim.
+let usageLedger = [];
+
+function trackUsage(response) {
+  const u = response?.usageMetadata;
+  if (!u) return;
+  usageLedger.push({ input: u.promptTokenCount || 0, output: (u.candidatesTokenCount || 0) + (u.thoughtsTokenCount || 0) });
+}
+
+export function startUsage() {
+  usageLedger = [];
+}
+
+export function takeUsage() {
+  const total = usageLedger.reduce((acc, u) => ({ input: acc.input + u.input, output: acc.output + u.output }), { input: 0, output: 0 });
+  const out = { calls: usageLedger.length, ...total, total: total.input + total.output };
+  usageLedger = [];
+  return out;
+}
+
+// Soma contagens de várias gerações (usage do brief = mãe + derivadas).
+export function sumUsage(list) {
+  return (list || []).filter(Boolean).reduce(
+    (acc, u) => ({ calls: acc.calls + (u.calls || 0), input: acc.input + (u.input || 0), output: acc.output + (u.output || 0), total: acc.total + (u.total || 0) }),
+    { calls: 0, input: 0, output: 0, total: 0 },
+  );
+}
+
 async function readDoc(rel) {
   const file = path.join(ROOT, rel);
   if (!existsSync(file)) return '';
@@ -134,11 +163,7 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
 
   let chosenPillar = pillar;
   let chosenAngle = angle;
-  if (!chosenPillar) {
-    chosenPillar = chooseNextPillar(published, 20, tenant.taxonomy);
-    chosenAngle = chooseNextAngle(chosenPillar, published, 30, tenant.taxonomy);
-    await snapshotBandit(published, tenant); // observabilidade da evolução do aprendizado
-  }
+  if (!chosenPillar) ({ pillar: chosenPillar, angle: chosenAngle } = await chooseTopic(tenant, published));
 
   if (dryRun) {
     return mockGeneration({ channel, pillar: chosenPillar, angle: chosenAngle });
@@ -210,6 +235,7 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     { tries: 4, baseMs: 2000, label: 'gemini-generate' },
   );
 
+  trackUsage(response);
   const text = response.text || '';
   const parsed = parseJsonResponse(text);
   // Observabilidade: hash do system prompt + modelo → atribuição causal no DB
@@ -224,6 +250,16 @@ export async function generatePost({ channel, pillar, angle, context, dryRun = f
     }
   }
   return { ...parsed, channel, pillar: chosenPillar, angle: chosenAngle, model: MODEL_GENERATE, prompt_hash: promptHash };
+}
+
+// Pilar e ângulo pela rotação (bandit). index.js chama uma vez por rodada, pra todas as
+// redes falarem da mesma ideia (SPEC 003 R1).
+export async function chooseTopic(tenant = resolveTenant(), published = null) {
+  const real = published || (await getPublished()).filter(isRealPost);
+  const pillar = chooseNextPillar(real, 20, tenant.taxonomy);
+  const angle = chooseNextAngle(pillar, real, 30, tenant.taxonomy);
+  await snapshotBandit(real, tenant); // observabilidade da evolução do aprendizado
+  return { pillar, angle };
 }
 
 // Snapshot dos posteriores Beta por pilar → bandit_snapshots (best-effort, só sob flag).
@@ -290,6 +326,7 @@ export async function critiqueVariations({ channel, pillar, variations, tenant =
       contents: prompt,
       config: { maxOutputTokens: 600, responseMimeType: 'application/json' },
     });
+    trackUsage(response);
     const parsed = parseJsonResponse(response.text || '');
     return Array.isArray(parsed.verdicts) ? parsed.verdicts : null;
   } catch (e) {
@@ -347,6 +384,7 @@ export async function judgeVariations({ channel, pillar, variations, tenant = re
       contents: prompt,
       config: { maxOutputTokens: 600, responseMimeType: 'application/json' },
     });
+    trackUsage(response);
     const parsed = parseJsonResponse(response.text || '');
     return judgeFromScores(parsed.scores, variations);
   } catch (e) {
@@ -401,12 +439,78 @@ export async function polishPost({ channel, pillar, variation, tenant = resolveT
       contents: prompt,
       config: { maxOutputTokens: 1500, responseMimeType: 'application/json' },
     });
+    trackUsage(response);
     const parsed = parseJsonResponse(response.text || '');
     if (parsed.hook && parsed.body) return { ...variation, hook: parsed.hook, body: parsed.body };
     return variation;
   } catch (e) {
     return variation;
   }
+}
+
+// Reaproveitamento (SPEC 003 R2.2): adapta o texto aprovado do conteúdo-mãe pra outra rede
+// numa chamada só, no modelo barato. Sem 3 variações, crítico, judge nem polish: a ideia,
+// a voz e a prova já passaram por eles no canal-mãe. Slides do carrossel ficam iguais.
+export function buildAdaptPrompt({ fromChannel, toChannel, pillar, variation, kind, channelPrompt = '', rules = [], tenant }) {
+  const plat = tenant.platforms?.[toChannel];
+  const limits = plat
+    ? `Rede alvo: ${toChannel} (tom ${plat.tone}; limite ${plat.maxChars} caracteres${plat.thread ? ' por tweet; se não couber em um, escreva a thread com os tweets separados por linha em branco' : ''}).`
+    : `Rede alvo: ${toChannel}.`;
+  const shape = kind === 'carousel'
+    ? 'O post vai com os MESMOS slides do original; escreva só a legenda que acompanha os slides.'
+    : kind === 'pergunta'
+      ? 'O post vai com a MESMA imagem (uma pergunta sobre um croqui); escreva o texto que acompanha a imagem.'
+      : '';
+  return [
+    [
+      `Você adapta um post já aprovado de ${fromChannel} para ${toChannel}, sem perder a ideia, a prova e a voz.`,
+      'Não invente fato, número ou cliente novo. Corte o que não cabe; reescreva para o jeito da rede.',
+      limits,
+      shape,
+    ].filter(Boolean).join('\n'),
+    channelPrompt ? `## Regras da rede\n\n${channelPrompt}` : '',
+    rules.length ? `## Regras aprendidas (siga à risca)\n\n${rules.map(r => `- ${r}`).join('\n')}` : '',
+    `Pilar: ${pillar}\nHook original: ${variation.hook}\nCorpo original:\n${variation.body}`,
+    'Devolva só JSON: {"hook":"...","body":"...","hashtags":["..."]}',
+  ].filter(Boolean).join('\n\n');
+}
+
+export async function adaptPost({ fromChannel, toChannel, pillar, angle, variation, kind, dryRun = false, tenant = resolveTenant() }) {
+  const base = { id: variation.id, format: kind === 'carousel' ? 'carousel' : kind === 'pergunta' ? 'pergunta' : 'single' };
+  if (kind === 'carousel') Object.assign(base, { slides: variation.slides, slideUrls: variation.slideUrls });
+  if (kind === 'pergunta') Object.assign(base, { question: variation.question, sketch: variation.sketch });
+
+  if (dryRun) {
+    return { channel: toChannel, pillar, angle, variations: [{ ...base, hook: `[MOCK reuse ${toChannel}] ${variation.hook}`, body: variation.body, hashtags: [] }] };
+  }
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY não configurada. Use DRY_RUN=true pra testar sem API.');
+
+  const [channelPrompt, rules] = await Promise.all([
+    loadChannelPrompt(toChannel, tenant),
+    getActiveStyleRules(tenant.id, { channel: toChannel }),
+  ]);
+  const prompt = buildAdaptPrompt({ fromChannel, toChannel, pillar, variation, kind, channelPrompt, rules, tenant });
+  const client = new GoogleGenAI({ apiKey });
+  const response = await withRetry(
+    () => client.models.generateContent({
+      model: MODEL_SIMPLE,
+      contents: prompt,
+      config: { maxOutputTokens: 1500, responseMimeType: 'application/json' },
+    }),
+    { tries: 3, baseMs: 2000, label: 'gemini-adapt' },
+  );
+  trackUsage(response);
+  const parsed = parseJsonResponse(response.text || '');
+  if (!parsed.body) throw new Error(`Adaptação ${fromChannel}→${toChannel} sem corpo`);
+  return {
+    channel: toChannel,
+    pillar,
+    angle,
+    variations: [{ ...base, hook: parsed.hook || variation.hook, body: parsed.body, hashtags: Array.isArray(parsed.hashtags) ? parsed.hashtags : [] }],
+    model: MODEL_SIMPLE,
+    prompt_hash: createHash('sha256').update(prompt).digest('hex').slice(0, 16),
+  };
 }
 
 // Monta a legenda final = corpo + hashtags (campo estruturado). Mantém o body

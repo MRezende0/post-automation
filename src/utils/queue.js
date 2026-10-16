@@ -295,6 +295,7 @@ function pendingRowToItem(row) {
   return {
     channel: row.channel,
     pending_id: row.pending_id,
+    brief_id: row.brief_id ?? undefined,
     generation: row.generation,
     top_id: row.top_id ?? undefined,
     images: row.images ?? undefined,
@@ -351,6 +352,7 @@ export async function savePending(item) {
       tenant_id: currentTenantId(),
       pending_id: item.pending_id,
       channel: item.channel,
+      brief_id: item.brief_id ?? null,
       generation: item.generation ?? null,
       top_id: item.top_id ?? null,
       images: item.images ?? null,
@@ -363,7 +365,13 @@ export async function savePending(item) {
       saved_at: new Date().toISOString(),
     };
     // upsert por canal (espelha o YAML, que sobrescreve o pending do canal)
-    const { error } = await supabase().from('pending_approvals').upsert(row, { onConflict: 'tenant_id,channel' });
+    let { error } = await supabase().from('pending_approvals').upsert(row, { onConflict: 'tenant_id,channel' });
+    // Banco sem a 0009 ainda: salva sem o vínculo com a ideia em vez de perder a geração.
+    if (error && /brief_id/.test(error.message)) {
+      console.error(`[queue] pending sem brief_id (aplique a migration 0009): ${error.message}`);
+      const { brief_id: _omit, ...legacy } = row;
+      ({ error } = await supabase().from('pending_approvals').upsert(legacy, { onConflict: 'tenant_id,channel' }));
+    }
     if (error) throw new Error(`Falha ao salvar pending no Supabase: ${error.message}`);
     return;
   }

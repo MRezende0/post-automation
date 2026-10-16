@@ -132,6 +132,7 @@ async function handleRegen(p, tenant) {
   await savePending({
     channel: p.channel,
     pending_id: pendingId,
+    brief_id: p.brief_id,
     generation: prepared.generation,
     top_id: prepared.topId,
     images: prepared.images,

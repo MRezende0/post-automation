@@ -7,7 +7,9 @@
 // Flags via env: DRY_RUN, PUBLISH_TEST, SKIP_APPROVAL.
 
 import 'dotenv/config';
-import { renderPreview, prepareGeneration, publishToChannel } from './pipeline.js';
+import { renderPreview, prepareGeneration, prepareReuse, publishToChannel } from './pipeline.js';
+import { chooseTopic, sumUsage } from './generate.js';
+import { pickMotherChannel, motherFormat, buildReusePlan, createBrief, markBrief } from './utils/brief.js';
 import { popNext, markPublished, loadPending, savePending, expirePending } from './utils/queue.js';
 import { uploadImage } from './utils/storage.js';
 import * as instagram from './channels/instagram.js';
@@ -63,8 +65,9 @@ async function main() {
 
   // Prioridade no modo automático: campanha ativa > feriado próximo > rotação.
   let campaignActive = false;
+  let campaign = null;
   if (CAMPAIGN_AWARE && !seed.pillar) {
-    const campaign = await getActiveCampaign(new Date());
+    campaign = await getActiveCampaign(new Date());
     if (campaign) {
       campaignActive = true;
       seed.campaign = campaignSlug(campaign); // vira utm_campaign na aprovação
@@ -86,51 +89,106 @@ async function main() {
     }
   }
 
+  // Uma ideia por rodada (SPEC 003 R1): pilar e ângulo escolhidos uma vez, pra todas as redes.
+  if (!seed.pillar) Object.assign(seed, await chooseTopic(tenant));
+
+  // Rede com post aguardando decisão não gera por cima: o resolve cuida.
+  const open = [];
   for (const channel of CHANNELS) {
-    log(`\n=== Canal: ${channel} ===`);
-
-    // Já tem post aguardando decisão nesse canal? Não gera por cima — o resolve cuida.
-    const pending = await loadPending(channel, { peek: true });
-    if (pending && !SKIP_APPROVAL) {
-      log(`Pending ativo em ${channel} (${pending.pending_id}) — pulando geração até resolver`);
-      await notify(`⏳ Já há um post ${channel} aguardando sua decisão — resolva antes de gerar outro`, { dryRun: DRY_RUN }).catch(() => {});
+    const pending = SKIP_APPROVAL ? null : await loadPending(channel, { peek: true });
+    if (!pending) {
+      open.push(channel);
       continue;
     }
-
-    const prepared = await prepareGeneration({ channel, seed, tenant });
-    const { generation, topId, images } = prepared;
-
-    if (SKIP_APPROVAL) {
-      await publishApproved({ channel, generation, chosenId: topId, images, seed });
-      continue;
-    }
-
-    const pendingId = newPendingId(channel);
-    const { keyboardMessageId, messageIds } = await sendApprovalRequest({
-      channel,
-      pillar: generation.pillar,
-      angle: generation.angle,
-      variations: generation.variations,
-      pendingId,
-      images,
-    });
-    log(`Preview enviado (pending ${pendingId}, ${messageIds.length} msgs)`);
-
-    await savePending({
-      channel,
-      pending_id: pendingId,
-      generation,
-      top_id: topId,
-      images,
-      seed,
-      message_ids: messageIds,
-      keyboard_message_id: keyboardMessageId,
-      regen_count: 0,
-      status: 'awaiting_decision',
-    });
+    log(`Pending ativo em ${channel} (${pending.pending_id}): pulando até resolver`);
+    await notify(`⏳ Já há um post ${channel} aguardando sua decisão. Resolva antes de gerar outro`, { dryRun: DRY_RUN }).catch(() => {});
+  }
+  const canGenerate = open.filter(c => tenant.platforms?.[c]?.publish !== false);
+  if (!canGenerate.length) {
+    log('Nenhuma rede livre para gerar nesta rodada.');
+    return;
   }
 
+  // Canal-mãe roda o pipeline completo; as outras redes seguem o plano de aproveitamento.
+  const mother = pickMotherChannel({ channels: canGenerate, pillar: seed.pillar, campaign, tenant, preferred: seed.channels });
+  log(`\n=== Canal-mãe: ${mother} (pilar=${seed.pillar}, ângulo=${seed.angle || 'livre'}) ===`);
+  const motherPrepared = await prepareGeneration({ channel: mother, seed, tenant });
+  const top = motherPrepared.generation.variations.find(v => v.id === motherPrepared.topId) || motherPrepared.generation.variations[0];
+  const kind = motherFormat(top, { longTextChars: tenant.reuse?.longTextChars });
+  const plan = buildReusePlan({ channels: open, mother, kind, tenant });
+  log(`Plano (${kind}): ${Object.entries(plan).map(([c, p]) => `${c}=${p.mode}`).join(', ')}`);
+
+  const briefId = await createBrief({
+    tenantId: tenant.id,
+    campaignSlug: seed.campaign,
+    pillar: motherPrepared.generation.pillar,
+    angle: motherPrepared.generation.angle,
+    idea: top.hook,
+  });
+  const briefSeed = { ...seed, brief_id: briefId, mother_channel: mother, reuse_plan: plan };
+
+  const results = [{ channel: mother, prepared: motherPrepared }];
+  for (const channel of open) {
+    const step = plan[channel];
+    if (channel === mother) continue;
+    if (step.mode === 'skip' || step.mode === 'locked') {
+      log(`${channel}: ${step.mode}${step.reason ? ` (${step.reason})` : ''}`);
+      continue;
+    }
+    log(`\n=== ${channel}: ${step.mode === 'reuse' ? 'reaproveita' : 'post próprio'} ===`);
+    try {
+      const prepared = step.mode === 'reuse'
+        ? await prepareReuse({ channel, mother: { channel: mother, ...motherPrepared }, kind, tenant })
+        : await prepareGeneration({ channel, seed, tenant });
+      results.push({ channel, prepared });
+    } catch (e) {
+      // Uma rede que falha não derruba as outras da mesma ideia.
+      log(`Falha em ${channel}: ${e.message}`);
+      await notify(`⚠️ ${channel} ficou fora desta ideia: ${e.message}`, { dryRun: DRY_RUN }).catch(() => {});
+    }
+  }
+  log(`Tokens da ideia: ${JSON.stringify(sumUsage(results.map(r => r.prepared.generation.usage)))}`);
+
+  for (const { channel, prepared } of results) {
+    await submitForApproval({ channel, prepared, seed: briefSeed, briefId });
+  }
+  await markBrief(briefId, SKIP_APPROVAL ? 'approved' : 'ready');
+
   log('\nFim da geração. Decisões serão processadas pelo resolve.');
+}
+
+// Manda o preview e salva a pendência da rede. SKIP_APPROVAL/DRY_RUN publica direto.
+async function submitForApproval({ channel, prepared, seed, briefId }) {
+  const { generation, topId, images } = prepared;
+  if (SKIP_APPROVAL) {
+    await publishApproved({ channel, generation, chosenId: topId, images, seed });
+    return;
+  }
+
+  const pendingId = newPendingId(channel);
+  const { keyboardMessageId, messageIds } = await sendApprovalRequest({
+    channel,
+    pillar: generation.pillar,
+    angle: generation.angle,
+    variations: generation.variations,
+    pendingId,
+    images,
+  });
+  log(`Preview enviado (${channel}, pending ${pendingId}, ${messageIds.length} msgs)`);
+
+  await savePending({
+    channel,
+    pending_id: pendingId,
+    brief_id: briefId,
+    generation,
+    top_id: topId,
+    images,
+    seed,
+    message_ids: messageIds,
+    keyboard_message_id: keyboardMessageId,
+    regen_count: 0,
+    status: 'awaiting_decision',
+  });
 }
 
 // Caminho SKIP_APPROVAL/DRY_RUN: publica o top-1 sem passar pelo Telegram.

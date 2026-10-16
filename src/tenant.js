@@ -29,6 +29,23 @@ const PILAR = {
     twitter:   { tone: 'informal, cru, conversado', maxChars: 280, formats: ['single', 'thread'], thread: true, rendersImage: false, publish: false },
   },
 
+  // Reaproveitamento entre redes (SPEC 003 R2). Uma ideia por rodada: o canal-mãe roda o
+  // pipeline completo e cada outra rede segue o modo da tabela, pelo formato do conteúdo-mãe.
+  //   reuse = 1 chamada barata adaptando o texto, mesma arte; own = pipeline completo sobre
+  //   a mesma ideia; skip = não gera. A plataforma deixa trocar na aprovação.
+  reuse: {
+    // canal-mãe por pilar quando a campanha não define (formats_mix)
+    motherByPillar: { building: 'linkedin', dor: 'linkedin', dica: 'instagram', prova: 'instagram' },
+    byFormat: {
+      texto_longo: { linkedin: 'reuse', instagram: 'own', twitter: 'reuse' },
+      carousel: { linkedin: 'reuse', instagram: 'reuse', twitter: 'reuse' },
+      pergunta: { linkedin: 'skip', instagram: 'reuse', twitter: 'reuse' },
+      texto_curto: { linkedin: 'reuse', instagram: 'reuse', twitter: 'reuse' },
+    },
+    // corpo acima disso é texto longo (não cabe numa legenda de Instagram)
+    longTextChars: 700,
+  },
+
   // Marca nas artes (templates novos leem as cores daqui, não do HTML). ADR 0002:
   // a plataforma é produto próprio, então a marca é dado do tenant.
   brand: {
