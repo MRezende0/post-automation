@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { approvePending } from '@/lib/scheduling';
-import { requireTenant } from '@/lib/session';
+import { requirePermission } from '@/lib/session';
 import { parseApprove } from '@/lib/route-input';
 import { apiError, badRequest } from '@/lib/api';
 
 export async function POST(req: Request) {
   try {
-    const t = await requireTenant();
+    const t = await requirePermission('content.approve');
     const parsed = parseApprove(await req.json().catch(() => null));
     if (!parsed.ok) return badRequest(parsed.error);
     const result = await approvePending(t, parsed.value);

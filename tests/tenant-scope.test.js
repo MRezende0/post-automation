@@ -20,6 +20,7 @@ const RAW_DB_ALLOWED = {
   'lib/supabase.ts': Infinity,
   'lib/tenant-db.ts': Infinity,
   'lib/publish.ts': 1, // varredura dos vencidos de todos os tenants
+  'lib/accounts.ts': Infinity, // login e sessão: uma pessoa atravessa contas (SPEC 009)
   'app/api/health/route.ts': 1, // ping do banco, sem dado de tenant
 };
 
@@ -96,7 +97,7 @@ describe('sessão carrega o tenant', () => {
 
   it('o token devolve o tenant que foi assinado', async () => {
     const token = await createSessionToken('acme');
-    expect(await verifySessionToken(token)).toEqual({ tenantId: 'acme' });
+    expect(await verifySessionToken(token)).toEqual({ tenantId: 'acme', userId: null, sessionVersion: null });
   });
 
   it('trocar o tenant no cookie invalida a sessão', async () => {

@@ -1,8 +1,9 @@
 // route-input.ts: validação do corpo das rotas antigas (aprovar, agendados, slots, pausa,
-// rejeitar, login), no mesmo formato dos parsers de ideas-model e learning. Puro, sem I/O:
+// rejeitar, login, sessão por pessoa), no mesmo formato dos parsers de ideas-model e learning. Puro, sem I/O:
 // o que passa daqui já tem o tipo certo; o que não passa volta 400 com uma mensagem útil.
 
 import { CHANNELS, type Channel } from './types';
+import { isTenantId } from './tenant';
 
 type Parsed<T> = { ok: true; value: T } | { ok: false; error: string };
 
@@ -109,6 +110,32 @@ export function parseLogin(body: unknown): Parsed<{ password: string }> {
   if (typeof b.password !== 'string' || !b.password) return { ok: false, error: 'Digite a senha.' };
   if (b.password.length > 200) return { ok: false, error: 'Senha incorreta.' };
   return { ok: true, value: { password: b.password } };
+}
+
+// ID token do Identity Platform: um JWT (três partes base64url). A conferência de verdade é do
+// firebase-admin; aqui só se barra lixo e tamanho absurdo antes de chamar a rede.
+const JWT = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*$/;
+
+export function parseSessionBody(body: unknown): Parsed<{ idToken: string; tenantId?: string }> {
+  const b = obj(body);
+  if (typeof b.idToken !== 'string' || b.idToken.length > 8192 || !JWT.test(b.idToken)) {
+    return { ok: false, error: 'Login inválido. Entre de novo.' };
+  }
+  const tenantId = parseTenantId(b.tenantId);
+  if (tenantId === null) return { ok: false, error: 'Conta inválida. Escolha a conta de novo.' };
+  return { ok: true, value: { idToken: b.idToken, tenantId } };
+}
+
+export function parseTenantSwitch(body: unknown): Parsed<{ tenantId: string }> {
+  const tenantId = parseTenantId(obj(body).tenantId);
+  if (!tenantId) return { ok: false, error: 'Escolha a conta.' };
+  return { ok: true, value: { tenantId } };
+}
+
+// undefined = não veio; null = veio e é inválido.
+function parseTenantId(value: unknown): string | undefined | null {
+  if (value == null || value === '') return undefined;
+  return isTenantId(value) ? value : null;
 }
 
 export function parseChannel(value: string | null): Parsed<Channel> {

@@ -1,11 +1,13 @@
-// session.ts: quem está logado e em qual tenant. Server-only (lê o cookie).
-// Hoje a sessão vem da senha única (auth.ts); com o login por usuário (SPEC 006 F2) só a
-// origem muda: o resto do app já recebe o tenant por aqui.
+// session.ts: quem está logado, em qual conta e com que papel. Server-only (lê o cookie).
+// Dois modos (SPEC 009): senha única, em que a sessão é da instalação e vale como admin; e por
+// pessoa, em que cada requisição confere no banco a versão da sessão e a membership.
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { SESSION_COOKIE, verifySessionToken } from './auth';
+import { SESSION_COOKIE, authProvider, verifySessionToken } from './auth';
 import { tenantDb, type TenantDb } from './tenant-db';
+import { hasPermission, roleIn, sessionUser, type SessionUser } from './accounts';
+import type { Permission, Role } from './permissions';
 
 export class UnauthorizedError extends Error {
   constructor() {
@@ -13,15 +15,46 @@ export class UnauthorizedError extends Error {
   }
 }
 
-export async function currentTenantId(): Promise<string> {
+export class ForbiddenError extends Error {
+  constructor() {
+    super('Seu papel nesta conta não permite essa ação. Peça a um administrador.');
+  }
+}
+
+export type SessionContext = { t: TenantDb; role: Role; user: SessionUser | null };
+
+export async function requireSession(): Promise<SessionContext> {
   const store = await cookies();
   const session = await verifySessionToken(store.get(SESSION_COOKIE)?.value);
   if (!session) throw new UnauthorizedError();
-  return session.tenantId;
+  const provider = authProvider();
+
+  if (!session.userId) {
+    if (provider !== 'password') throw new UnauthorizedError();
+    return { t: tenantDb(session.tenantId), role: 'admin', user: null };
+  }
+
+  if (provider !== 'identity') throw new UnauthorizedError();
+  const user = await sessionUser(session.userId);
+  if (!user || user.sessionVersion !== session.sessionVersion) throw new UnauthorizedError();
+  const role = await roleIn(user.id, session.tenantId);
+  if (!role) throw new UnauthorizedError();
+  return { t: tenantDb(session.tenantId), role, user };
+}
+
+// Toda rota da API passa por aqui com a permissão que a ação exige (SPEC 009).
+export async function requirePermission(permission: Permission): Promise<TenantDb> {
+  const ctx = await requireSession();
+  if (ctx.user && !(await hasPermission(ctx.role, ctx.t.tenantId, permission))) throw new ForbiddenError();
+  return ctx.t;
+}
+
+export async function currentTenantId(): Promise<string> {
+  return (await requireSession()).t.tenantId;
 }
 
 export async function requireTenant(): Promise<TenantDb> {
-  return tenantDb(await currentTenantId());
+  return requirePermission('content.view');
 }
 
 // Páginas: sessão vencida leva ao login em vez de quebrar a tela.

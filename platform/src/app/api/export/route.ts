@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { exportTenant } from '@/lib/export';
-import { requireTenant } from '@/lib/session';
+import { requirePermission } from '@/lib/session';
 import { apiError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
@@ -8,7 +8,7 @@ export const maxDuration = 60;
 
 export async function GET() {
   try {
-    const t = await requireTenant();
+    const t = await requirePermission('account.export');
     const data = await exportTenant(t);
     const day = data.exported_at.slice(0, 10);
     return new NextResponse(JSON.stringify(data, null, 2), {
