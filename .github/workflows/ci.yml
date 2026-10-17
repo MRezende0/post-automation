@@ -42,12 +42,39 @@ jobs:
             package-lock.json
             platform/package-lock.json
       - run: npm ci
+      # os testes da raiz importam módulos da plataforma (Next, firebase-admin)
+      - run: npm ci
+        working-directory: platform
       - run: npm test
       - name: Typecheck da plataforma
         working-directory: platform
+        run: npx tsc --noEmit -p .
+
+  identity-emulator:
+    name: Login no emulador
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: "true"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            platform/package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: platform
+      # O runner já traz o Java 21 que o emulador precisa; projeto `demo-`, sem conta Google.
+      - name: ID token do emulador do Firebase Auth (SPEC 009)
         run: |
-          npm ci
-          npx tsc --noEmit -p .
+          export JAVA_HOME="$JAVA_HOME_21_X64"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          java -version
+          npm run emulator:test
 
   migrations-check:
     name: Migrations num banco limpo
@@ -177,7 +204,7 @@ jobs:
   ci-ok:
     name: CI ok
     if: always()
-    needs: [test, migrations-check, security]
+    needs: [test, identity-emulator, migrations-check, security]
     runs-on: ubuntu-latest
     steps:
       - run: |

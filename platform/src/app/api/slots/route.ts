@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { addSlot, removeSlot } from '@/lib/slots';
-import { requireTenant } from '@/lib/session';
+import { requirePermission } from '@/lib/session';
 import { isUuid, parseSlot } from '@/lib/route-input';
 import { apiError, badRequest } from '@/lib/api';
 
 export async function POST(req: Request) {
   try {
-    const t = await requireTenant();
+    const t = await requirePermission('publishing.manage');
     const parsed = parseSlot(await req.json().catch(() => null));
     if (!parsed.ok) return badRequest(parsed.error);
     await addSlot(t, parsed.value);
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const t = await requireTenant();
+    const t = await requirePermission('publishing.manage');
     const id = new URL(req.url).searchParams.get('id');
     if (!isUuid(id)) return badRequest('Slot não encontrado. Recarregue a página.');
     await removeSlot(t, id);

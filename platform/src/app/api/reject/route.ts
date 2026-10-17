@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { rejectPending } from '@/lib/scheduling';
 import { parseFeedbackInput } from '@/lib/learning';
 import { saveFeedback } from '@/lib/feedback';
-import { requireTenant } from '@/lib/session';
+import { requirePermission } from '@/lib/session';
 import { parseReject } from '@/lib/route-input';
 import { apiError, badRequest } from '@/lib/api';
 
@@ -10,7 +10,7 @@ import { apiError, badRequest } from '@/lib/api';
 // e o feedback estruturado entra no prompt das próximas gerações.
 export async function POST(req: Request) {
   try {
-    const t = await requireTenant();
+    const t = await requirePermission('content.approve');
     const parsed = parseReject(await req.json().catch(() => null));
     if (!parsed.ok) return badRequest(parsed.error);
     const { pendingId, reason, feedback } = parsed.value;

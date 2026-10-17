@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { parseRuleInput, parseRulePatch } from '@/lib/learning';
 import { createRule, updateRule } from '@/lib/feedback';
-import { requireTenant } from '@/lib/session';
+import { requirePermission } from '@/lib/session';
 import { apiError, badRequest } from '@/lib/api';
 
 export async function POST(req: Request) {
   try {
-    const t = await requireTenant();
+    const t = await requirePermission('brand.manage');
     const parsed = parseRuleInput(await req.json().catch(() => null));
     if (!parsed.ok) return badRequest(parsed.error);
     const id = await createRule(t, parsed.value);
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    const t = await requireTenant();
+    const t = await requirePermission('brand.manage');
     const parsed = parseRulePatch(await req.json().catch(() => null));
     if (!parsed.ok) return badRequest(parsed.error);
     await updateRule(t, parsed.value.id, parsed.value);

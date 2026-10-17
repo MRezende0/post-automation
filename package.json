@@ -20,7 +20,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "funnel": "node src/funnel.js",
-    "tenant:create": "node scripts/create-tenant.js"
+    "tenant:create": "node scripts/create-tenant.js",
+    "access:grant": "node scripts/grant-access.js",
+    "test:emulator": "vitest run --config vitest.emulator.config.js",
+    "emulator:test": "npx -y firebase-tools@15.34.0 emulators:exec --only auth --project demo-post-automation \"npm run test:emulator\""
   },
   "engines": {
     "node": ">=22.12.0"

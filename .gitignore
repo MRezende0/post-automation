@@ -20,3 +20,6 @@ previews/
 
 # estado local da CLI do Supabase
 supabase/.temp/
+
+# emulador do Firebase (npm run emulator:test)
+firebase-debug*.log

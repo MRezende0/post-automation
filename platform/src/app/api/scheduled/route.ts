@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { reschedulePost, cancelScheduled, retryScheduled } from '@/lib/scheduling';
-import { requireTenant } from '@/lib/session';
+import { requirePermission } from '@/lib/session';
 import { parseScheduledAction } from '@/lib/route-input';
 import { apiError, badRequest } from '@/lib/api';
 
 // Ações sobre um agendado: reschedule | cancel | retry.
 export async function POST(req: Request) {
   try {
-    const t = await requireTenant();
+    const t = await requirePermission('content.approve');
     const parsed = parseScheduledAction(await req.json().catch(() => null));
     if (!parsed.ok) return badRequest(parsed.error);
     const a = parsed.value;

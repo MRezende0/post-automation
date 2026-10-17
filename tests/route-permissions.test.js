@@ -1,0 +1,62 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, relative } from 'node:path';
+
+// Toda rota da API declara a permissão de cada método (SPEC 009). Rota nova sem permissão, ou com
+// uma permissão diferente da tabela da spec, reprova aqui.
+const API = join(import.meta.dirname, '../platform/src/app/api');
+
+const PUBLIC = new Set(['login', 'logout', 'health', 'cron/publish-due', 'auth/session']);
+
+const EXPECTED = {
+  approve: ['content.approve'],
+  reject: ['content.approve'],
+  scheduled: ['content.approve'],
+  'ideas/approve': ['content.approve'],
+  'ideas/reject': ['content.approve'],
+  'ideas/rework': ['content.edit'],
+  'engage/copied': ['content.edit'],
+  'engage/draft': ['content.edit'],
+  'engage/publish': ['content.edit'],
+  'engage/targets': ['content.edit', 'content.edit'],
+  feedback: ['content.feedback', 'content.edit'],
+  rules: ['brand.manage', 'brand.manage'],
+  slots: ['publishing.manage', 'publishing.manage'],
+  pause: ['publishing.manage'],
+  export: ['account.export'],
+  'next-slot': ['content.view'],
+  'auth/me': ['content.view'],
+  'auth/tenant': ['content.view'],
+  'auth/logout-all': ['content.view'],
+};
+
+function routes(dir) {
+  return readdirSync(dir).flatMap((name) => {
+    const p = join(dir, name);
+    if (statSync(p).isDirectory()) return routes(p);
+    return name === 'route.ts' ? [p] : [];
+  });
+}
+
+describe('permissão por rota', () => {
+  const found = Object.fromEntries(
+    routes(API).map((f) => {
+      const src = readFileSync(f, 'utf8');
+      const key = relative(API, f).replace(/\/route\.ts$/, '');
+      return [key, { src, perms: [...src.matchAll(/requirePermission\('([a-z._]+)'\)/g)].map((m) => m[1]) }];
+    }),
+  );
+
+  it('cada método protegido declara a permissão da tabela', () => {
+    const protectedRoutes = Object.fromEntries(Object.entries(found).filter(([k]) => !PUBLIC.has(k)).map(([k, v]) => [k, v.perms]));
+    expect(protectedRoutes).toEqual(EXPECTED);
+  });
+
+  it('nenhuma rota usa o requireTenant cru', () => {
+    expect(Object.entries(found).filter(([, v]) => /requireTenant\(/.test(v.src)).map(([k]) => k)).toEqual([]);
+  });
+
+  it('as rotas públicas são só as conhecidas', () => {
+    expect(Object.keys(found).filter((k) => !(k in EXPECTED)).sort()).toEqual([...PUBLIC].sort());
+  });
+});

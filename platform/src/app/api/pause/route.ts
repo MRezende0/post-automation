@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { setPause } from '@/lib/pause';
 import { notify } from '@/lib/notifications';
-import { requireTenant } from '@/lib/session';
+import { requirePermission } from '@/lib/session';
 import { parsePause } from '@/lib/route-input';
 import { apiError, badRequest } from '@/lib/api';
 
 export async function POST(req: Request) {
   try {
-    const t = await requireTenant();
+    const t = await requirePermission('publishing.manage');
     const parsed = parsePause(await req.json().catch(() => null));
     if (!parsed.ok) return badRequest(parsed.error);
     const state = await setPause(t, parsed.value.paused, parsed.value.reason);
